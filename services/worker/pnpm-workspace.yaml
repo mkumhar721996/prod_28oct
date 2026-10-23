@@ -1,0 +1,3 @@
+packages: []
+# No dependency in this component requires a build/install script.
+allowBuilds: {}

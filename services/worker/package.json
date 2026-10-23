@@ -1,0 +1,29 @@
+{
+  "name": "comp-background-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scheduled and asynchronous jobs: notifications, report generation, email delivery and data synchronization.",
+  "main": "dist/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "packageManager": "pnpm@12.9.1",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest",
+    "devloop": "pnpm run typecheck && jest"
+  },
+  "dependencies": {
+    "pg-boss": "^10.1.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.3"
+  }
+}
