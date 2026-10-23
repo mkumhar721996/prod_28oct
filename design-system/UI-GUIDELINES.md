@@ -22,6 +22,9 @@
 ## Theme
 - Light only, white surfaces (`color-bg`) with `color-fg` text: it matches the shipped app, and a dark theme would be a separate, deliberate effort.
 - Colour carries meaning: `color-primary` for action and focus, `color-danger` for destruction and errors, never decoration.
+- Use `color-accent` (`.btn-accent`, `.badge-accent`) at most once per view for a highlight or promotion, and `color-secondary` only for supporting fills: if everything is emphasised nothing is.
+- Pick text and borders from the `color-neutral-*` scale (`-600` and darker for text); `color-neutral-400` is decoration only: lighter greys fall below readable contrast.
+- Status uses the `success`, `warning`, `danger` and `info` families (`.alert-*`, `.badge-*`) and always pairs colour with a word or icon: the meaning survives without colour.
 
 ## Voice and tone
 - Plain, friendly and brief; sentence case everywhere: the product is small and approachable.
