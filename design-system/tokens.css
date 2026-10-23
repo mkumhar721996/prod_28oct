@@ -46,6 +46,11 @@
   --color-accent-active: #134e4a; /** Accent pressed */
   --color-accent-fg: #ffffff; /** Text on accent fills */
   --color-accent-bg: #ccfbf1; /** Accent tint surface */
+  --color-purple: #7e22ce; /** Purple: feature differentiation and secondary highlights */
+  --color-purple-hover: #6b21a8; /** Purple hover */
+  --color-purple-active: #581c87; /** Purple pressed */
+  --color-purple-fg: #ffffff; /** Text on purple fills */
+  --color-purple-bg: #f3e8ff; /** Purple tint surface */
   --color-danger-active: #7f1d1d; /** Destructive pressed */
   --color-danger-border: #fca5a5; /** Error scale: tint border */
   --color-success-hover: #166534; /** Success hover */
