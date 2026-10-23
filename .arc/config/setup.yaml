@@ -1,0 +1,30 @@
+components:
+  comp_background_worker:
+    mode: local
+    test_command: cd services/worker && pnpm test
+    build_command: cd services/worker && pnpm run build
+    devloop_command: cd services/worker && pnpm run devloop
+  comp_records_api:
+    mode: local
+    e2e_command: cd services/api && pnpm run e2e
+    test_command: cd services/api && pnpm run test
+    build_command: cd services/api && pnpm run build
+    devloop_command: cd services/api && pnpm run devloop
+  comp_web_app:
+    mode: local
+    e2e_command: cd apps/web && pnpm e2e
+    test_command: cd apps/web && pnpm test
+    build_command: cd apps/web && pnpm build
+    devloop_command: cd apps/web && pnpm devloop
+commands:
+  test: (cd services/worker && pnpm test) && (cd services/api && pnpm run test) &&
+    (cd apps/web && pnpm test)
+  build: (cd services/worker && pnpm run build) && (cd services/api && pnpm run build)
+    && (cd apps/web && pnpm build)
+  devloop: (cd services/worker && pnpm run devloop) && (cd services/api && pnpm run
+    devloop) && (cd apps/web && pnpm devloop)
+setup_command: (cd apps/web && pnpm install --frozen-lockfile) && (cd services/api
+  && pnpm install --frozen-lockfile) && (cd services/worker && pnpm install --frozen-lockfile)
+toolchain:
+  node: '22'
+  pnpm: 12.9.1
