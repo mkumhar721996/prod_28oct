@@ -3,15 +3,51 @@ components:
   comp_web_app:
     name: Web App
     kind: web_ui
+    directory: apps/web
+    stack:
+      choices:
+        styling: tailwindcss
+        language: typescript
+        framework: nextjs
+        package_manager: pnpm
+        testing_tool_e2e: playwright
+        testing_tool_unit: vitest
+      notes: database not applicable — calls the Records API only
   comp_records_api:
     name: Records API
     kind: api_service
+    directory: services/api
+    stack:
+      choices:
+        database: postgresql
+        language: typescript
+        framework: nestjs
+        package_manager: pnpm
+        testing_tool_e2e: supertest
+        testing_tool_unit: jest
+      notes: styling not applicable — API only; TypeScript chosen for consistency
+        with the Web App
   comp_background_worker:
     name: Background Worker
     kind: worker
+    directory: services/worker
+    stack:
+      choices:
+        language: typescript
+        framework: pg-boss
+        package_manager: pnpm
+        testing_tool_unit: jest
+      notes: pg-boss polls the PostgreSQL job table; no owned datastore, styling or
+        e2e surface
   comp_relational_database:
     name: Relational Database
     kind: infrastructure
+    stack:
+      choices:
+        managed_service: PostgreSQL
   comp_object_storage:
     name: Object Storage
     kind: managed_service
+    stack:
+      choices:
+        managed_service: Amazon S3
