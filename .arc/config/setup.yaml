@@ -4,18 +4,21 @@ components:
     test_command: cd services/worker && pnpm test
     build_command: cd services/worker && pnpm run build
     devloop_command: cd services/worker && pnpm run devloop
+    install_command: cd services/worker && pnpm add {name}@{version}
   comp_records_api:
     mode: local
     e2e_command: cd services/api && pnpm run e2e
     test_command: cd services/api && pnpm run test
     build_command: cd services/api && pnpm run build
     devloop_command: cd services/api && pnpm run devloop
+    install_command: cd services/api && pnpm add {name}@{version}
   comp_web_app:
     mode: local
     e2e_command: cd apps/web && pnpm e2e
     test_command: cd apps/web && pnpm test
     build_command: cd apps/web && pnpm build
     devloop_command: cd apps/web && pnpm devloop
+    install_command: cd apps/web && pnpm add {name}@{version}
 commands:
   test: (cd services/worker && pnpm test) && (cd services/api && pnpm run test) &&
     (cd apps/web && pnpm test)
@@ -28,3 +31,5 @@ setup_command: (cd apps/web && pnpm install --frozen-lockfile) && (cd services/a
 toolchain:
   node: '22'
   pnpm: 12.9.1
+package_install_commands:
+  pnpm: pnpm add {name}@{version}
