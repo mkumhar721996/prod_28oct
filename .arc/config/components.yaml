@@ -1,0 +1,17 @@
+version: 1
+components:
+  comp_web_app:
+    name: Web App
+    kind: web_ui
+  comp_records_api:
+    name: Records API
+    kind: api_service
+  comp_background_worker:
+    name: Background Worker
+    kind: worker
+  comp_relational_database:
+    name: Relational Database
+    kind: infrastructure
+  comp_object_storage:
+    name: Object Storage
+    kind: managed_service
