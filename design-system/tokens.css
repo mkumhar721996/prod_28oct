@@ -1,0 +1,120 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --color-fg: #111827; /** Default text; matches the app's gray-900 body text */
+  --color-fg-muted: #4b5563; /** Secondary text, hints, placeholders */
+  --color-bg: #ffffff; /** Page and surface background; matches the app's white body */
+  --color-bg-subtle: #f3f4f6; /** Hover fills and quiet surfaces */
+  --color-primary: #2563eb; /** Brand and primary action */
+  --color-primary-hover: #1d4ed8; /** Primary action hover */
+  --color-primary-fg: #ffffff; /** Text on primary and danger fills */
+  --color-border: #d1d5db; /** Dividers and card borders */
+  --color-border-strong: #6b7280; /** Form control borders and secondary buttons */
+  --color-focus: #1d4ed8; /** Keyboard focus ring */
+  --color-danger: #b91c1c; /** Destructive action and error text */
+  --color-danger-hover: #991b1b; /** Destructive hover */
+  --color-danger-bg: #fee2e2; /** Danger tint surface */
+  --color-success: #15803d; /** Success text and icon */
+  --color-success-bg: #dcfce7; /** Success tint surface */
+  --color-warning: #92400e; /** Warning text and icon */
+  --color-warning-bg: #fef3c7; /** Warning tint surface */
+  --color-info: #1d4ed8; /** Info text and icon */
+  --color-info-bg: #dbeafe; /** Info tint surface */
+  --color-overlay: #111827; /** Modal backdrop (used with opacity-backdrop) */
+  --color-skeleton: #e5e7eb; /** Skeleton placeholder fill */
+  --space-1: 4px; /** Tight gaps */
+  --space-2: 8px; /** Small gap */
+  --space-3: 16px; /** Default gap and padding */
+  --space-4: 24px; /** Section gap */
+  --space-5: 32px; /** Large gap */
+  --space-6: 48px; /** Page-level gap */
+  --radius-sm: 4px; /** Chips, badges, checkboxes */
+  --radius-md: 8px; /** Buttons, inputs, menus */
+  --radius-lg: 12px; /** Cards, modals */
+  --radius-full: 9999px; /** Pills, avatars, switches */
+  --font-size-sm: 14px; /** Hints, labels, badges */
+  --font-size-md: 16px; /** Body text */
+  --font-size-lg: 20px; /** Subheadings */
+  --font-size-xl: 28px; /** Page titles */
+  --border-width: 1px; /** Standard border */
+  --border-width-strong: 2px; /** Focus ring and selected tab indicator */
+  --size-control: 40px; /** Default control height */
+  --size-control-sm: 32px; /** Small control height */
+  --size-control-lg: 48px; /** Large control height */
+  --size-icon: 16px; /** Icon and menu check size */
+  --size-avatar: 40px; /** Avatar diameter */
+  --size-check: 18px; /** Checkbox and radio box */
+  --size-switch-width: 40px; /** Switch track width */
+  --size-switch-height: 22px; /** Switch track height */
+  --size-switch-thumb: 16px; /** Switch thumb */
+  --size-drawer: 360px; /** Drawer width */
+  --size-modal: 480px; /** Modal max width */
+  --size-menu-min: 200px; /** Menu min width */
+  --size-toast: 320px; /** Toast max width */
+  --size-tooltip-max: 240px; /** Tooltip max width */
+  --size-grid-min: 220px; /** Minimum column width in .grid */
+  --size-spinner: 24px; /** Spinner diameter */
+  --size-skeleton-line: 16px; /** Skeleton line height */
+  --size-focus-offset: 2px; /** Focus ring offset */
+  --size-shell-max: 1200px; /** Max content width of the app shell */
+  --font-family-base: ui-sans-serif, system-ui, sans-serif; /** Tailwind default sans stack used by the app */
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, monospace; /** Code samples */
+  --font-weight-regular: 400; /** Body */
+  --font-weight-medium: 500; /** Labels and buttons */
+  --font-weight-semibold: 600; /** Headings; matches the app's font-semibold */
+  --line-height-base: 1.5; /** Body line height */
+  --line-height-tight: 1.25; /** Headings */
+  --opacity-disabled: 0.5; /** Disabled controls */
+  --opacity-backdrop: 0.5; /** Modal backdrop */
+  --motion-spinner-ms: 700; /** Spinner rotation period in milliseconds */
+  --z-dropdown: 10; /** Dropdown menus and tooltips */
+  --z-overlay: 100; /** Backdrop and drawer */
+  --z-modal: 110; /** Modal */
+  --z-toast: 120; /** Toast */
+  --button-primary-background: var(--color-primary);
+  --button-primary-foreground: var(--color-primary-fg);
+  --button-primary-border: var(--color-primary);
+  --button-primary-background-hover: var(--color-primary-hover);
+  --button-secondary-background: var(--color-bg);
+  --button-secondary-foreground: var(--color-fg);
+  --button-secondary-border: var(--color-border-strong);
+  --button-secondary-background-hover: var(--color-bg-subtle);
+  --button-ghost-background: var(--color-bg);
+  --button-ghost-foreground: var(--color-primary);
+  --button-ghost-border: var(--color-bg);
+  --button-ghost-background-hover: var(--color-bg-subtle);
+  --button-danger-background: var(--color-danger);
+  --button-danger-foreground: var(--color-primary-fg);
+  --button-danger-border: var(--color-danger);
+  --button-danger-background-hover: var(--color-danger-hover);
+  --button-default-radius: var(--radius-md);
+  --button-default-padding-x: var(--space-3);
+  --card-default-background: var(--color-bg);
+  --card-default-foreground: var(--color-fg);
+  --card-default-border: var(--color-border);
+  --card-default-radius: var(--radius-lg);
+  --card-default-padding: var(--space-3);
+  --input-default-background: var(--color-bg);
+  --input-default-foreground: var(--color-fg);
+  --input-default-border: var(--color-border-strong);
+  --input-default-border-invalid: var(--color-danger);
+  --input-default-radius: var(--radius-md);
+  --badge-neutral-background: var(--color-bg-subtle);
+  --badge-neutral-foreground: var(--color-fg);
+  --badge-success-background: var(--color-success-bg);
+  --badge-success-foreground: var(--color-success);
+  --badge-warning-background: var(--color-warning-bg);
+  --badge-warning-foreground: var(--color-warning);
+  --badge-danger-background: var(--color-danger-bg);
+  --badge-danger-foreground: var(--color-danger);
+  --alert-info-background: var(--color-info-bg);
+  --alert-info-foreground: var(--color-info);
+  --alert-success-background: var(--color-success-bg);
+  --alert-success-foreground: var(--color-success);
+  --alert-warning-background: var(--color-warning-bg);
+  --alert-warning-foreground: var(--color-warning);
+  --alert-danger-background: var(--color-danger-bg);
+  --alert-danger-foreground: var(--color-danger);
+}

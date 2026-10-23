@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web App — Style guide</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="prototype-utils.css">
+<style>
+  .sg { max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-4) var(--space-3); display: flex; flex-direction: column; gap: var(--space-5); }
+  .sg section > h2 { padding-bottom: var(--space-2); border-bottom: var(--border-width) solid var(--color-border); margin-bottom: var(--space-3); }
+  .sg h3 { margin: var(--space-3) 0 var(--space-2); color: var(--color-fg-muted); font-size: var(--font-size-sm); }
+  .sg ul.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .sg-swatch { width: var(--size-control); height: var(--size-control); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); flex: none; }
+  .sg-muted { color: var(--color-fg-muted); font-size: var(--font-size-sm); }
+  .sg-bar { display: inline-block; height: var(--space-2); background: var(--color-primary); }
+  .sg-radius { width: var(--size-control); height: var(--size-control); border: var(--border-width-strong) solid var(--color-primary); }
+  .sg-box { width: var(--size-control); height: var(--size-control); background: var(--color-primary); border-radius: var(--radius-sm); }
+  .sg-demo { padding: var(--space-3); border: var(--border-width) dashed var(--color-border); border-radius: var(--radius-md); }
+  .sg-pad { padding-bottom: var(--space-6); }
+</style>
+</head>
+<body>
+<main class="sg">
+<h1>Web App — Style guide</h1>
+
+<section id="tokens">
+  <h2>Tokens</h2>
+  <h3>Colour</h3>
+  <ul class="list">
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-fg)"></span><code>color-fg</code><span class="sg-muted">#111827 · default text</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-fg-muted)"></span><code>color-fg-muted</code><span class="sg-muted">#4b5563 · secondary text</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-bg)"></span><code>color-bg</code><span class="sg-muted">#ffffff · page background</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-bg-subtle)"></span><code>color-bg-subtle</code><span class="sg-muted">#f3f4f6 · quiet surfaces</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-primary)"></span><code>color-primary</code><span class="sg-muted">#2563eb · primary action</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-primary-hover)"></span><code>color-primary-hover</code><span class="sg-muted">#1d4ed8 · primary hover</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-primary-fg)"></span><code>color-primary-fg</code><span class="sg-muted">#ffffff · text on fills</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-border)"></span><code>color-border</code><span class="sg-muted">#d1d5db · dividers, cards</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-border-strong)"></span><code>color-border-strong</code><span class="sg-muted">#6b7280 · control borders</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-focus)"></span><code>color-focus</code><span class="sg-muted">#1d4ed8 · focus ring</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-danger)"></span><code>color-danger</code><span class="sg-muted">#b91c1c</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-danger-hover)"></span><code>color-danger-hover</code><span class="sg-muted">#991b1b</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-danger-bg)"></span><code>color-danger-bg</code><span class="sg-muted">#fee2e2</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-success)"></span><code>color-success</code><span class="sg-muted">#15803d</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-success-bg)"></span><code>color-success-bg</code><span class="sg-muted">#dcfce7</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-warning)"></span><code>color-warning</code><span class="sg-muted">#92400e</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-warning-bg)"></span><code>color-warning-bg</code><span class="sg-muted">#fef3c7</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-info)"></span><code>color-info</code><span class="sg-muted">#1d4ed8</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-info-bg)"></span><code>color-info-bg</code><span class="sg-muted">#dbeafe</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-overlay)"></span><code>color-overlay</code><span class="sg-muted">#111827 · modal backdrop</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-skeleton)"></span><code>color-skeleton</code><span class="sg-muted">#e5e7eb</span></li>
+  </ul>
+
+  <h3>Spacing</h3>
+  <ul class="list">
+    <li class="cluster"><code>space-1</code><span class="sg-bar" style="width:var(--space-1)"></span><span class="sg-muted">4px</span></li>
+    <li class="cluster"><code>space-2</code><span class="sg-bar" style="width:var(--space-2)"></span><span class="sg-muted">8px</span></li>
+    <li class="cluster"><code>space-3</code><span class="sg-bar" style="width:var(--space-3)"></span><span class="sg-muted">16px</span></li>
+    <li class="cluster"><code>space-4</code><span class="sg-bar" style="width:var(--space-4)"></span><span class="sg-muted">24px</span></li>
+    <li class="cluster"><code>space-5</code><span class="sg-bar" style="width:var(--space-5)"></span><span class="sg-muted">32px</span></li>
+    <li class="cluster"><code>space-6</code><span class="sg-bar" style="width:var(--space-6)"></span><span class="sg-muted">48px</span></li>
+  </ul>
+
+  <h3>Radius</h3>
+  <ul class="list">
+    <li class="cluster"><span class="sg-radius" style="border-radius:var(--radius-sm)"></span><code>radius-sm</code><span class="sg-muted">4px</span></li>
+    <li class="cluster"><span class="sg-radius" style="border-radius:var(--radius-md)"></span><code>radius-md</code><span class="sg-muted">8px</span></li>
+    <li class="cluster"><span class="sg-radius" style="border-radius:var(--radius-lg)"></span><code>radius-lg</code><span class="sg-muted">12px</span></li>
+    <li class="cluster"><span class="sg-radius" style="border-radius:var(--radius-full)"></span><code>radius-full</code><span class="sg-muted">9999px</span></li>
+  </ul>
+
+  <h3>Typography</h3>
+  <ul class="list">
+    <li><span style="font-size:var(--font-size-sm)">The quick brown fox</span> <code>font-size-sm</code> <span class="sg-muted">14px</span></li>
+    <li><span style="font-size:var(--font-size-md)">The quick brown fox</span> <code>font-size-md</code> <span class="sg-muted">16px</span></li>
+    <li><span style="font-size:var(--font-size-lg)">The quick brown fox</span> <code>font-size-lg</code> <span class="sg-muted">20px</span></li>
+    <li><span style="font-size:var(--font-size-xl)">The quick brown fox</span> <code>font-size-xl</code> <span class="sg-muted">28px</span></li>
+    <li><span style="font-weight:var(--font-weight-regular)">Regular</span> · <span style="font-weight:var(--font-weight-medium)">Medium</span> · <span style="font-weight:var(--font-weight-semibold)">Semibold</span> <code>font-weight-regular / medium / semibold</code> <span class="sg-muted">400 / 500 / 600</span></li>
+    <li><span style="font-family:var(--font-family-base)">Base family</span> · <span style="font-family:var(--font-family-mono)">Mono family</span> <code>font-family-base / font-family-mono</code></li>
+    <li><code>line-height-base</code> <span class="sg-muted">1.5</span> · <code>line-height-tight</code> <span class="sg-muted">1.25</span></li>
+  </ul>
+
+  <h3>Sizes, borders, opacity, motion, layering</h3>
+  <ul class="list">
+    <li class="cluster"><code>border-width</code><span class="sg-muted">1px</span> <code>border-width-strong</code><span class="sg-muted">2px</span></li>
+    <li class="cluster"><code>size-control-sm / size-control / size-control-lg</code><span class="sg-muted">32 / 40 / 48px</span></li>
+    <li class="cluster"><code>size-icon</code><span class="sg-muted">16px</span> <code>size-avatar</code><span class="sg-muted">40px</span> <code>size-check</code><span class="sg-muted">18px</span></li>
+    <li class="cluster"><code>size-switch-width / -height / -thumb</code><span class="sg-muted">40 / 22 / 16px</span></li>
+    <li class="cluster"><code>size-drawer</code><span class="sg-muted">360px</span> <code>size-modal</code><span class="sg-muted">480px</span> <code>size-menu-min</code><span class="sg-muted">200px</span> <code>size-toast</code><span class="sg-muted">320px</span> <code>size-tooltip-max</code><span class="sg-muted">240px</span></li>
+    <li class="cluster"><code>size-grid-min</code><span class="sg-muted">220px</span> <code>size-spinner</code><span class="sg-muted">24px</span> <code>size-skeleton-line</code><span class="sg-muted">16px</span> <code>size-focus-offset</code><span class="sg-muted">2px</span> <code>size-shell-max</code><span class="sg-muted">1200px</span></li>
+    <li class="cluster"><code>opacity-disabled</code><span class="sg-muted">0.5</span> <code>opacity-backdrop</code><span class="sg-muted">0.5</span> <code>motion-spinner-ms</code><span class="sg-muted">700</span></li>
+    <li class="cluster"><code>z-dropdown</code><span class="sg-muted">10</span> <code>z-overlay</code><span class="sg-muted">100</span> <code>z-modal</code><span class="sg-muted">110</span> <code>z-toast</code><span class="sg-muted">120</span></li>
+  </ul>
+
+  <h3>Component aliases (resolve to base tokens)</h3>
+  <ul class="list">
+    <li><code>button-{primary|secondary|ghost|danger}-{background|foreground|border|background-hover}</code> → <code>color-*</code></li>
+    <li><code>button-default-radius</code> → <code>radius-md</code>; <code>button-default-padding-x</code> → <code>space-3</code></li>
+    <li><code>card-default-{background|foreground|border}</code> → <code>color-bg / color-fg / color-border</code>; <code>card-default-radius</code> → <code>radius-lg</code>; <code>card-default-padding</code> → <code>space-3</code></li>
+    <li><code>input-default-{background|foreground|border|border-invalid}</code>, <code>input-default-radius</code></li>
+    <li><code>badge-{neutral|success|warning|danger}-{background|foreground}</code>, <code>alert-{info|success|warning|danger}-{background|foreground}</code></li>
+  </ul>
+</section>
+
+<section id="utilities">
+  <h2>Layout helpers</h2>
+  <h3>.stack (and .stack-1/2/4/5)</h3>
+  <div class="sg-demo"><div class="stack"><div class="sg-box"></div><div class="sg-box"></div><div class="sg-box"></div></div></div>
+  <h3>.cluster (and .cluster-3)</h3>
+  <div class="sg-demo"><div class="cluster"><div class="sg-box"></div><div class="sg-box"></div><div class="sg-box"></div></div></div>
+  <h3>.grid</h3>
+  <div class="sg-demo"><div class="grid"><div class="card">One</div><div class="card">Two</div><div class="card">Three</div></div></div>
+  <h3>Text helpers: .text-muted, .text-sm</h3>
+  <p>Body text. <span class="text-muted">Muted text.</span> <span class="text-sm">Small text.</span></p>
+</section>
+
+<section id="buttons">
+  <h2>Buttons</h2>
+  <h3>Variants</h3>
+  <div class="cluster">
+    <button class="btn btn-primary" type="button">Primary</button>
+    <button class="btn btn-secondary" type="button">Secondary</button>
+    <button class="btn btn-ghost" type="button">Ghost</button>
+    <button class="btn btn-danger" type="button">Danger</button>
+    <button class="btn" type="button">Default .btn</button>
+  </div>
+  <h3>Disabled</h3>
+  <div class="cluster">
+    <button class="btn btn-primary" type="button" disabled>Primary</button>
+    <button class="btn btn-secondary" type="button" disabled>Secondary</button>
+    <button class="btn btn-ghost" type="button" disabled>Ghost</button>
+    <button class="btn btn-danger" type="button" disabled>Danger</button>
+  </div>
+  <h3>Sizes and icon-only (focus a button with Tab to see :focus-visible)</h3>
+  <div class="cluster">
+    <button class="btn btn-primary btn-sm" type="button">Small</button>
+    <button class="btn btn-primary" type="button">Medium</button>
+    <button class="btn btn-primary btn-lg" type="button">Large</button>
+    <button class="btn btn-secondary btn-icon btn-sm" type="button" aria-label="Close">✕</button>
+    <button class="btn btn-secondary btn-icon" type="button" aria-label="Add">+</button>
+    <button class="btn btn-secondary btn-icon btn-lg" type="button" aria-label="Search">⌕</button>
+  </div>
+</section>
+
+<section id="forms">
+  <h2>Form controls</h2>
+  <div class="grid">
+    <div class="field"><label for="f1">Name</label><input class="input" id="f1" placeholder="Jane Doe"><span class="field-hint">Shown on your profile.</span></div>
+    <div class="field"><label for="f2">Email</label><input class="input is-invalid" id="f2" value="jane@" aria-invalid="true"><span class="field-error">Enter an email like name@example.com</span></div>
+    <div class="field"><label for="f3">Disabled</label><input class="input" id="f3" value="Read only" disabled></div>
+    <div class="field"><label for="f4">Notes</label><textarea class="textarea" id="f4" placeholder="Anything else?"></textarea></div>
+    <div class="field"><label for="f5">Plan</label><select class="select" id="f5"><option>Free</option><option>Team</option></select></div>
+    <div class="field"><label for="f6">Plan (invalid)</label><select class="select is-invalid" id="f6"><option>Choose…</option></select><span class="field-error">Choose a plan</span></div>
+    <div class="field"><label for="f7">Plan (disabled)</label><select class="select" id="f7" disabled><option>Free</option></select></div>
+  </div>
+  <h3>Checkbox, radio, switch</h3>
+  <div class="stack stack-2">
+    <label class="check-row"><input class="checkbox" type="checkbox"> Unchecked</label>
+    <label class="check-row"><input class="checkbox" type="checkbox" checked> Checked</label>
+    <label class="check-row"><input class="checkbox is-invalid" type="checkbox"> Invalid</label>
+    <label class="check-row"><input class="checkbox" type="checkbox" disabled> Disabled</label>
+    <label class="check-row"><input class="radio" type="radio" name="r" checked> Selected</label>
+    <label class="check-row"><input class="radio" type="radio" name="r"> Unselected</label>
+    <label class="check-row"><input class="radio" type="radio" name="r2" disabled> Disabled</label>
+    <label class="check-row"><input class="switch" type="checkbox" role="switch"> Off</label>
+    <label class="check-row"><input class="switch" type="checkbox" role="switch" checked> On</label>
+    <label class="check-row"><input class="switch" type="checkbox" role="switch" disabled> Disabled</label>
+  </div>
+</section>
+
+<section id="menus">
+  <h2>Dropdown and menu</h2>
+  <h3>Closed (kit opens it) — click the trigger</h3>
+  <div class="dropdown">
+    <button class="btn btn-secondary" type="button" data-menu aria-haspopup="menu">Sort by ▾</button>
+    <div class="dropdown-menu" role="menu" hidden>
+      <button class="dropdown-item" role="menuitemradio" aria-checked="true" type="button">Newest</button>
+      <button class="dropdown-item" role="menuitemradio" aria-checked="false" type="button">Oldest</button>
+      <button class="dropdown-item" role="menuitem" type="button" disabled>Disabled</button>
+    </div>
+  </div>
+  <h3>Open, with a checked item</h3>
+  <div class="dropdown sg-pad">
+    <button class="btn btn-secondary" type="button">Sort by ▾</button>
+    <div class="dropdown-menu is-open" role="menu">
+      <button class="dropdown-item" role="menuitemradio" aria-checked="true" type="button">Newest</button>
+      <button class="dropdown-item" role="menuitemradio" aria-checked="false" type="button">Oldest</button>
+    </div>
+  </div>
+  <h3>.menu</h3>
+  <div class="menu" style="max-width:var(--size-menu-min)"><a href="#">Profile</a><a href="#">Settings</a><button type="button">Sign out</button></div>
+</section>
+
+<section id="navigation">
+  <h2>Tabs, accordion, disclosure</h2>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" aria-selected="false">Activity</button>
+    <button class="tab" role="tab" aria-selected="false" disabled>Disabled</button>
+  </div>
+  <div class="tab-panel">Selected tab panel content.</div>
+  <h3>.accordion</h3>
+  <div class="accordion">
+    <details class="disclosure" open><summary>First item (open)</summary><p>Content for the first item.</p></details>
+    <details class="disclosure"><summary>Second item (closed)</summary><p>Content for the second item.</p></details>
+  </div>
+  <h3>.disclosure (standalone)</h3>
+  <details class="disclosure"><summary>More details</summary><p>Extra information.</p></details>
+</section>
+
+<section id="surfaces">
+  <h2>Card, badge, chip, avatar, divider</h2>
+  <div class="card stack stack-2"><h3 style="margin:0;color:var(--color-fg);font-size:var(--font-size-md)">Card title</h3><p class="text-muted">Card body text.</p><div class="cluster"><button class="btn btn-primary btn-sm" type="button">Action</button></div></div>
+  <h3>Badges</h3>
+  <div class="cluster"><span class="badge badge-neutral">Neutral</span><span class="badge badge-success">Success</span><span class="badge badge-warning">Warning</span><span class="badge badge-danger">Danger</span></div>
+  <h3>Chips (off / on / disabled)</h3>
+  <div class="cluster"><button class="chip" type="button" aria-pressed="false">Filter</button><button class="chip" type="button" aria-pressed="true">Selected</button><button class="chip" type="button" disabled>Disabled</button></div>
+  <h3>Avatars</h3>
+  <div class="cluster"><span class="avatar">JD</span><span class="avatar">AB</span></div>
+  <h3>Divider</h3>
+  <p>Above</p><hr class="divider"><p>Below</p>
+</section>
+
+<section id="overlays">
+  <h2>Overlays</h2>
+  <p class="text-muted">Shown in flow with .is-inline; in the product they are fixed-position and toggled with [hidden] / .is-open.</p>
+  <h3>Modal (open) with backdrop</h3>
+  <div class="stack stack-2">
+    <div class="backdrop is-open is-inline"></div>
+    <div class="modal is-open is-inline" role="dialog" aria-label="Delete project">
+      <div class="modal-header"><h3>Delete project</h3><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Close">✕</button></div>
+      <div class="modal-body">This can't be undone.</div>
+      <div class="modal-footer"><button class="btn btn-secondary" type="button">Cancel</button><button class="btn btn-danger" type="button">Delete project</button></div>
+    </div>
+  </div>
+  <h3>Modal (closed)</h3>
+  <div class="modal" hidden></div>
+  <p class="sg-muted">Closed overlays render nothing: <code>[hidden]</code> removes them.</p>
+  <h3>Drawer (open, right side)</h3>
+  <div class="drawer is-open is-inline" role="dialog" aria-label="Filters">
+    <div class="drawer-header"><h3>Filters</h3><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Close">✕</button></div>
+    <div class="drawer-body">Drawer content.</div>
+    <div class="drawer-footer"><button class="btn btn-primary" type="button">Apply</button></div>
+  </div>
+  <h3>Toast</h3>
+  <div class="toast is-open is-inline" role="status">Changes saved.</div>
+  <h3>Tooltip</h3>
+  <div class="sg-pad"><span class="tooltip-anchor"><button class="btn btn-secondary" type="button">Hover target</button><span class="tooltip is-open" role="tooltip">Helpful hint</span></span></div>
+</section>
+
+<section id="feedback">
+  <h2>Feedback</h2>
+  <div class="stack stack-2">
+    <div class="alert alert-info" role="status">Info: a new version is available.</div>
+    <div class="alert alert-success" role="status">Success: your changes were saved.</div>
+    <div class="alert alert-warning" role="status">Warning: your session expires soon.</div>
+    <div class="alert alert-danger" role="alert">Danger: we couldn't save your changes. Try again.</div>
+  </div>
+  <h3>Empty state</h3>
+  <div class="empty-state"><h3>No projects yet</h3><p>Create your first project to get started.</p><button class="btn btn-primary" type="button">Create project</button></div>
+  <h3>Skeleton</h3>
+  <div class="stack stack-2"><span class="skeleton" style="width:60%"></span><span class="skeleton"></span><span class="skeleton" style="width:80%"></span></div>
+  <h3>Spinner</h3>
+  <span class="spinner" role="status" aria-label="Loading"></span>
+</section>
+
+<section id="ui-guidelines">
+  <h2>UI guidelines</h2>
+  <div class="stack stack-4">
+    <div class="stack stack-2"><h3 style="color:var(--color-fg);font-size:var(--font-size-lg)">Navigation and information architecture</h3>
+      <ul>
+        <li>Top bar only, no sidebar: the app is a single-page product today and a sidebar would be empty chrome.</li>
+        <li>Top bar order: brand "Web App" (links home), then main navigation. The only destination today is <strong>Home</strong> (<code>data-nav-key="home"</code>); add new sections to the end of that nav so existing positions stay stable.</li>
+        <li>No account, wishlist or cart links: the app has no such features; add them to the right of the nav only when a feature ships.</li>
+        <li>On narrow screens the nav collapses behind a "Menu" button, so the brand and page title never wrap.</li>
+      </ul></div>
+    <div class="stack stack-2"><h3 style="color:var(--color-fg);font-size:var(--font-size-lg)">Layout and density</h3>
+      <ul>
+        <li>Spacious, single-column content, centred at <code>size-shell-max</code>: the current app is a centred page title, not a data console.</li>
+        <li>Separate page sections with <code>space-4</code> and related items with <code>space-2</code>/<code>space-3</code> (<code>.stack</code>, <code>.cluster</code>): consistent rhythm without per-screen CSS.</li>
+        <li>Design mobile-first; the layout changes at tablet width (768px), where the nav expands inline, because that is where the top bar fits without wrapping.</li>
+      </ul></div>
+    <div class="stack stack-2"><h3 style="color:var(--color-fg);font-size:var(--font-size-lg)">Component usage</h3>
+      <ul>
+        <li>One <code>.btn-primary</code> per view for the main action; <code>.btn-secondary</code> for alternatives, <code>.btn-ghost</code> for low-emphasis actions, <code>.btn-danger</code> only for destructive confirms: a single clear next step.</li>
+        <li>Use <code>.card</code> for self-contained, scannable groups in a <code>.grid</code>; a <code>&lt;table&gt;</code> only for comparing many records across columns; a plain list for short ordered items: each matches how people scan.</li>
+        <li>Wrap every form control in <code>.field</code> with a visible label; show errors with <code>.is-invalid</code> plus <code>.field-error</code> text: colour alone is never the error signal.</li>
+        <li>Use <code>.alert</code> for messages that stay on the page, <code>.toast</code> for transient confirmations, <code>.modal</code> only for decisions that block progress, <code>.drawer</code> for secondary detail or filters: the least interruptive surface wins.</li>
+        <li>Show <code>.skeleton</code> for content that is loading and <code>.empty-state</code> (with one primary action) when there is nothing to show: users get an explanation, not a blank area.</li>
+        <li>Use <code>.badge</code> for read-only status and <code>.chip</code> for user-toggled filters: it separates state from controls.</li>
+      </ul></div>
+    <div class="stack stack-2"><h3 style="color:var(--color-fg);font-size:var(--font-size-lg)">Theme</h3>
+      <ul>
+        <li>Light only, white surfaces (<code>color-bg</code>) with <code>color-fg</code> text: it matches the shipped app, and a dark theme would be a separate, deliberate effort.</li>
+        <li>Colour carries meaning: <code>color-primary</code> for action and focus, <code>color-danger</code> for destruction and errors, never decoration.</li>
+      </ul></div>
+    <div class="stack stack-2"><h3 style="color:var(--color-fg);font-size:var(--font-size-lg)">Voice and tone</h3>
+      <ul>
+        <li>Plain, friendly and brief; sentence case everywhere: the product is small and approachable.</li>
+        <li>Buttons are verb-first ("Save changes", "Delete project"): the label says what happens.</li>
+        <li>Errors say what went wrong and how to fix it, without blame ("Enter an email like name@example.com"): users recover faster.</li>
+        <li>Empty states explain the benefit and invite one action: they are the first impression of a feature.</li>
+      </ul></div>
+  </div>
+</section>
+</main>
+</body>
+</html>
