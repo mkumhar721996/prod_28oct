@@ -51,6 +51,20 @@
     <li class="cluster"><span class="sg-swatch" style="background:var(--color-skeleton)"></span><code>color-skeleton</code><span class="sg-muted">#e5e7eb</span></li>
   </ul>
 
+  <h3>Colour scales</h3>
+  <ul class="list">
+    <li class="cluster"><code>color-neutral-</code>
+      <span class="sg-swatch" style="background:var(--color-neutral-50)" title="50"></span><span class="sg-swatch" style="background:var(--color-neutral-100)" title="100"></span><span class="sg-swatch" style="background:var(--color-neutral-200)" title="200"></span><span class="sg-swatch" style="background:var(--color-neutral-300)" title="300"></span><span class="sg-swatch" style="background:var(--color-neutral-400)" title="400"></span><span class="sg-swatch" style="background:var(--color-neutral-500)" title="500"></span><span class="sg-swatch" style="background:var(--color-neutral-600)" title="600"></span><span class="sg-swatch" style="background:var(--color-neutral-700)" title="700"></span><span class="sg-swatch" style="background:var(--color-neutral-800)" title="800"></span><span class="sg-swatch" style="background:var(--color-neutral-900)" title="900"></span>
+      <span class="sg-muted">50 #f9fafb · 100 #f3f4f6 · 200 #e5e7eb · 300 #d1d5db · 400 #9ca3af · 500 #6b7280 · 600 #4b5563 · 700 #374151 · 800 #1f2937 · 900 #111827</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-primary-active)"></span><code>color-primary-active</code><span class="sg-muted">#1e40af · pressed</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-primary-bg)"></span><code>color-primary-bg</code><span class="sg-muted">#eff6ff · tint</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-secondary)"></span><code>color-secondary</code><span class="sg-muted">#475569</span><span class="sg-swatch" style="background:var(--color-secondary-hover)"></span><code>-hover</code><span class="sg-muted">#334155</span><span class="sg-swatch" style="background:var(--color-secondary-active)"></span><code>-active</code><span class="sg-muted">#1e293b</span><span class="sg-swatch" style="background:var(--color-secondary-bg)"></span><code>-bg</code><span class="sg-muted">#f1f5f9</span><span class="sg-swatch" style="background:var(--color-secondary-fg)"></span><code>-fg</code><span class="sg-muted">#ffffff</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-accent)"></span><code>color-accent</code><span class="sg-muted">#0f766e</span><span class="sg-swatch" style="background:var(--color-accent-hover)"></span><code>-hover</code><span class="sg-muted">#115e59</span><span class="sg-swatch" style="background:var(--color-accent-active)"></span><code>-active</code><span class="sg-muted">#134e4a</span><span class="sg-swatch" style="background:var(--color-accent-bg)"></span><code>-bg</code><span class="sg-muted">#ccfbf1</span><span class="sg-swatch" style="background:var(--color-accent-fg)"></span><code>-fg</code><span class="sg-muted">#ffffff</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-success-hover)"></span><code>color-success-hover</code><span class="sg-muted">#166534</span><span class="sg-swatch" style="background:var(--color-success-active)"></span><code>-active</code><span class="sg-muted">#14532d</span><span class="sg-swatch" style="background:var(--color-success-border)"></span><code>-border</code><span class="sg-muted">#86efac</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-warning-hover)"></span><code>color-warning-hover</code><span class="sg-muted">#78350f</span><span class="sg-swatch" style="background:var(--color-warning-active)"></span><code>-active</code><span class="sg-muted">#451a03</span><span class="sg-swatch" style="background:var(--color-warning-border)"></span><code>-border</code><span class="sg-muted">#fcd34d</span></li>
+    <li class="cluster"><span class="sg-swatch" style="background:var(--color-danger-active)"></span><code>color-danger-active</code><span class="sg-muted">#7f1d1d</span><span class="sg-swatch" style="background:var(--color-danger-border)"></span><code>-border</code><span class="sg-muted">#fca5a5</span><span class="sg-swatch" style="background:var(--color-info-border)"></span><code>color-info-border</code><span class="sg-muted">#93c5fd</span></li>
+  </ul>
+
   <h3>Spacing</h3>
   <ul class="list">
     <li class="cluster"><code>space-1</code><span class="sg-bar" style="width:var(--space-1)"></span><span class="sg-muted">4px</span></li>
@@ -94,11 +108,11 @@
 
   <h3>Component aliases (resolve to base tokens)</h3>
   <ul class="list">
-    <li><code>button-{primary|secondary|ghost|danger}-{background|foreground|border|background-hover}</code> → <code>color-*</code></li>
+    <li><code>button-{primary|secondary|ghost|danger|accent}-{background|foreground|border|background-hover|background-active}</code> → <code>color-*</code></li>
     <li><code>button-default-radius</code> → <code>radius-md</code>; <code>button-default-padding-x</code> → <code>space-3</code></li>
     <li><code>card-default-{background|foreground|border}</code> → <code>color-bg / color-fg / color-border</code>; <code>card-default-radius</code> → <code>radius-lg</code>; <code>card-default-padding</code> → <code>space-3</code></li>
     <li><code>input-default-{background|foreground|border|border-invalid}</code>, <code>input-default-radius</code></li>
-    <li><code>badge-{neutral|success|warning|danger}-{background|foreground}</code>, <code>alert-{info|success|warning|danger}-{background|foreground}</code></li>
+    <li><code>badge-{neutral|success|warning|danger|info|accent}-{background|foreground}</code>, <code>alert-{info|success|warning|danger}-{background|foreground|border}</code></li>
   </ul>
 </section>
 
@@ -122,6 +136,7 @@
     <button class="btn btn-secondary" type="button">Secondary</button>
     <button class="btn btn-ghost" type="button">Ghost</button>
     <button class="btn btn-danger" type="button">Danger</button>
+    <button class="btn btn-accent" type="button">Accent</button>
     <button class="btn" type="button">Default .btn</button>
   </div>
   <h3>Disabled</h3>
@@ -130,7 +145,10 @@
     <button class="btn btn-secondary" type="button" disabled>Secondary</button>
     <button class="btn btn-ghost" type="button" disabled>Ghost</button>
     <button class="btn btn-danger" type="button" disabled>Danger</button>
+    <button class="btn btn-accent" type="button" disabled>Accent</button>
   </div>
+  <h3>Hover and pressed (:hover and :active — hold the mouse down on any button above)</h3>
+  <p class="text-muted">Every variant darkens on hover and darkens again while pressed, using the <code>-hover</code> and <code>-active</code> colour tokens.</p>
   <h3>Sizes and icon-only (focus a button with Tab to see :focus-visible)</h3>
   <div class="cluster">
     <button class="btn btn-primary btn-sm" type="button">Small</button>
@@ -212,7 +230,7 @@
   <h2>Card, badge, chip, avatar, divider</h2>
   <div class="card stack stack-2"><h3 style="margin:0;color:var(--color-fg);font-size:var(--font-size-md)">Card title</h3><p class="text-muted">Card body text.</p><div class="cluster"><button class="btn btn-primary btn-sm" type="button">Action</button></div></div>
   <h3>Badges</h3>
-  <div class="cluster"><span class="badge badge-neutral">Neutral</span><span class="badge badge-success">Success</span><span class="badge badge-warning">Warning</span><span class="badge badge-danger">Danger</span></div>
+  <div class="cluster"><span class="badge badge-neutral">Neutral</span><span class="badge badge-success">Success</span><span class="badge badge-warning">Warning</span><span class="badge badge-danger">Danger</span><span class="badge badge-info">Info</span><span class="badge badge-accent">Accent</span></div>
   <h3>Chips (off / on / disabled)</h3>
   <div class="cluster"><button class="chip" type="button" aria-pressed="false">Filter</button><button class="chip" type="button" aria-pressed="true">Selected</button><button class="chip" type="button" disabled>Disabled</button></div>
   <h3>Avatars</h3>
@@ -293,6 +311,9 @@
       <ul>
         <li>Light only, white surfaces (<code>color-bg</code>) with <code>color-fg</code> text: it matches the shipped app, and a dark theme would be a separate, deliberate effort.</li>
         <li>Colour carries meaning: <code>color-primary</code> for action and focus, <code>color-danger</code> for destruction and errors, never decoration.</li>
+        <li>Use <code>color-accent</code> (<code>.btn-accent</code>, <code>.badge-accent</code>) at most once per view for a highlight or promotion, and <code>color-secondary</code> only for supporting fills: if everything is emphasised nothing is.</li>
+        <li>Pick text and borders from the <code>color-neutral-*</code> scale (<code>-600</code> and darker for text); <code>color-neutral-400</code> is decoration only: lighter greys fall below readable contrast.</li>
+        <li>Status uses the <code>success</code>, <code>warning</code>, <code>danger</code> and <code>info</code> families (<code>.alert-*</code>, <code>.badge-*</code>) and always pairs colour with a word or icon: the meaning survives without colour.</li>
       </ul></div>
     <div class="stack stack-2"><h3 style="color:var(--color-fg);font-size:var(--font-size-lg)">Voice and tone</h3>
       <ul>

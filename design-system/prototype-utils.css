@@ -49,6 +49,13 @@ code { font-family: var(--font-family-mono); font-size: var(--font-size-sm); }
 .btn-ghost:hover { background: var(--button-ghost-background-hover); }
 .btn-danger { background: var(--button-danger-background); color: var(--button-danger-foreground); border-color: var(--button-danger-border); }
 .btn-danger:hover { background: var(--button-danger-background-hover); }
+.btn-accent { background: var(--button-accent-background); color: var(--button-accent-foreground); border-color: var(--button-accent-border); }
+.btn-accent:hover { background: var(--button-accent-background-hover); }
+.btn-primary:active { background: var(--button-primary-background-active); }
+.btn-secondary:active { background: var(--button-secondary-background-active); }
+.btn-ghost:active { background: var(--button-ghost-background-active); }
+.btn-danger:active { background: var(--button-danger-background-active); }
+.btn-accent:active { background: var(--button-accent-background-active); }
 .btn-sm { min-height: var(--size-control-sm); padding: 0 var(--space-2); font-size: var(--font-size-sm); }
 .btn-lg { min-height: var(--size-control-lg); padding: 0 var(--space-4); font-size: var(--font-size-lg); }
 .btn-icon { width: var(--size-control); padding: 0; }
@@ -150,6 +157,8 @@ code { font-family: var(--font-family-mono); font-size: var(--font-size-sm); }
 .badge-success { background: var(--badge-success-background); color: var(--badge-success-foreground); }
 .badge-warning { background: var(--badge-warning-background); color: var(--badge-warning-foreground); }
 .badge-danger { background: var(--badge-danger-background); color: var(--badge-danger-foreground); }
+.badge-info { background: var(--badge-info-background); color: var(--badge-info-foreground); }
+.badge-accent { background: var(--badge-accent-background); color: var(--badge-accent-foreground); }
 .chip {
   display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--size-control-sm); padding: 0 var(--space-2);
   border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-sm);
@@ -200,13 +209,13 @@ code { font-family: var(--font-family-mono); font-size: var(--font-size-sm); }
 /* Feedback */
 .alert {
   display: flex; gap: var(--space-2); padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid currentColor; border-radius: var(--radius-md);
+  border: var(--border-width) solid var(--alert-info-border); border-radius: var(--radius-md);
   background: var(--alert-info-background); color: var(--alert-info-foreground);
 }
-.alert-info { background: var(--alert-info-background); color: var(--alert-info-foreground); }
-.alert-success { background: var(--alert-success-background); color: var(--alert-success-foreground); }
-.alert-warning { background: var(--alert-warning-background); color: var(--alert-warning-foreground); }
-.alert-danger { background: var(--alert-danger-background); color: var(--alert-danger-foreground); }
+.alert-info { background: var(--alert-info-background); color: var(--alert-info-foreground); border-color: var(--alert-info-border); }
+.alert-success { background: var(--alert-success-background); color: var(--alert-success-foreground); border-color: var(--alert-success-border); }
+.alert-warning { background: var(--alert-warning-background); color: var(--alert-warning-foreground); border-color: var(--alert-warning-border); }
+.alert-danger { background: var(--alert-danger-background); color: var(--alert-danger-foreground); border-color: var(--alert-danger-border); }
 .empty-state {
   display: flex; flex-direction: column; align-items: center; gap: var(--space-2); text-align: center;
   padding: var(--space-6) var(--space-3); border: var(--border-width) dashed var(--color-border-strong); border-radius: var(--radius-lg);

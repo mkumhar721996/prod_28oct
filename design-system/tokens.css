@@ -24,6 +24,37 @@
   --color-info-bg: #dbeafe; /** Info tint surface */
   --color-overlay: #111827; /** Modal backdrop (used with opacity-backdrop) */
   --color-skeleton: #e5e7eb; /** Skeleton placeholder fill */
+  --color-neutral-50: #f9fafb; /** Neutral scale: lightest surface */
+  --color-neutral-100: #f3f4f6; /** Neutral scale: quiet surface */
+  --color-neutral-200: #e5e7eb; /** Neutral scale: pressed quiet surface, track */
+  --color-neutral-300: #d1d5db; /** Neutral scale: hairline border */
+  --color-neutral-400: #9ca3af; /** Neutral scale: decorative only, below text contrast */
+  --color-neutral-500: #6b7280; /** Neutral scale: strong border, large text */
+  --color-neutral-600: #4b5563; /** Neutral scale: secondary text */
+  --color-neutral-700: #374151; /** Neutral scale: strong secondary text */
+  --color-neutral-800: #1f2937; /** Neutral scale: near-black surface */
+  --color-neutral-900: #111827; /** Neutral scale: default text */
+  --color-primary-active: #1e40af; /** Primary action pressed */
+  --color-primary-bg: #eff6ff; /** Primary tint surface; pressed ghost fill */
+  --color-secondary: #475569; /** Secondary brand: supporting fills and emphasis (slate) */
+  --color-secondary-hover: #334155; /** Secondary hover */
+  --color-secondary-active: #1e293b; /** Secondary pressed */
+  --color-secondary-fg: #ffffff; /** Text on secondary fills */
+  --color-secondary-bg: #f1f5f9; /** Secondary tint surface */
+  --color-accent: #0f766e; /** Accent: highlights and promotional emphasis (teal) */
+  --color-accent-hover: #115e59; /** Accent hover */
+  --color-accent-active: #134e4a; /** Accent pressed */
+  --color-accent-fg: #ffffff; /** Text on accent fills */
+  --color-accent-bg: #ccfbf1; /** Accent tint surface */
+  --color-danger-active: #7f1d1d; /** Destructive pressed */
+  --color-danger-border: #fca5a5; /** Error scale: tint border */
+  --color-success-hover: #166534; /** Success hover */
+  --color-success-active: #14532d; /** Success pressed */
+  --color-success-border: #86efac; /** Success scale: tint border */
+  --color-warning-hover: #78350f; /** Warning hover */
+  --color-warning-active: #451a03; /** Warning pressed */
+  --color-warning-border: #fcd34d; /** Warning scale: tint border */
+  --color-info-border: #93c5fd; /** Info scale: tint border */
   --space-1: 4px; /** Tight gaps */
   --space-2: 8px; /** Small gap */
   --space-3: 16px; /** Default gap and padding */
@@ -89,6 +120,15 @@
   --button-danger-foreground: var(--color-primary-fg);
   --button-danger-border: var(--color-danger);
   --button-danger-background-hover: var(--color-danger-hover);
+  --button-primary-background-active: var(--color-primary-active);
+  --button-secondary-background-active: var(--color-neutral-200);
+  --button-ghost-background-active: var(--color-primary-bg);
+  --button-danger-background-active: var(--color-danger-active);
+  --button-accent-background: var(--color-accent);
+  --button-accent-foreground: var(--color-accent-fg);
+  --button-accent-border: var(--color-accent);
+  --button-accent-background-hover: var(--color-accent-hover);
+  --button-accent-background-active: var(--color-accent-active);
   --button-default-radius: var(--radius-md);
   --button-default-padding-x: var(--space-3);
   --card-default-background: var(--color-bg);
@@ -109,6 +149,14 @@
   --badge-warning-foreground: var(--color-warning);
   --badge-danger-background: var(--color-danger-bg);
   --badge-danger-foreground: var(--color-danger);
+  --badge-info-background: var(--color-info-bg);
+  --badge-info-foreground: var(--color-info);
+  --badge-accent-background: var(--color-accent-bg);
+  --badge-accent-foreground: var(--color-accent);
+  --alert-info-border: var(--color-info-border);
+  --alert-success-border: var(--color-success-border);
+  --alert-warning-border: var(--color-warning-border);
+  --alert-danger-border: var(--color-danger-border);
   --alert-info-background: var(--color-info-bg);
   --alert-info-foreground: var(--color-info);
   --alert-success-background: var(--color-success-bg);
