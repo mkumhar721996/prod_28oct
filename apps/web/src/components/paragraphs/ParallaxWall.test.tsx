@@ -10,6 +10,7 @@ const wallBlock = {
   field_text: "Wall headline",
   field_image: { url: "/files/wall.jpg", alt: "Wall alt" },
 };
+const css = readFileSync(new URL("../../app/globals.css", import.meta.url), "utf8");
 const render = (block: object) => renderToStaticMarkup(<ParagraphBlocks blocks={[block as never]} />);
 
 describe("ParallaxWall", () => {
@@ -35,8 +36,14 @@ describe("ParallaxWall", () => {
     }
   });
 
+  it("is driven by page scroll, not a nested scroller (AC2)", () => {
+    const wallCss = css.slice(css.indexOf(".parallax-wall {"));
+    expect(wallCss).toContain("animation-timeline: view()");
+    expect(wallCss).not.toMatch(/overflow-y:\s*auto/);
+    expect(render(wallBlock)).not.toContain("scroll-space");
+  });
+
   it("disables the parallax transform under reduced motion (AC4)", () => {
-    const css = readFileSync(new URL("../../app/globals.css", import.meta.url), "utf8");
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)[^}]*\.parallax-wall/s);
   });
 

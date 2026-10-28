@@ -23,10 +23,13 @@ const SCROLL = 400;
 
 async function layerDelta(page: Page, selector: string) {
   const layer = page.locator(selector);
+  // Start with the wall at the bottom edge of the viewport, then scroll the page.
+  await page.evaluate(() => {
+    const wall = document.querySelector(".parallax-wall")!;
+    window.scrollTo(0, wall.getBoundingClientRect().top + window.scrollY - window.innerHeight + 1);
+  });
   const before = (await layer.boundingBox())!.y;
-  await page.locator(".parallax-wall__viewport").evaluate((el, by) => {
-    el.scrollTop = by;
-  }, SCROLL);
+  await page.evaluate((by) => window.scrollBy(0, by), SCROLL);
   const after = (await layer.boundingBox())!.y;
   // Movement relative to the content, which scrolls by exactly SCROLL.
   return after - before + SCROLL;
@@ -34,7 +37,8 @@ async function layerDelta(page: Page, selector: string) {
 
 async function open(page: Page, width: number) {
   await page.setViewportSize({ width, height: 800 });
-  await page.setContent(`<style>${css}</style>${wall}`);
+  const spacer = `<div style="height:2000px"></div>`;
+  await page.setContent(`<style>${css}</style>${spacer}${wall}${spacer}`);
 }
 
 for (const width of [375, 768, 1280]) {

@@ -23,7 +23,6 @@ export default function ParallaxWall({ block }: { block: ParagraphBlock }) {
         <div className="parallax-wall__layer parallax-wall__layer--foreground" style={layerStyle(PARALLAX_LAYERS.foreground)}>
           <p className="parallax-wall__text">{text}</p>
         </div>
-        <div className="parallax-wall__scroll-space" />
       </div>
     </div>
   );
