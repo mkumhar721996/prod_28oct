@@ -43,6 +43,25 @@ describe('SessionController throttling', () => {
     expect(sessions.start).toHaveBeenCalledWith(res, 'p1');
   });
 
+  it('enforces the cap under parallel guesses for one email', async () => {
+    const { controller, players, req, res } = setup();
+    players.authenticate.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(null), 10)),
+    );
+    const results = await Promise.allSettled(
+      Array.from({ length: 50 }, () => controller.signIn(creds, req, res)),
+    );
+    expect(players.authenticate.mock.calls.length).toBeLessThanOrEqual(10);
+    expect(results.filter((r) => r.status === 'rejected')).toHaveLength(50);
+  });
+
+  it('successful sign-ins do not use up the IP budget', async () => {
+    const { controller, players, req, res } = setup();
+    players.authenticate.mockResolvedValue({ id: 'p1', email: creds.email });
+    for (let i = 0; i < 15; i++) await controller.signIn(creds, req, res);
+    expect(players.authenticate).toHaveBeenCalledTimes(15);
+  });
+
   it('limits registrations per IP', async () => {
     const { controller, players, req, res } = setup();
     players.register.mockResolvedValue({ id: 'p1', email: creds.email });

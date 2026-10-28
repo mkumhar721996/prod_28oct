@@ -8,6 +8,7 @@ NestJS service backed by PostgreSQL.
 | --- | --- | --- |
 | `DATABASE_URL` | yes | PostgreSQL connection string. The API fails fast at start when unset. |
 | `SESSION_COOKIE_SECURE` | no | `true`/`false`; defaults to on when `NODE_ENV=production`. |
+| `TRUST_PROXY_HOPS` | no | Proxy hops to trust for `X-Forwarded-For` (default 1: the web app's rewrite). Set 0 if the API is reached directly. The sign-in and registration limits key on the resulting client IP. |
 | `PORT` | no | Listen port (default 3000). |
 
 ## Database migrations

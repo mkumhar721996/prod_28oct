@@ -54,12 +54,13 @@ export class SessionController {
     const emailKey = `sign-in-email:${normaliseEmail(body?.email)}`;
     this.limiter.assertAllowed(ipKey, MAX_SIGN_IN_FAILURES);
     this.limiter.assertAllowed(emailKey, MAX_SIGN_IN_FAILURES);
+    // Reserve the attempt synchronously, before any await, so parallel guesses cannot all pass
+    // the check; a success gives the reservation back.
+    this.limiter.record(ipKey);
+    this.limiter.record(emailKey);
     const player = await this.players.authenticate(body?.email, body?.password);
-    if (!player) {
-      this.limiter.record(ipKey);
-      this.limiter.record(emailKey);
-      throw new UnauthorizedException('Email or password incorrect');
-    }
+    if (!player) throw new UnauthorizedException('Email or password incorrect');
+    this.limiter.release(ipKey);
     this.limiter.reset(emailKey);
     await this.sessions.start(res, player.id);
     return { role: 'player', email: player.email };

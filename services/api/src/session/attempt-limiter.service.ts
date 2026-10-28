@@ -36,6 +36,12 @@ export class AttemptLimiter {
     this.windows.set(key, w);
   }
 
+  /** Gives back one attempt (e.g. a reserved attempt that turned out to succeed). */
+  release(key: string): void {
+    const w = this.current(key);
+    if (w) w.count = Math.max(0, w.count - 1);
+  }
+
   reset(key: string): void {
     this.windows.delete(key);
   }

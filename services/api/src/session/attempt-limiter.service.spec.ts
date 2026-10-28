@@ -32,6 +32,15 @@ describe('AttemptLimiter', () => {
     expect(() => limiter.assertAllowed('k', 5)).not.toThrow();
   });
 
+  it('release gives one attempt back and never goes below zero', () => {
+    limiter.record('k');
+    limiter.record('k');
+    limiter.release('k');
+    for (let i = 0; i < 3; i++) limiter.release('k');
+    for (let i = 0; i < 4; i++) limiter.record('k');
+    expect(() => limiter.assertAllowed('k', 5)).not.toThrow();
+  });
+
   it('reset clears a key', () => {
     for (let i = 0; i < 5; i++) limiter.record('k');
     limiter.reset('k');
