@@ -16,7 +16,7 @@ export default defineConfig({
     },
     {
       command: `pnpm build && pnpm exec next start -p ${port}`,
-      env: { RECORDS_API_URL: `http://localhost:${sessionPort}` },
+      env: { RECORDS_API_URL: `http://localhost:${sessionPort}`, QUIZ_FIXTURE: "1" },
       url: `http://localhost:${port}`,
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
