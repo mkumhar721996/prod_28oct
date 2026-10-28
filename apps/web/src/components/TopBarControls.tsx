@@ -31,7 +31,7 @@ export async function handleSignOut(
 }
 
 /** Client wrapper: owns the pathname, Menu and sign-out state for the shared top bar. */
-export function TopBarControls({ signedIn }: { signedIn: boolean }) {
+export function TopBarControls({ signedIn, role }: { signedIn: boolean; role?: string | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,6 +48,7 @@ export function TopBarControls({ signedIn }: { signedIn: boolean }) {
     <TopBar
       signedIn={signedIn}
       pathname={pathname}
+      role={role}
       menuOpen={menuOpen}
       error={error}
       onToggleMenu={() => setMenuOpen((open) => !open)}
