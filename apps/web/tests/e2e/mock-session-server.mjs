@@ -33,7 +33,33 @@ createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/wallet") {
     const signedIn = cookie.includes("e2e-session=1");
     res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
-    res.end(JSON.stringify(signedIn ? { balanceCredits: 1000 } : {}));
+    // Cookie `e2e-balance=1` is a player with 1 credit, who may claim free credits.
+    const low = cookie.includes("e2e-balance=1");
+    const balanceCredits = low ? 1 : 1000;
+    res.end(
+      JSON.stringify(
+        signedIn ? { balanceCredits, topUp: { eligible: low, credits: 500 } } : {},
+      ),
+    );
+    return;
+  }
+  if (req.method === "GET" && url.pathname === "/wallet/history") {
+    const signedIn = cookie.includes("e2e-session=1");
+    res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
+    const entries = [
+      { id: "2", kind: "bet", amountCredits: 100, balanceCredits: 900, createdAt: "2026-10-28T14:30:00.000Z" },
+      { id: "1", kind: "grant", amountCredits: 1000, balanceCredits: 1000, createdAt: "2026-10-27T09:00:00.000Z" },
+    ];
+    res.end(
+      JSON.stringify(
+        signedIn ? { entries, page: 1, pageCount: 1, total: 2, range: "recent" } : {},
+      ),
+    );
+    return;
+  }
+  if (req.method === "POST" && url.pathname === "/wallet/top-up") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }));
     return;
   }
   if (req.method === "GET" && url.pathname === "/orders") {

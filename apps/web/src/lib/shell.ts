@@ -5,6 +5,9 @@ export const ORDERS_HREF = "/orders";
 export const SIGN_IN_HREF = "/sign-in";
 export const REGISTER_HREF = "/register";
 export const WALLET_HREF = "/wallet";
+export const HISTORY_HREF = "/history";
+/** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
+export const PLACE_BET_HREF = WALLET_HREF;
 
 export type NavEntry = { key: string; label: string; href: string };
 
@@ -13,6 +16,7 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "home", label: "Home", href: HOME_HREF },
   { key: "wallet", label: "Wallet", href: WALLET_HREF },
   { key: "orders", label: "Orders", href: ORDERS_HREF },
+  { key: "history", label: "History", href: HISTORY_HREF },
 ];
 
 export function brandHref(signedIn: boolean): string {

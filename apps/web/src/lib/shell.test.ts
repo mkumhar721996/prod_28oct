@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { BRAND_NAME, MAIN_NAV, brandHref, isCurrent, visibleNav } from "./shell";
+import {
+  BRAND_NAME,
+  MAIN_NAV,
+  PLACE_BET_HREF,
+  WALLET_HREF,
+  brandHref,
+  isCurrent,
+  visibleNav,
+} from "./shell";
 
 describe("shell", () => {
   it("has one brand value", () => {
@@ -15,7 +23,7 @@ describe("shell", () => {
     expect(visibleNav(false)).toEqual([]);
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
-    expect(visibleNav(true).at(-1)).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
+    expect(visibleNav(true)[1]).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
   });
 
   it("marks the current entry", () => {
@@ -23,8 +31,14 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
 
+  it("appends History at the end and points Place a bet at the wallet for now", () => {
+    expect(MAIN_NAV.at(-1)).toEqual({ key: "history", label: "History", href: "/history" });
+    expect(isCurrent(MAIN_NAV.at(-1)!, "/history")).toBe(true);
+    expect(PLACE_BET_HREF).toBe(WALLET_HREF);
+  });
+
   it("appends Orders after Home", () => {
-    expect(MAIN_NAV.map((e) => e.key)).toEqual(["home", "wallet", "orders"]);
+    expect(MAIN_NAV.map((e) => e.key)).toEqual(["home", "wallet", "orders", "history"]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
     expect(isCurrent(MAIN_NAV[2], "/")).toBe(false);

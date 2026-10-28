@@ -38,7 +38,9 @@ describe('PlayersService.register', () => {
     expect(sql[1]).toMatch(/^insert into players/);
     expect(sql[2]).toMatch(/^insert into wallets/);
     expect(calls[2][1]).toEqual(['p1', STARTING_GRANT]);
-    expect(sql[3]).toBe('commit');
+    expect(sql[3]).toMatch(/^insert into wallet_entries/);
+    expect(calls[3][1]).toEqual(['p1', STARTING_GRANT]);
+    expect(sql[4]).toBe('commit');
     expect(calls[1][1]![0]).toBe('ana@example.com');
     expect(client.release).toHaveBeenCalled();
   });
@@ -47,6 +49,17 @@ describe('PlayersService.register', () => {
     const { service, calls } = setup((sql) => {
       if (sql.includes('insert into players')) return { rows: [{ id: 'p1', email: 'a@b.co' }] };
       if (sql.includes('insert into wallets')) throw new Error('boom');
+      return { rows: [] };
+    });
+    await expect(service.register('a@b.co', 'play-2026')).rejects.toThrow('boom');
+    expect(sqlOf(calls)).toContain('rollback');
+    expect(sqlOf(calls)).not.toContain('commit');
+  });
+
+  it('rolls back when the welcome-bonus ledger insert throws', async () => {
+    const { service, calls } = setup((sql) => {
+      if (sql.includes('insert into players')) return { rows: [{ id: 'p1', email: 'a@b.co' }] };
+      if (sql.includes('insert into wallet_entries')) throw new Error('boom');
       return { rows: [] };
     });
     await expect(service.register('a@b.co', 'play-2026')).rejects.toThrow('boom');

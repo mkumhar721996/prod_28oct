@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { BalanceTile } from "@/components/BalanceTile";
-import { getSession, getWalletBalance } from "@/lib/session";
+import { ClaimCreditsPanel } from "@/components/ClaimCreditsPanel";
+import { getSession, getWallet } from "@/lib/session";
 import { SIGN_IN_HREF } from "@/lib/shell";
 
 export default async function WalletPage({
@@ -10,7 +11,7 @@ export default async function WalletPage({
 }) {
   const session = await getSession();
   if (!session) redirect(`${SIGN_IN_HREF}?next=wallet`);
-  const [{ welcome }, balance] = await Promise.all([searchParams, getWalletBalance()]);
+  const [{ welcome }, wallet] = await Promise.all([searchParams, getWallet()]);
   return (
     <div className="narrow stack stack-4">
       <h1>Wallet</h1>
@@ -19,7 +20,8 @@ export default async function WalletPage({
           <span>Welcome! We added 1,000 credits to your new wallet.</span>
         </div>
       )}
-      <BalanceTile credits={balance} email={session.email} />
+      <BalanceTile credits={wallet.balanceCredits} email={session.email} />
+      <ClaimCreditsPanel balanceCredits={wallet.balanceCredits} topUp={wallet.topUp} />
     </div>
   );
 }

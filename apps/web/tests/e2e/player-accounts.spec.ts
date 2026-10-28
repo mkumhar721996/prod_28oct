@@ -48,6 +48,38 @@ test("AC8: a wrong password shows the message and keeps the email", async ({ pag
   await expect(page.getByLabel("Password")).toHaveValue("");
 });
 
+test("History: the nav opens the history page with each entry", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/wallet");
+  await page.getByRole("link", { name: "History" }).first().click();
+  await expect(page).toHaveURL(/\/history$/);
+  await expect(page.getByRole("heading", { name: "History" })).toBeVisible();
+  await expect(page.getByText("Welcome bonus")).toBeVisible();
+  await expect(page.getByText("Bet", { exact: true })).toBeVisible();
+});
+
+test("Free credits: a player with 1 credit claims and sees the success message", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page
+    .context()
+    .addCookies([{ name: "e2e-balance", value: "1", url: "http://localhost:3100" }]);
+  await page.route("**/api/wallet/top-up", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }),
+    }),
+  );
+  await page.goto("/wallet");
+  await expect(page.getByText("Available")).toBeVisible();
+  await page.getByRole("button", { name: "Claim free credits" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Free credits claimed" })).toContainText(
+    "Free credits claimed: 500 credits. Balance 501 credits.",
+  );
+});
+
 test("AC7: a duplicate email shows the alert", async ({ page }) => {
   await page.route("**/session/register", (route) =>
     route.fulfill({ status: 409, contentType: "application/json", body: "{}" }),
