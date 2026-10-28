@@ -6,6 +6,7 @@ type Window = { count: number; resetAt: number };
 @Injectable()
 export class AttemptLimiter {
   static readonly WINDOW_MS = 15 * 60 * 1000;
+  static readonly MAX_KEYS = 10_000;
   private readonly windows = new Map<string, Window>();
 
   /** Clock; a field (not a constructor argument) so Nest does not try to inject it. */
@@ -30,7 +31,19 @@ export class AttemptLimiter {
     }
   }
 
+  get size(): number {
+    return this.windows.size;
+  }
+
+  /** Drops expired windows once the map is large, so unique keys cannot grow it without bound. */
+  private sweep(): void {
+    if (this.windows.size <= AttemptLimiter.MAX_KEYS) return;
+    const t = this.now();
+    for (const [key, w] of this.windows) if (w.resetAt <= t) this.windows.delete(key);
+  }
+
   record(key: string): void {
+    this.sweep();
     const w = this.current(key) ?? { count: 0, resetAt: this.now() + AttemptLimiter.WINDOW_MS };
     w.count += 1;
     this.windows.set(key, w);

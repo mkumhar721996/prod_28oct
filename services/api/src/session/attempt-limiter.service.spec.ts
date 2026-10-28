@@ -41,6 +41,13 @@ describe('AttemptLimiter', () => {
     expect(() => limiter.assertAllowed('k', 5)).not.toThrow();
   });
 
+  it('drops expired keys so the map cannot grow without bound', () => {
+    for (let i = 0; i < AttemptLimiter.MAX_KEYS + 1; i++) limiter.record(`email-${i}`);
+    now += AttemptLimiter.WINDOW_MS + 1;
+    limiter.record('fresh');
+    expect(limiter.size).toBe(1);
+  });
+
   it('reset clears a key', () => {
     for (let i = 0; i < 5; i++) limiter.record('k');
     limiter.reset('k');

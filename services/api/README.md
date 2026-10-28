@@ -25,6 +25,12 @@ The SQL files in `migrations/` are idempotent (`create ... if not exists`), so r
 
 Sign-in is refused with 429 after 10 failed attempts in 15 minutes for one email or one IP;
 registration is limited to 20 per IP in 15 minutes. Counters are in memory, per API process.
+
+The per-IP limits trust `X-Forwarded-For` (`TRUST_PROXY_HOPS`, default 1). **Keep the API reachable
+only through the web app**: if its port is exposed directly with the default, a client can send its
+own `X-Forwarded-For` and rotate it to get a fresh per-IP bucket on every request (the per-email
+limit would still apply). Set `TRUST_PROXY_HOPS=0` for any deployment where clients reach the API
+directly.
 Passwords are 8 to 128 characters.
 
 ## Tests
