@@ -15,7 +15,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body className="min-h-screen antialiased">
         <div className="shell">
-          <TopBarControls signedIn={session !== null} />
+          <TopBarControls signedIn={session !== null} role={session?.role ?? null} />
           <main className="shell-main">{children}</main>
         </div>
       </body>

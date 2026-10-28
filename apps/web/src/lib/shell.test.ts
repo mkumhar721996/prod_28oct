@@ -13,8 +13,26 @@ describe("shell", () => {
 
   it("shows nav only when signed in", () => {
     expect(visibleNav(false)).toEqual([]);
-    expect(visibleNav(true)).toEqual(MAIN_NAV);
+    expect(visibleNav(false, "hr")).toEqual([]);
+    expect(visibleNav(true, "hr")).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
+  });
+
+  it("shows HR entries to hr", () => {
+    expect(visibleNav(true, "hr").map((e) => e.label)).toEqual(
+      expect.arrayContaining(["New hires", "Holidays"]),
+    );
+  });
+
+  it("hides HR entries from other or missing roles", () => {
+    expect(visibleNav(true, null).map((e) => e.key)).toEqual(["home"]);
+    expect(visibleNav(true).map((e) => e.key)).toEqual(["home"]);
+    expect(visibleNav(true, "new_hire").map((e) => e.key)).toEqual(["home"]);
+  });
+
+  it("orders New hires before Holidays", () => {
+    const keys = visibleNav(true, "hr").map((e) => e.key);
+    expect(keys.indexOf("new-hires")).toBeLessThan(keys.indexOf("holidays"));
   });
 
   it("marks the current entry", () => {

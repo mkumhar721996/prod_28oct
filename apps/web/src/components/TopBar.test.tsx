@@ -60,6 +60,22 @@ describe("TopBar signed in", () => {
   });
 });
 
+describe("TopBar role-based nav", () => {
+  it("shows New hires then Holidays to hr", () => {
+    const hr = renderToStaticMarkup(<TopBar signedIn role="hr" pathname="/" />);
+    expect(hr).toMatch(/data-nav-key="new-hires"[^>]*>New hires</);
+    expect(hr).toMatch(/data-nav-key="holidays"[^>]*>Holidays</);
+    expect(hr.indexOf(">New hires<")).toBeLessThan(hr.indexOf(">Holidays<"));
+  });
+
+  it("shows a new hire neither entry", () => {
+    const nh = renderToStaticMarkup(<TopBar signedIn role="new_hire" pathname="/" />);
+    expect(nh).not.toContain("New hires");
+    expect(nh).not.toContain("Holidays");
+    expect(nh).toContain('data-nav-key="home"');
+  });
+});
+
 describe("TopBar signed out", () => {
   const html = renderToStaticMarkup(<TopBar signedIn={false} pathname="/sign-in" />);
 

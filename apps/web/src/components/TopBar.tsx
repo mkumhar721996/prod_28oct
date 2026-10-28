@@ -3,6 +3,7 @@ import { BRAND_NAME, brandHref, isCurrent, visibleNav } from "@/lib/shell";
 type TopBarProps = {
   signedIn: boolean;
   pathname: string;
+  role?: string | null;
   menuOpen?: boolean;
   /** Sign-out error text; shown as an alert when set. */
   error?: string | null;
@@ -14,6 +15,7 @@ type TopBarProps = {
 export function TopBar({
   signedIn,
   pathname,
+  role = null,
   menuOpen = false,
   error = null,
   onToggleMenu,
@@ -43,7 +45,7 @@ export function TopBar({
                 Menu
               </button>
               <nav id="main-nav" className="shell-nav" aria-label="Main">
-                {visibleNav(signedIn).map((entry) => (
+                {visibleNav(signedIn, role).map((entry) => (
                   <a
                     key={entry.key}
                     href={entry.href}
