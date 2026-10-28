@@ -48,6 +48,16 @@ body { background: var(--color-bg); color: var(--color-fg); }
 .shell-nav a:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
 .shell-error { flex-basis: 100%; }
 .shell-main { flex: 1; width: 100%; max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-4) var(--space-3); }
+/* Rich text paragraph */
+.paragraph--type--rich-text .rich-text { font-family: var(--font-family-base); font-size: var(--font-size-md); line-height: var(--line-height-base); color: var(--color-fg); }
+.paragraph--type--rich-text .rich-text p { margin: 0 0 var(--space-2); }
+.paragraph--type--rich-text .rich-text ul, .paragraph--type--rich-text .rich-text ol { margin: 0 0 var(--space-2); padding-left: calc(var(--space-2) * 2); }
+.paragraph--type--rich-text .rich-text strong { font-weight: bold; }
+.paragraph--type--rich-text .rich-text em { font-style: italic; }
+.paragraph--type--rich-text .rich-text a { color: var(--color-primary); text-decoration: underline; }
+.paragraph--type--rich-text .rich-text a:hover { color: var(--color-primary-hover); }
+.paragraph--type--rich-text .rich-text a:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+
 /* Breakpoint literal: custom properties cannot be used in media queries */
 @media (min-width: 768px) {
   .shell-menu-btn { display: none; }
