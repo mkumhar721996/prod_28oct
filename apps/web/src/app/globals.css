@@ -53,3 +53,22 @@ body { background: var(--color-bg); color: var(--color-fg); }
   .shell-menu-btn { display: none; }
   .shell-nav { display: flex; flex-direction: row; width: auto; }
 }
+
+/* Parallax wall: CSS 3D perspective; each layer is pushed back in Z and scaled to compensate.
+   Layer rate relative to the wall's scroll = dir * speed (rate 1 - dir*speed). */
+.parallax-wall { width: 100%; max-width: var(--size-shell-max); margin: 0 auto; background: var(--color-bg-subtle); color: var(--color-fg); }
+.parallax-wall__viewport { position: relative; height: 60vh; overflow-x: hidden; overflow-y: auto; perspective: 1px; perspective-origin: center top; transform-style: preserve-3d; }
+.parallax-wall__layer {
+  position: absolute; inset: 0;
+  --parallax-d: calc(var(--parallax-dir) * var(--parallax-speed) / (1 - var(--parallax-dir) * var(--parallax-speed)));
+  transform: translateZ(calc(-1px * var(--parallax-d))) scale(calc(1 + var(--parallax-d)));
+  transform-origin: center top;
+}
+.parallax-wall__scroll-space { height: 200%; }
+.parallax-wall__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+.parallax-wall__layer--foreground { display: flex; align-items: center; padding: var(--space-4) var(--space-3); }
+.parallax-wall__text { margin: 0; font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); }
+@media (prefers-reduced-motion: reduce) {
+  .parallax-wall__viewport { perspective: none; transform-style: flat; }
+  .parallax-wall__layer { transform: none; }
+}
