@@ -22,6 +22,13 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
 
+  it("appends Orders after Home", () => {
+    expect(MAIN_NAV.map((e) => e.key)).toEqual(["home", "orders"]);
+    expect(isCurrent(MAIN_NAV[1], "/orders")).toBe(true);
+    expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
+    expect(isCurrent(MAIN_NAV[1], "/")).toBe(false);
+  });
+
   it("marks a section current on its nested routes", () => {
     const hires = { key: "hires", label: "New hires", href: "/new-hires" };
     expect(isCurrent(hires, "/new-hires/42")).toBe(true);
