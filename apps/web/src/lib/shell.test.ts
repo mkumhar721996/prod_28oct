@@ -28,6 +28,12 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[0], "/")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
+
+  it("marks a section current on its nested routes", () => {
+    const hires = { key: "hires", label: "New hires", href: "/new-hires" };
+    expect(isCurrent(hires, "/new-hires/42")).toBe(true);
+    expect(isCurrent(hires, "/new-hires-archive")).toBe(false);
+  });
 });
 
 describe("runSignOut", () => {

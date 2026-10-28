@@ -1,13 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// The session endpoints are assumed (the sign-in story defines them), so they are stubbed here.
+// The session endpoints are assumed (the sign-in story defines them). The server-side session
+// read hits tests/e2e/mock-session-server.mjs, which is signed in when the `e2e-session` cookie is
+// forwarded; the browser-side sign-out call is stubbed with page.route().
 async function stubSession(page: Page, signedIn: boolean, signOutStatus = 200) {
-  await page.route("**/session", (route) =>
-    signedIn
-      ? route.fulfill({ json: { role: "hr" } })
-      : route.fulfill({ status: 401, json: {} }),
+  if (signedIn) {
+    await page
+      .context()
+      .addCookies([{ name: "e2e-session", value: "1", url: "http://localhost:3100" }]);
+  }
+  await page.route("**/session/sign-out", (route) =>
+    route.fulfill({ status: signOutStatus, body: "" }),
   );
-  await page.route("**/session/sign-out", (route) => route.fulfill({ status: signOutStatus, body: "" }));
 }
 
 test("signed in: header, brand, sign out and highlighted Home", async ({ page }) => {
@@ -34,7 +38,7 @@ test("signed out: brand only, brand goes to sign-in", async ({ page }) => {
 
 test("signed in: brand goes home", async ({ page }) => {
   await stubSession(page, true);
-  await page.goto("/");
+  await page.goto("/elsewhere");
   await page.getByRole("link", { name: "Web App" }).click();
   await expect(page).toHaveURL(/\/$/);
 });

@@ -17,7 +17,8 @@ export function visibleNav(signedIn: boolean): readonly NavEntry[] {
 }
 
 export function isCurrent(entry: NavEntry, pathname: string): boolean {
-  return entry.href === pathname;
+  if (entry.href === HOME_HREF) return pathname === HOME_HREF;
+  return pathname === entry.href || pathname.startsWith(`${entry.href}/`);
 }
 
 /** Runs sign out; calls onSuccess only when it resolves. Returns whether it succeeded. */
