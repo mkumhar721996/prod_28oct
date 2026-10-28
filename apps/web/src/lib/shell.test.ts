@@ -15,6 +15,7 @@ describe("shell", () => {
     expect(visibleNav(false)).toEqual([]);
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
+    expect(visibleNav(true).at(-1)).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
   });
 
   it("marks the current entry", () => {

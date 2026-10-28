@@ -5,10 +5,15 @@ import { createServer } from "node:http";
 const port = Number(process.env.MOCK_SESSION_PORT ?? 3101);
 
 createServer((req, res) => {
+  const signedIn = (req.headers.cookie ?? "").includes("e2e-session=1");
   if (req.method === "GET" && req.url === "/session") {
-    const signedIn = (req.headers.cookie ?? "").includes("e2e-session=1");
     res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
-    res.end(JSON.stringify(signedIn ? { role: "hr" } : {}));
+    res.end(JSON.stringify(signedIn ? { role: "player", email: "ana@example.com" } : {}));
+    return;
+  }
+  if (req.method === "GET" && req.url === "/wallet") {
+    res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
+    res.end(JSON.stringify(signedIn ? { balanceCredits: 1000 } : {}));
     return;
   }
   res.writeHead(404).end();
