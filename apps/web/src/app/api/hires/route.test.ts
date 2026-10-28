@@ -31,6 +31,22 @@ describe("/api/hires proxy", () => {
     expect(upstream).not.toHaveBeenCalled();
   });
 
+  it("rate limits a client that posts too often with 429", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 201 })));
+    const post = () =>
+      route.POST(
+        new Request("http://web/api/hires", {
+          method: "POST",
+          body: "{}",
+          headers: { "x-forwarded-for": "203.0.113.9" },
+        }),
+      );
+    const statuses: number[] = [];
+    for (let i = 0; i < 12; i++) statuses.push((await post()).status);
+    expect(statuses.slice(0, 10).every((s) => s === 201)).toBe(true);
+    expect(statuses.slice(10)).toEqual([429, 429]);
+  });
+
   it("does not expose the hire list (no GET handler)", () => {
     expect((route as Record<string, unknown>).GET).toBeUndefined();
   });
