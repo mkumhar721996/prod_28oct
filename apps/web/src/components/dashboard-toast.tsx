@@ -13,7 +13,7 @@ export function DashboardToast() {
 
   useEffect(() => {
     if (!invited) return;
-    setMessage(`Invite sent to ${invited}`);
+    setMessage(`Invite queued for ${invited}`);
     // Strip the query so a reload or back navigation does not replay the toast.
     router.replace("/hr");
   }, [invited, router]);

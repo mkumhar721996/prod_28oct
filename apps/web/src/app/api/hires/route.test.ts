@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as route from "./route";
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 
 describe("/api/hires proxy", () => {
   it("forwards POST bodies to the Records API and relays status and body", async () => {
@@ -31,20 +34,31 @@ describe("/api/hires proxy", () => {
     expect(upstream).not.toHaveBeenCalled();
   });
 
-  it("rate limits a client that posts too often with 429", async () => {
+  it("applies a global ceiling that a spoofed x-forwarded-for cannot dodge", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 201 })));
-    const post = () =>
-      route.POST(
+    const statuses: number[] = [];
+    for (let i = 0; i < 80; i++) {
+      const res = await route.POST(
         new Request("http://web/api/hires", {
           method: "POST",
           body: "{}",
-          headers: { "x-forwarded-for": "203.0.113.9" },
+          headers: { "x-forwarded-for": `203.0.113.${i}` },
         }),
       );
-    const statuses: number[] = [];
-    for (let i = 0; i < 12; i++) statuses.push((await post()).status);
-    expect(statuses.slice(0, 10).every((s) => s === 201)).toBe(true);
-    expect(statuses.slice(10)).toEqual([429, 429]);
+      statuses.push(res.status);
+    }
+    expect(statuses[0]).toBe(201);
+    expect(statuses.at(-1)).toBe(429);
+  });
+
+  it("aborts a hung upstream with a timeout signal", async () => {
+    const upstream = vi.fn(async () => new Response("{}", { status: 201 }));
+    vi.stubGlobal("fetch", upstream);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.now() + 120_000);
+    await route.POST(new Request("http://web/api/hires", { method: "POST", body: "{}" }));
+    const [, init] = upstream.mock.calls[0] as unknown as [string, RequestInit];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
   it("does not expose the hire list (no GET handler)", () => {

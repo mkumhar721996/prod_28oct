@@ -6,24 +6,27 @@ const RECORDS_API_URL = () => process.env.RECORDS_API_URL ?? "http://localhost:4
 // A hire is four short fields; anything near this size is not a legitimate request.
 const MAX_BODY_BYTES = 8 * 1024;
 
-// Per-instance fixed window: a stopgap until sign-in exists. It slows invite spam from one client
-// but is not shared across instances and trusts the proxy's x-forwarded-for.
+// Global fixed-window ceiling, a stopgap until sign-in exists. Route handlers expose no trusted
+// client address and x-forwarded-for is client-controlled, so a per-client key is bypassable; one
+// counter is spoof-proof and constant-size. It caps total invite volume but is per instance, and a
+// flood can lock HR out until the window ends.
 const WINDOW_MS = 60_000;
-const MAX_POSTS_PER_WINDOW = 10;
-const hits = new Map<string, { count: number; resetAt: number }>();
+const MAX_POSTS_PER_WINDOW = 60;
+const UPSTREAM_TIMEOUT_MS = 10_000;
+const window = { count: 0, resetAt: 0 };
 
-function rateLimited(request: Request): boolean {
+function rateLimited(): boolean {
   const now = Date.now();
-  for (const [key, h] of hits) if (h.resetAt <= now) hits.delete(key);
-  const client = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  const h = hits.get(client) ?? { count: 0, resetAt: now + WINDOW_MS };
-  h.count += 1;
-  hits.set(client, h);
-  return h.count > MAX_POSTS_PER_WINDOW;
+  if (now >= window.resetAt) {
+    window.count = 0;
+    window.resetAt = now + WINDOW_MS;
+  }
+  window.count += 1;
+  return window.count > MAX_POSTS_PER_WINDOW;
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (rateLimited(request)) {
+  if (rateLimited()) {
     return Response.json({ errors: {}, message: "Too many requests." }, { status: 429 });
   }
   try {
@@ -36,12 +39,14 @@ export async function POST(request: Request): Promise<Response> {
       headers: { "Content-Type": request.headers.get("content-type") ?? "application/json" },
       body,
       cache: "no-store",
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
     return new Response(await upstream.text(), {
       status: upstream.status,
       headers: { "Content-Type": upstream.headers.get("content-type") ?? "application/json" },
     });
-  } catch {
+  } catch (error) {
+    console.error("POST /api/hires: Records API request failed", error);
     return Response.json({ errors: {}, message: "The Records API is unavailable." }, { status: 502 });
   }
 }

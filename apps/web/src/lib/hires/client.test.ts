@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sendInvite } from "./client";
-import { DUPLICATE_EMAIL_MESSAGE } from "./validate";
+
+const DUPLICATE_EMAIL_MESSAGE = "A hire with this email already exists. Use a different email.";
 
 const input = { name: "Ada", email: "ada@example.com", role: "Engineer", startDate: "2026-11-02" };
 const FORM_ERROR = "We couldn't send the invite. Try again.";

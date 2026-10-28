@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 const DUPLICATE = "A hire with this email already exists. Use a different email.";
 
@@ -9,28 +9,44 @@ async function fillValid(page: Page, email = "ada@example.com") {
   await page.getByLabel("Start date").fill("2026-11-02");
 }
 
+// The /hr page lists hires on the server, so the list comes from tests/e2e/records-api-stub.mjs.
+const STUB_URL = "http://localhost:4100/__state";
+const seed = (request: APIRequestContext, state: object) => request.put(STUB_URL, { data: state });
+
+test.beforeEach(({ request }) => seed(request, { hires: [] }));
+
+// Only the browser's POST is stubbed here; the list is not (see above).
 async function stubHires(page: Page, onPost: () => void = () => {}, status = 201) {
   await page.route("**/api/hires", async (route) => {
-    if (route.request().method() === "POST") {
-      onPost();
-      if (status === 201) return route.fulfill({ status, json: { id: "1", status: "invited" } });
-      if (status === 409) return route.fulfill({ status, json: { errors: { email: DUPLICATE } } });
-      return route.fulfill({ status, json: {} });
-    }
-    return route.fulfill({ json: [] });
+    onPost();
+    if (status === 201) return route.fulfill({ status, json: { id: "1", status: "invited" } });
+    if (status === 409) return route.fulfill({ status, json: { errors: { email: DUPLICATE } } });
+    return route.fulfill({ status, json: {} });
   });
 }
 
 test.describe("entry points", () => {
-  test("dashboard button opens the form", async ({ page }) => {
+  test("header button opens the form when hires exist", async ({ page, request }) => {
+    await seed(request, {
+      hires: [{ id: "1", name: "Priya Raman", email: "priya@example.com", role: "Engineer", startDate: "2026-11-02", status: "invited" }],
+    });
     await page.goto("/hr");
-    await page.getByRole("link", { name: "Add new hire" }).first().click();
-    await expect(page).toHaveURL(/\/hr\/hires\/new$/);
+    await expect(page.locator(".empty-state")).toHaveCount(0);
+    await page.locator(".page-head").getByRole("link", { name: "Add new hire" }).click();
+    await expect(page).toHaveURL(/\/hr\/hires\/new/);
     await expect(page.getByRole("heading", { level: 1, name: "Add new hire" })).toBeVisible();
   });
 
+  test("a failed load shows an error with retry and keeps Add new hire reachable", async ({ page, request }) => {
+    await seed(request, { down: true });
+    await page.goto("/hr");
+    await expect(page.locator(".empty-state")).toHaveCount(0);
+    await expect(page.getByRole("alert")).toContainText("We couldn't load the new hires.");
+    await expect(page.getByRole("link", { name: "Try again" })).toBeVisible();
+    await expect(page.locator(".page-head").getByRole("link", { name: "Add new hire" })).toBeVisible();
+  });
+
   test("empty state action opens the form", async ({ page }) => {
-    await stubHires(page);
     await page.goto("/hr");
     await page.locator(".empty-state").getByRole("link", { name: "Add new hire" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Add new hire" })).toBeVisible();
@@ -54,7 +70,7 @@ test.describe("send invite", () => {
     await fillValid(page);
     await page.getByRole("button", { name: "Send invite" }).click();
     await expect(page).toHaveURL(/\/hr$/);
-    await expect(page.getByRole("status")).toHaveText("Invite sent to ada@example.com");
+    await expect(page.getByRole("status")).toHaveText("Invite queued for ada@example.com");
     expect(posts).toBe(1);
     await page.reload();
     await expect(page.getByRole("status")).toHaveCount(0);
@@ -130,7 +146,7 @@ test.describe("send invite", () => {
 
   test("hostile text is rendered as text in the toast", async ({ page }) => {
     await page.goto("/hr?invited=%3Cscript%3E");
-    await expect(page.getByRole("status")).toHaveText("Invite sent to <script>");
+    await expect(page.getByRole("status")).toHaveText("Invite queued for <script>");
   });
 });
 

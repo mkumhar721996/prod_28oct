@@ -4,8 +4,6 @@ export type Hire = HireInput & { id: string; status: "invited" };
 
 export const ROLES = ["Engineer", "Designer", "Recruiter", "Finance"] as const;
 
-export const DUPLICATE_EMAIL_MESSAGE = "A hire with this email already exists. Use a different email.";
-
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateHire(input: HireInput): HireErrors {
