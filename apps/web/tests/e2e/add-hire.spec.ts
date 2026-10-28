@@ -124,8 +124,8 @@ test.describe("send invite", () => {
     await page.goto("/hr/hires/new");
     await fillValid(page);
     await page.getByRole("button", { name: "Send invite" }).dblclick();
-    await expect(page).toHaveURL(/\/hr/);
-    expect(posts).toBe(1);
+    await expect(page).toHaveURL(/\/hr$/);
+    await expect.poll(() => posts).toBe(1);
   });
 
   test("hostile text is rendered as text in the toast", async ({ page }) => {
