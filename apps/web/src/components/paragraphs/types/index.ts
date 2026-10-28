@@ -1,3 +1,3 @@
 // One line per component file in this folder: export { default as HeroBanner } from "./HeroBanner";
 // barrel.test.ts fails if a *.tsx here is missing from this list.
-export {};
+export { default as Carousel } from "./Carousel";

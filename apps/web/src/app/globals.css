@@ -53,3 +53,15 @@ body { background: var(--color-bg); color: var(--color-fg); }
   .shell-menu-btn { display: none; }
   .shell-nav { display: flex; flex-direction: row; width: auto; }
 }
+
+/* Carousel paragraph */
+.carousel { display: flex; flex-direction: column; gap: var(--space-2); }
+.carousel-slide {
+  padding: var(--space-3); border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg); background: var(--color-bg); color: var(--color-fg);
+}
+.carousel-controls { display: flex; justify-content: space-between; gap: var(--space-2); }
+/* Breakpoint literal: custom properties cannot be used in media queries */
+@media (min-width: 768px) {
+  .carousel-controls { justify-content: flex-end; }
+}
