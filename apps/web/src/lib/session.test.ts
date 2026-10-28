@@ -2,7 +2,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => ({ cookies: async () => ({ toString: () => "session=tok" }) }));
 
-import { getWalletBalance, registerPlayer, signInPlayer } from "./session";
+import {
+  claimFreeCredits,
+  getWallet,
+  getWalletBalance,
+  getWalletHistory,
+  registerPlayer,
+  signInPlayer,
+} from "./session";
 
 function stubFetch(status: number, body: unknown) {
   const fetchMock = vi.fn(async () => new Response(JSON.stringify(body), { status }));
@@ -56,5 +63,58 @@ describe("getWalletBalance", () => {
   it("throws when the wallet cannot be read", async () => {
     stubFetch(500, {});
     await expect(getWalletBalance()).rejects.toThrow();
+  });
+});
+
+describe("getWallet", () => {
+  it("returns the balance and top-up state", async () => {
+    const body = { balanceCredits: 1, topUp: { eligible: true, credits: 500 } };
+    stubFetch(200, body);
+    expect(await getWallet()).toEqual(body);
+  });
+
+  it("throws on a non-OK response", async () => {
+    stubFetch(500, {});
+    await expect(getWallet()).rejects.toThrow();
+  });
+});
+
+describe("getWalletHistory", () => {
+  it("forwards the cookie and asks for the page and range", async () => {
+    const fetchMock = stubFetch(200, { entries: [], page: 2, pageCount: 3, total: 24, range: "all" });
+    expect((await getWalletHistory(2, "all")).pageCount).toBe(3);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/wallet\/history\?page=2&range=all$/),
+      expect.objectContaining({ headers: { cookie: "session=tok" }, cache: "no-store" }),
+    );
+  });
+
+  it("throws on a non-OK response", async () => {
+    stubFetch(500, {});
+    await expect(getWalletHistory(1, "recent")).rejects.toThrow();
+  });
+});
+
+describe("claimFreeCredits", () => {
+  it("posts with credentials and returns the new balance", async () => {
+    const fetchMock = stubFetch(200, { balanceCredits: 501, grantedCredits: 500 });
+    expect(await claimFreeCredits()).toEqual({ ok: true, balanceCredits: 501, grantedCredits: 500 });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/wallet/top-up",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+  });
+
+  it("returns the server message on a 409", async () => {
+    stubFetch(409, { message: "Your balance is more than 1 credit, so a free top-up is not available." });
+    expect(await claimFreeCredits()).toEqual({
+      ok: false,
+      message: "Your balance is more than 1 credit, so a free top-up is not available.",
+    });
+  });
+
+  it("gives no message when the network fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    expect(await claimFreeCredits()).toEqual({ ok: false });
   });
 });

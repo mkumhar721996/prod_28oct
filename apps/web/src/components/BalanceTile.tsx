@@ -1,4 +1,5 @@
-export const formatCredits = (credits: number) => `${credits.toLocaleString("en-US")} credits`;
+export const formatCredits = (credits: number) =>
+  `${credits.toLocaleString("en-US")} ${credits === 1 ? "credit" : "credits"}`;
 
 export function BalanceTile({ credits, email }: { credits: number; email?: string }) {
   return (

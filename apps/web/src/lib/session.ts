@@ -12,6 +12,8 @@ const SIGN_OUT_PATH = "/session/sign-out";
 const REGISTER_PATH = "/session/register";
 const SIGN_IN_PATH = "/session/sign-in";
 const WALLET_PATH = "/wallet";
+// Under /api because /wallet is the page itself; next.config.ts rewrites it to POST /wallet/top-up.
+const TOP_UP_PATH = "/api/wallet/top-up";
 
 /** Server side: the current session, or null when signed out. Throws if the session service fails. */
 export async function getSession(): Promise<Session> {
@@ -34,6 +36,76 @@ export async function getWalletBalance(): Promise<number> {
   });
   if (!res.ok) throw new Error(`Wallet lookup failed (${res.status})`);
   return ((await res.json()) as { balanceCredits: number }).balanceCredits;
+}
+
+export type TopUp = { eligible: boolean; credits: number };
+export type Wallet = { balanceCredits: number; topUp: TopUp };
+
+/** Server side: the player's balance and whether a free top-up is available. Throws on failure. */
+export async function getWallet(): Promise<Wallet> {
+  const cookieHeader = (await cookies()).toString();
+  const res = await fetch(`${API_URL}${WALLET_PATH}`, {
+    cache: "no-store",
+    headers: cookieHeader ? { cookie: cookieHeader } : {},
+  });
+  if (!res.ok) throw new Error(`Wallet lookup failed (${res.status})`);
+  return (await res.json()) as Wallet;
+}
+
+export type HistoryKind = "grant" | "bet" | "win" | "topup";
+export type HistoryRange = "recent" | "all";
+export type HistoryEntry = {
+  id: string;
+  kind: HistoryKind;
+  amountCredits: number;
+  balanceCredits: number;
+  /** ISO-8601 UTC. */
+  createdAt: string;
+};
+export type WalletHistory = {
+  entries: HistoryEntry[];
+  page: number;
+  pageCount: number;
+  total: number;
+  range: HistoryRange;
+};
+
+/** Server side: one page of the player's own history. Throws if it cannot be read. */
+export async function getWalletHistory(page: number, range: HistoryRange): Promise<WalletHistory> {
+  const cookieHeader = (await cookies()).toString();
+  const query = new URLSearchParams({ page: String(page), range });
+  const res = await fetch(`${API_URL}${WALLET_PATH}/history?${query}`, {
+    cache: "no-store",
+    headers: cookieHeader ? { cookie: cookieHeader } : {},
+  });
+  if (!res.ok) throw new Error(`History lookup failed (${res.status})`);
+  return (await res.json()) as WalletHistory;
+}
+
+export type ClaimResult =
+  | { ok: true; balanceCredits: number; grantedCredits: number }
+  | { ok: false; message?: string };
+
+/** Client side: claims the free top-up. Never throws. */
+export async function claimFreeCredits(): Promise<ClaimResult> {
+  try {
+    const res = await fetch(TOP_UP_PATH, { method: "POST", credentials: "include" });
+    const body = (await res.json().catch(() => ({}))) as {
+      message?: unknown;
+      balanceCredits?: number;
+      grantedCredits?: number;
+    };
+    if (res.ok) {
+      return {
+        ok: true,
+        balanceCredits: body.balanceCredits ?? 0,
+        grantedCredits: body.grantedCredits ?? 0,
+      };
+    }
+    return { ok: false, message: typeof body.message === "string" ? body.message : undefined };
+  } catch {
+    return { ok: false };
+  }
 }
 
 export type AuthResult = { ok: true } | { ok: false; status: number; message: string };
