@@ -68,6 +68,23 @@ describe('PlayersService.register', () => {
     await expect(service.register('a@b.co', 'short')).rejects.toBeInstanceOf(BadRequestException);
     expect(pool.connect).not.toHaveBeenCalled();
   });
+
+  it('caps the password length before hashing', async () => {
+    const { service, pool } = setup();
+    await expect(service.register('a@b.co', 'x'.repeat(129))).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(pool.connect).not.toHaveBeenCalled();
+  });
+
+  it('keeps the original error when the rollback itself fails', async () => {
+    const { service } = setup((sql) => {
+      if (sql.includes('insert into players')) throw new Error('original');
+      if (sql === 'rollback') throw new Error('rollback failed');
+      return { rows: [] };
+    });
+    await expect(service.register('a@b.co', 'play-2026')).rejects.toThrow('original');
+  });
 });
 
 describe('PlayersService.authenticate', () => {

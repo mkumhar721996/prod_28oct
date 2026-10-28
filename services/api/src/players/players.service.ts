@@ -1,6 +1,11 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { EMAIL_PATTERN, MIN_PASSWORD_LENGTH, STARTING_GRANT } from './players.constants';
+import {
+  EMAIL_PATTERN,
+  MAX_PASSWORD_LENGTH,
+  MIN_PASSWORD_LENGTH,
+  STARTING_GRANT,
+} from './players.constants';
 import { PasswordService } from './password.service';
 
 export type Player = { id: string; email: string };
@@ -29,6 +34,9 @@ export class PlayersService {
     if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
       throw new BadRequestException(`Use at least ${MIN_PASSWORD_LENGTH} characters`);
     }
+    if (password.length > MAX_PASSWORD_LENGTH) {
+      throw new BadRequestException(`Use at most ${MAX_PASSWORD_LENGTH} characters`);
+    }
     const passwordHash = await this.passwords.hash(password);
     const client = await this.db.pool.connect();
     try {
@@ -45,7 +53,7 @@ export class PlayersService {
       await client.query('commit');
       return player;
     } catch (err) {
-      await client.query('rollback');
+      await client.query('rollback').catch(() => undefined);
       if ((err as { code?: string }).code === UNIQUE_VIOLATION) {
         throw new ConflictException(
           'An account with this email already exists. Sign in instead, or use a different email.',
@@ -59,7 +67,8 @@ export class PlayersService {
 
   /** The player for these credentials, or null. Never touches the wallet. */
   async authenticate(email: unknown, password: unknown): Promise<Player | null> {
-    const candidate = typeof password === 'string' ? password : '';
+    const candidate =
+      typeof password === 'string' && password.length <= MAX_PASSWORD_LENGTH ? password : '';
     const { rows } = await this.db.pool.query(
       'select id, email, password_hash from players where email = $1',
       [normaliseEmail(email)],
