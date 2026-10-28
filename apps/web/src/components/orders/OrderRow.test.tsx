@@ -32,7 +32,13 @@ describe("OrderRow", () => {
   it("is not interactive", () => {
     const html = render(order);
     expect(html).not.toMatch(/<(a|button)\b/);
-    expect(html).not.toContain("onClick");
     expect(html).not.toContain("href=");
+    expect(html).not.toMatch(/role="(link|button)"/);
+    expect(html).not.toContain("tabindex");
+  });
+
+  it("renders an unknown status instead of crashing", () => {
+    const html = render({ ...order, status: "Something new" as Order["status"] });
+    expect(html).toContain("Something new");
   });
 });

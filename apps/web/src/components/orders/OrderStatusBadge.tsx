@@ -11,7 +11,8 @@ const BADGES: Record<OrderStatus, { tone: string; icon: IconName }> = {
 
 /** Read-only status: colour is always paired with an icon and the status word. */
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
-  const { tone, icon } = BADGES[status];
+  // An unknown status still renders (neutral info tone), matching tabOf's Active fallback.
+  const { tone, icon } = BADGES[status] ?? { tone: "badge-info", icon: "info" };
   return (
     <span className={`badge ${tone} order-badge`}>
       <Icon name={icon} />

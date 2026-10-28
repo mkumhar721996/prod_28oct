@@ -1,3 +1,5 @@
+import { ORDERS_HREF } from "./shell";
+
 export type OrderStatus = "Received" | "Preparing" | "Ready for pickup" | "Fulfilled" | "Cancelled";
 export type Order = {
   id: string;
@@ -9,7 +11,6 @@ export type Order = {
 export type OrdersTab = "active" | "past";
 export type OrdersPage = { items: Order[]; nextCursor: string | null; hasAnyOrders: boolean };
 
-export const ORDERS_HREF = "/orders";
 export const ORDERS_PAGE_SIZE = 20;
 
 // The browser calls /api/orders on the web origin; next.config.ts rewrites it (cookies included) to
