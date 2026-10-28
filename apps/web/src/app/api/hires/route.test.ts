@@ -22,6 +22,15 @@ describe("/api/hires proxy", () => {
     expect(res.status).toBe(502);
   });
 
+  it("rejects an oversized body with 413 without calling the Records API", async () => {
+    const upstream = vi.fn();
+    vi.stubGlobal("fetch", upstream);
+    const body = JSON.stringify({ name: "x".repeat(20_000) });
+    const res = await route.POST(new Request("http://web/api/hires", { method: "POST", body }));
+    expect(res.status).toBe(413);
+    expect(upstream).not.toHaveBeenCalled();
+  });
+
   it("does not expose the hire list (no GET handler)", () => {
     expect((route as Record<string, unknown>).GET).toBeUndefined();
   });
