@@ -15,6 +15,7 @@ describe("shell", () => {
     expect(visibleNav(false)).toEqual([]);
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
+    expect(visibleNav(true).at(-1)).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
   });
 
   it("marks the current entry", () => {
@@ -23,10 +24,10 @@ describe("shell", () => {
   });
 
   it("appends Orders after Home", () => {
-    expect(MAIN_NAV.map((e) => e.key)).toEqual(["home", "orders"]);
-    expect(isCurrent(MAIN_NAV[1], "/orders")).toBe(true);
+    expect(MAIN_NAV.map((e) => e.key)).toEqual(["home", "wallet", "orders"]);
+    expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
-    expect(isCurrent(MAIN_NAV[1], "/")).toBe(false);
+    expect(isCurrent(MAIN_NAV[2], "/")).toBe(false);
   });
 
   it("marks a section current on its nested routes", () => {

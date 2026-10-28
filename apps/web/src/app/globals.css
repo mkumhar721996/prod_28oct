@@ -108,3 +108,39 @@ svg.icon {
   .shell-menu-btn { display: none; }
   .shell-nav { display: flex; flex-direction: row; width: auto; }
 }
+
+/* Forms, cards and feedback (from design-system/prototype-utils.css and the approved prototype) */
+.text-muted { color: var(--color-fg-muted); }
+.text-sm { font-size: var(--font-size-sm); }
+a.link { color: var(--color-primary); }
+.stack { display: flex; flex-direction: column; gap: var(--space-3); }
+.stack-2 { gap: var(--space-2); }
+.stack-4 { gap: var(--space-4); }
+.card {
+  padding: var(--space-3); background: var(--color-bg); color: var(--color-fg);
+  border: var(--border-width) solid var(--color-border); border-radius: var(--radius-lg);
+}
+.field { display: flex; flex-direction: column; gap: var(--space-1); }
+.field > label { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
+.field-hint { font-size: var(--font-size-sm); color: var(--color-fg-muted); }
+.field-error { font-size: var(--font-size-sm); color: var(--color-danger); }
+.input {
+  width: 100%; min-height: var(--size-control); padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-md);
+  background: var(--color-bg); color: var(--color-fg); font: inherit;
+}
+.input::placeholder { color: var(--color-fg-muted); }
+.input:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.is-invalid { border-color: var(--color-danger); }
+.btn-primary { background: var(--color-primary); color: var(--color-primary-fg); border-color: var(--color-primary); }
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-primary:active { background: var(--color-primary-active); }
+.form-actions .btn { width: 100%; }
+.alert-info { background: var(--color-info-bg); color: var(--color-info); border-color: var(--color-info-border); }
+.alert-success { background: var(--color-success-bg); color: var(--color-success); border-color: var(--color-success-border); }
+.skeleton { display: block; height: var(--size-skeleton-line); border-radius: var(--radius-sm); background: var(--color-skeleton); }
+
+/* Account and wallet screens */
+.narrow { max-width: var(--size-modal); margin: 0 auto; width: 100%; }
+.balance-tile { display: flex; flex-direction: column; gap: var(--space-1); border-left: var(--border-width-strong) solid var(--color-primary); }
+.balance-figure { font-size: calc(var(--font-size-xl) * 1.5); font-weight: var(--font-weight-semibold); }

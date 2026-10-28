@@ -3,12 +3,15 @@ export const BRAND_NAME = "Web App";
 export const HOME_HREF = "/";
 export const ORDERS_HREF = "/orders";
 export const SIGN_IN_HREF = "/sign-in";
+export const REGISTER_HREF = "/register";
+export const WALLET_HREF = "/wallet";
 
 export type NavEntry = { key: string; label: string; href: string };
 
 /** Append new sections to the end so existing positions stay stable. */
 export const MAIN_NAV: readonly NavEntry[] = [
   { key: "home", label: "Home", href: HOME_HREF },
+  { key: "wallet", label: "Wallet", href: WALLET_HREF },
   { key: "orders", label: "Orders", href: ORDERS_HREF },
 ];
 

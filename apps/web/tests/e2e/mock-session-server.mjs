@@ -27,7 +27,13 @@ createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/session") {
     const signedIn = cookie.includes("e2e-session=1");
     res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
-    res.end(JSON.stringify(signedIn ? { role: "hr" } : {}));
+    res.end(JSON.stringify(signedIn ? { role: "player", email: "ana@example.com" } : {}));
+    return;
+  }
+  if (req.method === "GET" && url.pathname === "/wallet") {
+    const signedIn = cookie.includes("e2e-session=1");
+    res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
+    res.end(JSON.stringify(signedIn ? { balanceCredits: 1000 } : {}));
     return;
   }
   if (req.method === "GET" && url.pathname === "/orders") {
