@@ -1,1 +1,55 @@
 @import "tailwindcss";
+@import "../../../../design-system/tokens.css";
+
+body { background: var(--color-bg); color: var(--color-fg); }
+
+/* Buttons and alert (from design-system/prototype-utils.css) */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: var(--size-control);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font: inherit; font-weight: var(--font-weight-medium); text-decoration: none; cursor: pointer;
+}
+.btn:hover { background: var(--color-bg-subtle); }
+.btn-secondary { background: var(--color-bg); color: var(--color-fg); border-color: var(--color-border-strong); }
+.btn-ghost { background: var(--color-bg); color: var(--color-primary); border-color: var(--color-bg); }
+.btn-ghost:hover { background: var(--color-bg-subtle); }
+.btn-sm { min-height: var(--size-control-sm); padding: 0 var(--space-2); font-size: var(--font-size-sm); }
+.btn:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; pointer-events: none; }
+.btn:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.alert {
+  display: flex; gap: var(--space-2); padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-danger-border); border-radius: var(--radius-md);
+}
+.alert-danger { background: var(--color-danger-bg); color: var(--color-danger); border-color: var(--color-danger-border); }
+
+/* App shell (from the approved prototype) */
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.shell-header { border-bottom: var(--border-width) solid var(--color-border); background: var(--color-bg); }
+.shell-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2);
+  width: 100%; max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-2) var(--space-3);
+}
+.shell-group { display: flex; flex-wrap: wrap; align-items: center; flex: 1; gap: var(--space-2); }
+.shell-brand { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-fg); text-decoration: none; }
+.shell-brand:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.shell-nav { display: none; flex-direction: column; width: 100%; gap: var(--space-1); }
+.shell-menu-btn[aria-expanded="true"] + .shell-nav { display: flex; }
+.shell-nav a {
+  display: flex; align-items: center; min-height: var(--size-control); padding: 0 var(--space-3);
+  border-radius: var(--radius-md); color: var(--color-fg); text-decoration: none; font-weight: var(--font-weight-medium);
+}
+.shell-nav a:hover { background: var(--color-bg-subtle); }
+.shell-nav a[aria-current="page"] { color: var(--color-primary); background: var(--color-bg-subtle); }
+.shell-nav a:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.shell-error { flex-basis: 100%; }
+.shell-main { flex: 1; width: 100%; max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-4) var(--space-3); }
+/* Breakpoint literal: custom properties cannot be used in media queries */
+@media (min-width: 768px) {
+  .shell-menu-btn { display: none; }
+  .shell-nav { display: flex; flex-direction: row; width: auto; }
+}
