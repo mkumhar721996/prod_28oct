@@ -1,1 +1,40 @@
 @import "tailwindcss";
+@import "../../../../design-system/tokens.css";
+@import "../../../../design-system/prototype-utils.css";
+
+/* App shell (design-system/app-shell.html) */
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.shell-header { border-bottom: var(--border-width) solid var(--color-border); background: var(--color-bg); }
+.shell-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2);
+  width: 100%; max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-2) var(--space-3);
+}
+.shell-brand { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-fg); text-decoration: none; }
+.shell-nav { display: none; flex-direction: column; width: 100%; gap: var(--space-1); }
+.shell-menu-btn[aria-expanded="true"] + .shell-nav, .shell-nav.is-open { display: flex; }
+.shell-nav a {
+  display: flex; align-items: center; min-height: var(--size-control); padding: 0 var(--space-3);
+  border-radius: var(--radius-md); color: var(--color-fg); text-decoration: none; font-weight: var(--font-weight-medium);
+}
+.shell-nav a:hover { background: var(--color-bg-subtle); }
+.shell-nav a[aria-current="page"] { color: var(--color-primary); background: var(--color-bg-subtle); }
+.shell-nav a:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.shell-main { flex: 1; width: 100%; max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-4) var(--space-3); }
+.shell-footer { border-top: var(--border-width) solid var(--color-border); color: var(--color-fg-muted); font-size: var(--font-size-sm); }
+.shell-footer > div { max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-3); }
+/* Breakpoint literal: custom properties cannot be used in media queries */
+@media (min-width: 768px) {
+  .shell-menu-btn { display: none; }
+  .shell-nav { display: flex; flex-direction: row; width: auto; }
+}
+
+/* Add new hire story */
+.page { max-width: 40rem; margin: 0 auto; }
+.page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.crumbs { display: flex; gap: var(--space-1); align-items: center; font-size: var(--font-size-sm); color: var(--color-fg-muted); }
+.crumbs a { color: var(--color-primary); }
+.form-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: space-between; }
+.hires { width: 100%; border-collapse: collapse; }
+.hires th, .hires td { text-align: left; padding: var(--space-2); border-bottom: var(--border-width) solid var(--color-border); overflow-wrap: anywhere; }
+.table-wrap { overflow-x: auto; }
+.toast { left: 50%; right: auto; transform: translateX(-50%); bottom: var(--space-4); display: flex; gap: var(--space-2); align-items: center; }
