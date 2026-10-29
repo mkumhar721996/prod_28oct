@@ -174,4 +174,18 @@ describe('WalletService.historyFor', () => {
     expect(pool.query.mock.calls[0][0]).not.toMatch(/created_at >=/);
     expect(h.pageCount).toBe(1);
   });
+
+  it('orders by id only, so the list follows the balance chain', async () => {
+    const { service, pool } = setup();
+    pool.query.mockResolvedValueOnce({ rows: [{ total: '0' }] }).mockResolvedValueOnce({ rows: [] });
+    await service.historyFor('p1', { page: 1, range: 'all' }, NOW);
+    expect(pool.query.mock.calls[1][0]).toMatch(/order by id desc/);
+    expect(pool.query.mock.calls[1][0]).not.toMatch(/order by created_at/);
+  });
+
+  it('stamps the ledger row with the insert time, not the transaction start', async () => {
+    const { service, calls } = setup(updated(400));
+    await service.placeBet('p1', 100);
+    expect(calls[2][0]).toMatch(/clock_timestamp\(\)/);
+  });
 });

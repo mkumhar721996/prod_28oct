@@ -149,6 +149,30 @@ describe('Wallet ledger (e2e)', () => {
     });
   });
 
+  it('AC5/AC6: after simultaneous bets and wins, newest entry balance equals the wallet and the chain holds', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    for (let i = 0; i < 10; i++) {
+      await Promise.all([service.placeBet(id, 10), service.recordWin(id, 5)]);
+    }
+    const h = await service.historyFor(id, { page: 1, range: 'all' });
+    expect(h.entries[0].balanceCredits).toBe(await service.balanceFor(id));
+    const oldestFirst = [...h.entries].reverse();
+    for (let i = 1; i < oldestFirst.length; i++) {
+      const e = oldestFirst[i];
+      const delta = e.kind === 'bet' ? -e.amountCredits : e.amountCredits;
+      expect(e.balanceCredits).toBe(oldestFirst[i - 1].balanceCredits + delta);
+    }
+  });
+
+  it('migration 004 is idempotent', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const sql = fs.readFileSync(path.join(__dirname, '../migrations/004_wallet_entries_order_idx.sql'), 'utf8');
+    await pool.query(sql);
+    await pool.query(sql);
+  });
+
   it('AC12/AC13: pages of 10, and the oldest page lists the first entry', async () => {
     await register();
     const id = await playerId(ana.email);
