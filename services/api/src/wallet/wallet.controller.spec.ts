@@ -58,6 +58,17 @@ describe('WalletController', () => {
     expect(wallet.historyFor).toHaveBeenCalledWith('p1', {
       page: expectedPage,
       range: expectedRange,
+      view: 'wallet',
     });
+  });
+
+  it.each([
+    ['play', 'play'],
+    ['bogus', 'wallet'],
+    [undefined, 'wallet'],
+  ])('GET /wallet/history view=%s uses %s', async (view, expected) => {
+    const { controller, wallet } = setup();
+    await controller.history(req, undefined, undefined, view);
+    expect(wallet.historyFor).toHaveBeenCalledWith('p1', expect.objectContaining({ view: expected }));
   });
 });

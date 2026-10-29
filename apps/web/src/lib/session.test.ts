@@ -82,16 +82,16 @@ describe("getWallet", () => {
 describe("getWalletHistory", () => {
   it("forwards the cookie and asks for the page and range", async () => {
     const fetchMock = stubFetch(200, { entries: [], page: 2, pageCount: 3, total: 24, range: "all" });
-    expect((await getWalletHistory(2, "all")).pageCount).toBe(3);
+    expect((await getWalletHistory(2, "all", "play")).pageCount).toBe(3);
     expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringMatching(/\/wallet\/history\?page=2&range=all$/),
+      expect.stringMatching(/\/wallet\/history\?page=2&range=all&view=play$/),
       expect.objectContaining({ headers: { cookie: "session=tok" }, cache: "no-store" }),
     );
   });
 
   it("throws on a non-OK response", async () => {
     stubFetch(500, {});
-    await expect(getWalletHistory(1, "recent")).rejects.toThrow();
+    await expect(getWalletHistory(1, "recent", "wallet")).rejects.toThrow();
   });
 });
 

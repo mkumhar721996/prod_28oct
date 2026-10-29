@@ -54,6 +54,9 @@ export async function getWallet(): Promise<Wallet> {
 
 export type HistoryKind = "grant" | "bet" | "win" | "topup";
 export type HistoryRange = "recent" | "all";
+/** `wallet` is every entry; `play` is bets and wins only. */
+export type HistoryView = "wallet" | "play";
+export type JackpotTier = "Grand" | "Major" | "Minor" | "Mini";
 export type HistoryEntry = {
   id: string;
   kind: HistoryKind;
@@ -61,6 +64,10 @@ export type HistoryEntry = {
   balanceCredits: number;
   /** ISO-8601 UTC. */
   createdAt: string;
+  /** Credits of a bet that fed the jackpot; null when none. */
+  jackpotContributionCredits: number | null;
+  /** Tier of a jackpot win; null for any other entry. */
+  jackpotTier: JackpotTier | null;
 };
 export type WalletHistory = {
   entries: HistoryEntry[];
@@ -68,12 +75,17 @@ export type WalletHistory = {
   pageCount: number;
   total: number;
   range: HistoryRange;
+  view: HistoryView;
 };
 
 /** Server side: one page of the player's own history. Throws if it cannot be read. */
-export async function getWalletHistory(page: number, range: HistoryRange): Promise<WalletHistory> {
+export async function getWalletHistory(
+  page: number,
+  range: HistoryRange,
+  view: HistoryView,
+): Promise<WalletHistory> {
   const cookieHeader = (await cookies()).toString();
-  const query = new URLSearchParams({ page: String(page), range });
+  const query = new URLSearchParams({ page: String(page), range, view });
   const res = await fetch(`${API_URL}${WALLET_PATH}/history?${query}`, {
     cache: "no-store",
     headers: cookieHeader ? { cookie: cookieHeader } : {},

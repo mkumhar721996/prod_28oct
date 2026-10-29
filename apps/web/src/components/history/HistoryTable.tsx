@@ -1,4 +1,4 @@
-import type { HistoryEntry, HistoryKind } from "@/lib/session";
+import type { HistoryEntry, HistoryKind, JackpotTier } from "@/lib/session";
 import { LocalTime } from "./LocalTime";
 
 const KINDS: Record<HistoryKind, { label: string; badge: string; sign: string }> = {
@@ -8,7 +8,14 @@ const KINDS: Record<HistoryKind, { label: string; badge: string; sign: string }>
   topup: { label: "Top-up", badge: "badge-info", sign: "+" },
 };
 
-const number = (n: number) => n.toLocaleString("en-US");
+const TIERS: Record<JackpotTier, string> = {
+  Grand: "badge-accent",
+  Major: "badge-warning",
+  Minor: "badge-info",
+  Mini: "badge-neutral",
+};
+
+const number =(n: number) => n.toLocaleString("en-US");
 
 export function HistoryTable({
   entries,
@@ -34,6 +41,10 @@ export function HistoryTable({
               Amount
             </th>
             <th scope="col" className="num">
+              Jackpot contribution
+            </th>
+            <th scope="col">Jackpot tier</th>
+            <th scope="col" className="num">
               Balance
             </th>
           </tr>
@@ -53,6 +64,24 @@ export function HistoryTable({
                   {kind.sign}
                   {number(e.amountCredits)}
                 </td>
+                {e.kind === "bet" && e.jackpotContributionCredits !== null ? (
+                  <td className="num">{e.jackpotContributionCredits.toFixed(2)}</td>
+                ) : (
+                  <td className="num none">
+                    <span aria-hidden="true">—</span>
+                    <span className="sr">No contribution</span>
+                  </td>
+                )}
+                {e.kind === "win" && e.jackpotTier ? (
+                  <td>
+                    <span className={`badge ${TIERS[e.jackpotTier]}`}>{e.jackpotTier}</span>
+                  </td>
+                ) : (
+                  <td className="none">
+                    <span aria-hidden="true">—</span>
+                    <span className="sr">No jackpot tier</span>
+                  </td>
+                )}
                 <td className="num">{number(e.balanceCredits)}</td>
               </tr>
             );
