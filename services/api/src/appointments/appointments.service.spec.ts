@@ -1,5 +1,7 @@
 import { DatabaseService } from '../database/database.service';
-import { AppointmentsService } from './appointments.service';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { AppointmentsService, REASON_MAX } from './appointments.service';
 
 const NOW = new Date('2026-10-29T10:00:00Z');
 
@@ -130,5 +132,14 @@ describe('AppointmentsService', () => {
       const list = await service.listFor('p1');
       expect(list.map((a) => [a.date, a.time])).toContainEqual(['2026-11-02', '09:00']);
     });
+  });
+});
+
+describe('reason length limit', () => {
+  it('is the same in the API, the SQL check constraint and the web app', () => {
+    const sql = readFileSync(join(__dirname, '../../migrations/003_appointments.sql'), 'utf8');
+    const web = readFileSync(join(__dirname, '../../../../apps/web/src/lib/appointments.ts'), 'utf8');
+    expect(sql).toContain(`char_length(reason) <= ${REASON_MAX}`);
+    expect(web).toContain(`export const REASON_MAX = ${REASON_MAX};`);
   });
 });

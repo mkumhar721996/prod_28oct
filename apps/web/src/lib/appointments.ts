@@ -1,3 +1,4 @@
+// Keep in sync with REASON_MAX in services/api/src/appointments/appointments.service.ts and the check in services/api/migrations/003_appointments.sql (pinned by appointments.service.spec.ts).
 export const REASON_MAX = 500;
 const REASON_PREVIEW_CHARS = 60;
 

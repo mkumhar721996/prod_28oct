@@ -1,3 +1,4 @@
+-- The reason limit (500) must match REASON_MAX in appointments.service.ts and apps/web/src/lib/appointments.ts.
 -- A patient's booking of one 30-minute slot at a clinic. Clinics live in code, not in a table.
 -- slot_start is the slot's start as a UTC instant; it is shown in the clinic's own time zone.
 create table if not exists appointments (

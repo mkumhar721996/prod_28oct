@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CLINICS, Clinic, clinicLocalToUtc, isOfferedSlot, slotsFor, utcToClinicLocal } from './clinics';
 
+// Keep in sync with apps/web/src/lib/appointments.ts and the check in migrations/003_appointments.sql (pinned by appointments.service.spec.ts).
 export const REASON_MAX = 500;
 const CLINIC_SLOT_INDEX = 'appointments_clinic_slot_uniq';
 const PLAYER_SLOT_INDEX = 'appointments_player_slot_uniq';
