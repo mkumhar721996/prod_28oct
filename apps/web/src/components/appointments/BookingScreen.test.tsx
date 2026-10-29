@@ -10,7 +10,7 @@ vi.mock("@/lib/appointments", async (importOriginal) => ({
 }));
 
 import type { Clinic, SlotDay } from "@/lib/appointments";
-import { BookingScreen, runConfirm } from "./BookingScreen";
+import { BookingScreen, afterFailure, runConfirm } from "./BookingScreen";
 
 const clinics: Clinic[] = [
   { id: "central", name: "Central Clinic", hoursText: "Open Monday to Friday, 09:00 to 11:00" },
@@ -80,7 +80,7 @@ describe("BookingScreen markup", () => {
     expect(html).not.toContain("Appointment booked");
   });
 
-  it("keeps clinic, slot and reason after a generic failure", () => {
+  it("renders seeded clinic, slot, reason and failure alert together", () => {
     const html = render({
       clinicId: "north",
       days,
@@ -94,6 +94,37 @@ describe("BookingScreen markup", () => {
     expect(html).toMatch(/aria-pressed="true"[^>]*>09:00</);
     expect(html).toContain("Check-up");
     expect(confirmButton(html)).not.toContain('disabled=""');
+  });
+});
+
+describe("afterFailure", () => {
+  const alert = { kind: "danger" as const, title: "t", text: "x" };
+
+  it("keeps the slot and free times after a generic failure or existing booking", () => {
+    const current = { slot, days };
+    expect(afterFailure(current, { type: "error", alert })).toEqual({ ...current, alert });
+    const warning = { ...alert, kind: "warning" as const };
+    expect(afterFailure(current, { type: "already_booked", alert: warning })).toEqual({
+      ...current,
+      alert: warning,
+    });
+  });
+
+  it("drops the slot and takes the refetched times when the slot was taken", () => {
+    const fresh = [{ date: "2026-11-02", times: ["09:30"] }];
+    expect(afterFailure({ slot, days }, { type: "slot_taken", alert, days: fresh })).toEqual({
+      slot: null,
+      days: fresh,
+      alert,
+    });
+  });
+
+  it("keeps the old times when the refetch failed, but still drops the slot", () => {
+    expect(afterFailure({ slot, days }, { type: "slot_taken", alert, days: null })).toEqual({
+      slot: null,
+      days,
+      alert,
+    });
   });
 });
 

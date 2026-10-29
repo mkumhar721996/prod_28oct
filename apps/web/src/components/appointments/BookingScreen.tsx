@@ -53,6 +53,20 @@ export async function runConfirm(
   };
 }
 
+/**
+ * What the page keeps after a failed Confirm. Clinic and reason are never touched; the chosen
+ * slot is dropped only when it was taken, and the refetched free times replace the old ones.
+ */
+export function afterFailure(
+  current: { slot: Slot | null; days: SlotDay[] },
+  outcome: Exclude<ConfirmOutcome, { type: "booked" }>,
+): { slot: Slot | null; days: SlotDay[]; alert: BookingAlert } {
+  if (outcome.type === "slot_taken") {
+    return { slot: null, days: outcome.days ?? current.days, alert: outcome.alert };
+  }
+  return { ...current, alert: outcome.alert };
+}
+
 type Initial = {
   clinicId?: string;
   slot?: Slot | null;
@@ -123,11 +137,10 @@ export function BookingScreen({ clinics, initial }: { clinics: Clinic[]; initial
       return;
     }
     setPending(false);
-    if (outcome.type === "slot_taken") {
-      setSlot(null);
-      if (outcome.days) setDays(outcome.days);
-    }
-    setAlert(outcome.alert);
+    const next = afterFailure({ slot, days }, outcome);
+    setSlot(next.slot);
+    setDays(next.days);
+    setAlert(next.alert);
   }
 
   return (
