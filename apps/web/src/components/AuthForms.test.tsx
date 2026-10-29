@@ -50,13 +50,13 @@ describe("handleRegister", () => {
     expect(deps.refresh).toHaveBeenCalled();
   });
 
-  it("shows the duplicate-email alert on 409", async () => {
+  it("AC9: shows the duplicate-email field error on 409", async () => {
     const deps = {
       ...nav(),
       registerPlayer: vi.fn(async () => ({ ok: false as const, status: 409, message: "x" })),
     };
     expect(await handleRegister(deps, "a@b.co", "play-2026")).toEqual({
-      alert: DUPLICATE_EMAIL_ERROR,
+      email: DUPLICATE_EMAIL_ERROR,
     });
     expect(DUPLICATE_EMAIL_ERROR).toBe(
       "An account with this email already exists. Sign in instead, or use a different email.",

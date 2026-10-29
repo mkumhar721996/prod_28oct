@@ -47,7 +47,7 @@ describe("runClaim", () => {
   });
 
   it("returns the API message and does not refresh when refused", async () => {
-    const message = "Your balance is more than 1 credit, so a free top-up is not available.";
+    const message = "Free top-up is only available when your balance is 1 credit or less.";
     const refresh = vi.fn();
     const claimFreeCredits = vi.fn(async () => ({ ok: false as const, message }));
     expect(await runClaim({ claimFreeCredits, refresh })).toEqual({ ok: false, message });

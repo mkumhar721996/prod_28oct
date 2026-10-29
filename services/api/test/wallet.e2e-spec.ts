@@ -116,7 +116,9 @@ describe('Wallet ledger (e2e)', () => {
     const { agent } = await register();
     const id = await playerId(ana.email);
     await seed(id, 2);
-    await agent.post('/wallet/top-up').expect(409);
+    const refused = await agent.post('/wallet/top-up').expect(409);
+    expect(refused.body.message).toBe('Free top-up is only available when your balance is 1 credit or less.');
+    expect(await service.balanceFor(id)).toBe(2);
     await seed(id, 1);
     const res = await agent.post('/wallet/top-up').expect(200);
     expect(res.body).toEqual({ balanceCredits: 501, grantedCredits: 500 });

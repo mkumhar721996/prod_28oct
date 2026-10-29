@@ -106,10 +106,10 @@ describe("claimFreeCredits", () => {
   });
 
   it("returns the server message on a 409", async () => {
-    stubFetch(409, { message: "Your balance is more than 1 credit, so a free top-up is not available." });
+    stubFetch(409, { message: "Free top-up is only available when your balance is 1 credit or less." });
     expect(await claimFreeCredits()).toEqual({
       ok: false,
-      message: "Your balance is more than 1 credit, so a free top-up is not available.",
+      message: "Free top-up is only available when your balance is 1 credit or less.",
     });
   });
 
