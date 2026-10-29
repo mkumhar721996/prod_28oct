@@ -15,7 +15,10 @@ const TIERS: Record<JackpotTier, string> = {
   Mini: "badge-neutral",
 };
 
-const number =(n: number) => n.toLocaleString("en-US");
+const number = (n: number) => n.toLocaleString("en-US");
+
+/** Two decimals; a non-zero amount that would round to 0.00 shows as <0.01 so it never reads as nothing. */
+const contribution = (n: number) => (n > 0 && n < 0.005 ? "<0.01" : n.toFixed(2));
 
 export function HistoryTable({
   entries,
@@ -65,7 +68,7 @@ export function HistoryTable({
                   {number(e.amountCredits)}
                 </td>
                 {e.kind === "bet" && e.jackpotContributionCredits !== null ? (
-                  <td className="num">{e.jackpotContributionCredits.toFixed(2)}</td>
+                  <td className="num">{contribution(e.jackpotContributionCredits)}</td>
                 ) : (
                   <td className="num none">
                     <span aria-hidden="true">—</span>

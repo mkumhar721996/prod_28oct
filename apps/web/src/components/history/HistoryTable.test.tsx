@@ -62,6 +62,12 @@ describe("HistoryTable", () => {
     expect(h).toContain(">1.00<");
   });
 
+  it("shows <0.01 for a non-zero contribution that would round to 0.00", () => {
+    const h = renderToStaticMarkup(<HistoryTable entries={[bet("a", 0.004)]} from={1} total={1} />);
+    expect(h).toContain("&lt;0.01");
+    expect(h).not.toContain(">0.00<");
+  });
+
   it("shows a dash and text for a bet with no contribution", () => {
     const h = renderToStaticMarkup(<HistoryTable entries={[bet("a", null)]} from={1} total={1} />);
     expect(h).toContain("No contribution");
