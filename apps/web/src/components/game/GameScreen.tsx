@@ -35,6 +35,12 @@ export function GameScreen({ initial }: { initial: GameState }) {
   const hideToast = useCallback(() => setToast(false), []);
   const welcomed = useRef(false);
 
+  // router.refresh() re-renders the page with fresh server values; state seeded from props must follow.
+  useEffect(() => {
+    setBalance(initial.balanceCredits);
+    setJackpot(initial.jackpot);
+  }, [initial]);
+
   // A flag still set on arrival means the last spin's page was closed before its response came back.
   useEffect(() => {
     if (welcomed.current) return;
@@ -78,6 +84,7 @@ export function GameScreen({ initial }: { initial: GameState }) {
       const msg = resultMessage(outcome);
       setNotice({ tone: msg.tone, icon: msg.tone === "success" ? "check" : "info", text: msg.text });
     } else if (outcome.kind === "insufficient") {
+      if (outcome.balanceCredits !== undefined) setBalance(outcome.balanceCredits);
       setNotice({ tone: "danger", icon: "alert", text: outcome.message ?? "Your balance does not cover this bet." });
       router.refresh();
     } else {

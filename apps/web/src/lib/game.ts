@@ -29,7 +29,7 @@ export type SpinOutcome =
       balanceCredits: number;
       jackpot: JackpotCents;
     }
-  | { ok: false; kind: "insufficient" | "failed"; message?: string };
+  | { ok: false; kind: "insufficient" | "failed"; message?: string; balanceCredits?: number };
 
 /** Server side: the player's balance and the jackpot pool. Throws if they cannot be read. */
 export async function getGame(): Promise<GameState> {
@@ -54,7 +54,8 @@ export async function spinOnce(bet: number): Promise<SpinOutcome> {
     const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
     if (res.ok) return { ok: true, ...body } as SpinOutcome;
     const message = typeof body.message === "string" ? body.message : undefined;
-    return { ok: false, kind: res.status === 409 ? "insufficient" : "failed", message };
+    const balanceCredits = typeof body.balanceCredits === "number" ? body.balanceCredits : undefined;
+    return { ok: false, kind: res.status === 409 ? "insufficient" : "failed", message, balanceCredits };
   } catch {
     return { ok: false, kind: "failed" };
   }

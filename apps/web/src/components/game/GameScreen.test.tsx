@@ -118,6 +118,25 @@ describe("GameScreen", () => {
     expect(refresh).toHaveBeenCalled();
   });
 
+  it("AC8: shows the refreshed server balance and pool after router.refresh() re-renders", async () => {
+    spinOnce.mockResolvedValue({ ok: false, kind: "failed" });
+    const { rerender } = open();
+    await user.click(screen.getByRole("button", { name: "Spin" }));
+    await finishSpin();
+    expect(screen.getByText("1,000")).toBeInTheDocument();
+    rerender(<GameScreen initial={{ balanceCredits: 900, jackpot: jackpotAfter }} />);
+    expect(screen.getByText("900")).toBeInTheDocument();
+    expect(screen.getByText("10.00")).toBeInTheDocument();
+  });
+
+  it("uses the balance carried by a refused spin", async () => {
+    spinOnce.mockResolvedValue({ ok: false, kind: "insufficient", message: "nope", balanceCredits: 40 });
+    open();
+    await user.click(screen.getByRole("button", { name: "Spin" }));
+    await finishSpin();
+    expect(screen.getByText("40")).toBeInTheDocument();
+  });
+
   it("AC9: does not spin when the balance is below the bet, and the bet stays", async () => {
     open(90);
     await user.click(screen.getByRole("button", { name: "Spin" }));
