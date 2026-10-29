@@ -1,4 +1,4 @@
-import type { HistoryEntry, HistoryKind } from "@/lib/session";
+import type { HistoryEntry, HistoryKind, JackpotTier } from "@/lib/session";
 import { LocalTime } from "./LocalTime";
 
 const KINDS: Record<HistoryKind, { label: string; badge: string; sign: string }> = {
@@ -8,7 +8,17 @@ const KINDS: Record<HistoryKind, { label: string; badge: string; sign: string }>
   topup: { label: "Top-up", badge: "badge-info", sign: "+" },
 };
 
+const TIERS: Record<JackpotTier, string> = {
+  Grand: "badge-accent",
+  Major: "badge-warning",
+  Minor: "badge-info",
+  Mini: "badge-neutral",
+};
+
 const number = (n: number) => n.toLocaleString("en-US");
+
+/** Two decimals; a non-zero amount that would round to 0.00 shows as <0.01 so it never reads as nothing. */
+const contribution = (n: number) => (n > 0 && n < 0.005 ? "<0.01" : n.toFixed(2));
 
 export function HistoryTable({
   entries,
@@ -34,6 +44,10 @@ export function HistoryTable({
               Amount
             </th>
             <th scope="col" className="num">
+              Jackpot contribution
+            </th>
+            <th scope="col">Jackpot tier</th>
+            <th scope="col" className="num">
               Balance
             </th>
           </tr>
@@ -53,6 +67,24 @@ export function HistoryTable({
                   {kind.sign}
                   {number(e.amountCredits)}
                 </td>
+                {e.kind === "bet" && e.jackpotContributionCredits !== null ? (
+                  <td className="num">{contribution(e.jackpotContributionCredits)}</td>
+                ) : (
+                  <td className="num none">
+                    <span aria-hidden="true">—</span>
+                    <span className="sr">No contribution</span>
+                  </td>
+                )}
+                {e.kind === "win" && e.jackpotTier ? (
+                  <td>
+                    <span className={`badge ${TIERS[e.jackpotTier]}`}>{e.jackpotTier}</span>
+                  </td>
+                ) : (
+                  <td className="none">
+                    <span aria-hidden="true">—</span>
+                    <span className="sr">No jackpot tier</span>
+                  </td>
+                )}
                 <td className="num">{number(e.balanceCredits)}</td>
               </tr>
             );

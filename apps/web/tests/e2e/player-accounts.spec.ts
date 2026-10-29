@@ -53,9 +53,19 @@ test("History: the nav opens the history page with each entry", async ({ page })
   await page.goto("/wallet");
   await page.getByRole("link", { name: "History" }).first().click();
   await expect(page).toHaveURL(/\/history$/);
-  await expect(page.getByRole("heading", { name: "History" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Wallet transactions" })).toBeVisible();
   await expect(page.getByText("Welcome bonus")).toBeVisible();
   await expect(page.getByText("Bet", { exact: true })).toBeVisible();
+});
+
+test("History: jackpot contribution and tier show on both views", async ({ page }) => {
+  await signIn(page);
+  for (const path of ["/history", "/history?view=play"]) {
+    await page.goto(path);
+    await expect(page.getByRole("cell", { name: "5.00" })).toBeVisible();
+    await expect(page.locator(".badge", { hasText: "Grand" })).toBeVisible();
+  }
+  await expect(page.getByText("Welcome bonus")).toHaveCount(0);
 });
 
 test("Free credits: a player with 1 credit claims and sees the success message", async ({

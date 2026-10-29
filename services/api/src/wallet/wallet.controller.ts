@@ -1,7 +1,7 @@
 import { ConflictException, Controller, Get, HttpCode, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { PlayerRequest, SessionGuard } from '../session/session.guard';
 import { TOP_UP_NOT_LOW_MESSAGE, canBet } from './wallet.constants';
-import { HistoryRange, WalletService } from './wallet.service';
+import { HistoryRange, HistoryView, WalletService } from './wallet.service';
 
 @Controller('wallet')
 @UseGuards(SessionGuard)
@@ -34,11 +34,13 @@ export class WalletController {
     @Req() req: PlayerRequest,
     @Query('page') page?: string,
     @Query('range') range?: string,
+    @Query('view') view?: string,
   ) {
     const parsed = Number(page);
     return this.wallet.historyFor(req.player.id, {
       page: Number.isSafeInteger(parsed) && parsed >= 1 ? parsed : 1,
       range: (range === 'all' ? 'all' : 'recent') satisfies HistoryRange,
+      view: (view === 'play' ? 'play' : 'wallet') satisfies HistoryView,
     });
   }
 }

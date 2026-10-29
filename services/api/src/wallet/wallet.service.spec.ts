@@ -47,7 +47,7 @@ describe('WalletService.placeBet', () => {
       expect.stringMatching(/^insert into wallet_entries/),
       'commit',
     ]);
-    expect(calls[2][1]).toEqual(['p1', 'bet', 100, 400]);
+    expect(calls[2][1]).toEqual(['p1', 'bet', 100, 400, null, null]);
   });
 
   it('checks and changes in one statement with the balance > bet predicate', async () => {
@@ -94,7 +94,7 @@ describe('WalletService.recordWin', () => {
   it('AC2: credits the wallet and writes a win entry', async () => {
     const { service, calls } = setup(updated(650));
     expect(await service.recordWin('p1', 250)).toEqual({ ok: true, balanceCredits: 650 });
-    expect(calls[2][1]).toEqual(['p1', 'win', 250, 650]);
+    expect(calls[2][1]).toEqual(['p1', 'win', 250, 650, null, null]);
   });
 
   it('refuses an invalid amount', async () => {
@@ -108,7 +108,7 @@ describe('WalletService.claimTopUp', () => {
     const { service, calls } = setup(updated(501));
     expect(await service.claimTopUp('p1')).toEqual({ ok: true, balanceCredits: 501 });
     expect(calls[1][0]).toMatch(/balance_credits <= 1/);
-    expect(calls[2][1]).toEqual(['p1', 'topup', 500, 501]);
+    expect(calls[2][1]).toEqual(['p1', 'topup', 500, 501, null, null]);
   });
 
   it('refuses when the balance is not low', async () => {
@@ -144,10 +144,12 @@ describe('WalletService.historyFor', () => {
             amount_credits: '100',
             balance_after_credits: '400',
             created_at: new Date('2026-10-27T00:00:00Z'),
+            jackpot_contribution_credits: null,
+            jackpot_tier: null,
           },
         ],
       });
-    const h = await service.historyFor('p1', { page: 2, range: 'recent' }, NOW);
+    const h = await service.historyFor('p1', { page: 2, range: 'recent', view: 'wallet' }, NOW);
     expect(pool.query.mock.calls[0][0]).toMatch(/created_at >= \$2/);
     expect(pool.query.mock.calls[1][1]).toEqual(['p1', new Date('2026-09-28T12:00:00Z'), 10, 10]);
     expect(h).toEqual({
@@ -158,20 +160,80 @@ describe('WalletService.historyFor', () => {
           amountCredits: 100,
           balanceCredits: 400,
           createdAt: '2026-10-27T00:00:00.000Z',
+          jackpotContributionCredits: null,
+          jackpotTier: null,
         },
       ],
       page: 2,
       pageCount: 3,
       total: 24,
       range: 'recent',
+      view: 'wallet',
     });
   });
 
   it('has no date filter for range=all', async () => {
     const { service, pool } = setup();
     pool.query.mockResolvedValueOnce({ rows: [{ total: '0' }] }).mockResolvedValueOnce({ rows: [] });
-    const h = await service.historyFor('p1', { page: 1, range: 'all' }, NOW);
+    const h = await service.historyFor('p1', { page: 1, range: 'all', view: 'wallet' }, NOW);
     expect(pool.query.mock.calls[0][0]).not.toMatch(/created_at >=/);
     expect(h.pageCount).toBe(1);
+  });
+});
+
+describe('WalletService jackpot data', () => {
+  it('AC1: a bet stores its jackpot contribution in the same insert', async () => {
+    const { service, calls } = setup(updated(400));
+    await service.placeBet('p1', 100, { contributionCredits: 0.05 });
+    expect(calls[2][1]).toEqual(['p1', 'bet', 100, 400, 0.05, null]);
+  });
+
+  it('AC3: a win stores its jackpot tier in the same insert', async () => {
+    const { service, calls } = setup(updated(5400));
+    await service.recordWin('p1', 5000, { tier: 'Major' });
+    expect(calls[2][1]).toEqual(['p1', 'win', 5000, 5400, null, 'Major']);
+  });
+
+  it('refuses a bad contribution or tier before any SQL', async () => {
+    const { service, calls } = setup();
+    for (const c of [11, -1, NaN]) {
+      expect(await service.placeBet('p1', 10, { contributionCredits: c })).toEqual({
+        ok: false,
+        reason: 'invalid_amount',
+      });
+    }
+    expect(await service.recordWin('p1', 10, { tier: 'Huge' as never })).toEqual({
+      ok: false,
+      reason: 'invalid_amount',
+    });
+    expect(calls).toEqual([]);
+  });
+
+  it('AC1-4/6: history maps the numeric string to a number and null to null', async () => {
+    const { service, pool } = setup();
+    const base = {
+      id: '1',
+      amount_credits: '1',
+      balance_after_credits: '1',
+      created_at: new Date('2026-10-27T00:00:00Z'),
+    };
+    pool.query.mockResolvedValueOnce({ rows: [{ total: '2' }] }).mockResolvedValueOnce({
+      rows: [
+        { ...base, kind: 'bet', jackpot_contribution_credits: '0.050000', jackpot_tier: null },
+        { ...base, id: '2', kind: 'win', jackpot_contribution_credits: null, jackpot_tier: 'Grand' },
+      ],
+    });
+    const h = await service.historyFor('p1', { page: 1, range: 'all', view: 'wallet' });
+    expect(h.entries[0].jackpotContributionCredits).toBe(0.05);
+    expect(h.entries[0].jackpotTier).toBeNull();
+    expect(h.entries[1].jackpotContributionCredits).toBeNull();
+    expect(h.entries[1].jackpotTier).toBe('Grand');
+  });
+
+  it('AC2/4/5: the play view limits both queries to bets and wins', async () => {
+    const { service, pool } = setup();
+    pool.query.mockResolvedValueOnce({ rows: [{ total: '0' }] }).mockResolvedValueOnce({ rows: [] });
+    await service.historyFor('p1', { page: 1, range: 'all', view: 'play' });
+    expect(pool.query.mock.calls.every(([sql]) => /kind in \('bet','win'\)/.test(sql))).toBe(true);
   });
 });

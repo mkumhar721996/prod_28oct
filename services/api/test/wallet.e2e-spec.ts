@@ -141,7 +141,7 @@ describe('Wallet ledger (e2e)', () => {
     await service.recordWin(id, 5);
     await seed(id, 1);
     await service.claimTopUp(id);
-    const h = await service.historyFor(id, { page: 1, range: 'recent' });
+    const h = await service.historyFor(id, { page: 1, range: 'recent', view: 'wallet' });
     expect(h.entries.map((e) => e.kind)).toEqual(['topup', 'win', 'bet', 'grant']);
     expect(h.entries[0]).toMatchObject({
       balanceCredits: expect.any(Number),
@@ -157,10 +157,10 @@ describe('Wallet ledger (e2e)', () => {
       id,
       daysBefore(NOW, 29),
     ]);
-    const first = await service.historyFor(id, { page: 1, range: 'recent' }, NOW);
+    const first = await service.historyFor(id, { page: 1, range: 'recent', view: 'wallet' }, NOW);
     expect(first.entries).toHaveLength(10);
     expect(first.pageCount).toBe(3);
-    const last = await service.historyFor(id, { page: 3, range: 'recent' }, NOW);
+    const last = await service.historyFor(id, { page: 3, range: 'recent', view: 'wallet' }, NOW);
     expect(last.entries.at(-1)).toMatchObject({ kind: 'grant' });
   });
 
@@ -169,10 +169,10 @@ describe('Wallet ledger (e2e)', () => {
     const id = await playerId(ana.email);
     await pool.query("delete from wallet_entries where kind = 'grant' and player_id = $1", [id]);
     await insertEntry(id, 'bet', daysBefore(NOW, 31));
-    expect((await service.historyFor(id, { page: 1, range: 'recent' }, NOW)).entries).toHaveLength(0);
-    expect((await service.historyFor(id, { page: 1, range: 'all' }, NOW)).entries).toHaveLength(1);
+    expect((await service.historyFor(id, { page: 1, range: 'recent', view: 'wallet' }, NOW)).entries).toHaveLength(0);
+    expect((await service.historyFor(id, { page: 1, range: 'all', view: 'wallet' }, NOW)).entries).toHaveLength(1);
     await insertEntry(id, 'bet', daysBefore(NOW, 30));
-    expect((await service.historyFor(id, { page: 1, range: 'recent' }, NOW)).entries).toHaveLength(1);
+    expect((await service.historyFor(id, { page: 1, range: 'recent', view: 'wallet' }, NOW)).entries).toHaveLength(1);
   });
 
   it('history is private, needs a session, and tolerates bad query values', async () => {
@@ -196,5 +196,25 @@ describe('Wallet ledger (e2e)', () => {
     await pool.query(sql);
     expect(await entryCount(id, 'grant')).toBe(1);
     expect(await service.placeBet(id, 100)).toEqual({ ok: true, balanceCredits: 900 });
+  });
+
+  it('jackpot migration: existing rows stay readable and the kind checks hold', async () => {
+    const { agent } = await register();
+    const id = await playerId(ana.email);
+    const fs = await import('fs');
+    const path = await import('path');
+    const sql = fs.readFileSync(path.join(__dirname, '../migrations/004_wallet_entries_jackpot.sql'), 'utf8');
+    await pool.query(sql);
+    await pool.query(sql);
+    const res = await agent.get('/wallet/history');
+    expect(res.body.entries[0]).toMatchObject({ jackpotContributionCredits: null, jackpotTier: null });
+    const insert = (kind: string, contribution: number | null, tier: string | null) =>
+      pool.query(
+        'insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits, jackpot_contribution_credits, jackpot_tier) values ($1, $2, 1, 1, $3, $4)',
+        [id, kind, contribution, tier],
+      );
+    await expect(insert('bet', null, 'Grand')).rejects.toThrow();
+    await expect(insert('win', 0.5, null)).rejects.toThrow();
+    await expect(insert('bet', 0.05, null)).resolves.toBeDefined();
   });
 });

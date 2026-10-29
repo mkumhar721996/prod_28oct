@@ -46,13 +46,17 @@ createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/wallet/history") {
     const signedIn = cookie.includes("e2e-session=1");
     res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
-    const entries = [
-      { id: "2", kind: "bet", amountCredits: 100, balanceCredits: 900, createdAt: "2026-10-28T14:30:00.000Z" },
-      { id: "1", kind: "grant", amountCredits: 1000, balanceCredits: 1000, createdAt: "2026-10-27T09:00:00.000Z" },
+    const none = { jackpotContributionCredits: null, jackpotTier: null };
+    const all = [
+      { id: "3", kind: "win", amountCredits: 5000, balanceCredits: 5900, createdAt: "2026-10-28T15:00:00.000Z", ...none, jackpotTier: "Grand" },
+      { id: "2", kind: "bet", amountCredits: 100, balanceCredits: 900, createdAt: "2026-10-28T14:30:00.000Z", ...none, jackpotContributionCredits: 5 },
+      { id: "1", kind: "grant", amountCredits: 1000, balanceCredits: 1000, createdAt: "2026-10-27T09:00:00.000Z", ...none },
     ];
+    const view = url.searchParams.get("view") === "play" ? "play" : "wallet";
+    const entries = view === "play" ? all.filter((e) => e.kind !== "grant") : all;
     res.end(
       JSON.stringify(
-        signedIn ? { entries, page: 1, pageCount: 1, total: 2, range: "recent" } : {},
+        signedIn ? { entries, page: 1, pageCount: 1, total: entries.length, range: "recent", view } : {},
       ),
     );
     return;
