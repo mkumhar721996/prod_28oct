@@ -32,6 +32,16 @@ describe("Home", () => {
     expect(html).toMatch(/<a[^>]*href="\/appointments\/book"[^>]*>Book appointment<\/a>/);
   });
 
+  it("still renders Home and the Book button when appointments cannot be loaded", async () => {
+    getSession.mockResolvedValue({ role: "player" });
+    getAppointments.mockRejectedValue(new Error("Appointments lookup failed (500)"));
+    const html = renderToStaticMarkup(await Home());
+    expect(html).toContain("Next appointment");
+    expect(html).toContain("Couldn&#x27;t load appointments");
+    expect(html).not.toContain("Nothing booked yet");
+    expect(html).toMatch(/<a[^>]*href="\/appointments\/book"[^>]*>Book appointment<\/a>/);
+  });
+
   it("shows the soonest upcoming booking", async () => {
     getSession.mockResolvedValue({ role: "player" });
     getAppointments.mockResolvedValue([
