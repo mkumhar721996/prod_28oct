@@ -1,6 +1,6 @@
 import { ConflictException, Controller, Get, HttpCode, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { PlayerRequest, SessionGuard } from '../session/session.guard';
-import { canBet } from './wallet.constants';
+import { TOP_UP_NOT_LOW_MESSAGE, canBet } from './wallet.constants';
 import { HistoryRange, WalletService } from './wallet.service';
 
 @Controller('wallet')
@@ -24,9 +24,7 @@ export class WalletController {
   async topUp(@Req() req: PlayerRequest) {
     const result = await this.wallet.claimTopUp(req.player.id);
     if (!result.ok) {
-      throw new ConflictException(
-        'Your balance is more than 1 credit, so a free top-up is not available.',
-      );
+      throw new ConflictException(TOP_UP_NOT_LOW_MESSAGE);
     }
     return { balanceCredits: result.balanceCredits, grantedCredits: this.wallet.topUpCredits };
   }
