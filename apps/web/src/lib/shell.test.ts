@@ -31,14 +31,29 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
 
-  it("appends History at the end and points Place a bet at the wallet for now", () => {
-    expect(MAIN_NAV.at(-1)).toEqual({ key: "history", label: "History", href: "/history" });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/history")).toBe(true);
+  it("appends Appointments at the end; its booking page is current there too", () => {
+    expect(MAIN_NAV.at(-1)).toEqual({
+      key: "appointments",
+      label: "Appointments",
+      href: "/appointments",
+    });
+    expect(isCurrent(MAIN_NAV.at(-1)!, "/appointments/book")).toBe(true);
+  });
+
+  it("keeps History before Appointments and points Place a bet at the wallet for now", () => {
+    expect(MAIN_NAV[3]).toEqual({ key: "history", label: "History", href: "/history" });
+    expect(isCurrent(MAIN_NAV[3], "/history")).toBe(true);
     expect(PLACE_BET_HREF).toBe(WALLET_HREF);
   });
 
   it("appends Orders after Home", () => {
-    expect(MAIN_NAV.map((e) => e.key)).toEqual(["home", "wallet", "orders", "history"]);
+    expect(MAIN_NAV.map((e) => e.key)).toEqual([
+      "home",
+      "wallet",
+      "orders",
+      "history",
+      "appointments",
+    ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
     expect(isCurrent(MAIN_NAV[2], "/")).toBe(false);

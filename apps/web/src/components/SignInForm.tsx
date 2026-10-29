@@ -12,20 +12,27 @@ type SignInDeps = {
   refresh: () => void;
 };
 
-/** Returns the error to show, or null after a successful sign-in (which navigates to the wallet). */
+/** Returns the error to show, or null after a successful sign-in (which navigates to `redirectTo`). */
 export async function handleSignIn(
   deps: SignInDeps,
   email: string,
   password: string,
+  redirectTo: string = WALLET_HREF,
 ): Promise<string | null> {
   const result = await deps.signInPlayer(email, password);
   if (!result.ok) return result.message;
-  deps.replace(WALLET_HREF);
+  deps.replace(redirectTo);
   deps.refresh();
   return null;
 }
 
-export function SignInForm({ redirected = false }: { redirected?: boolean }) {
+export function SignInForm({
+  redirected = false,
+  redirectTo = WALLET_HREF,
+}: {
+  redirected?: boolean;
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +52,7 @@ export function SignInForm({ redirected = false }: { redirected?: boolean }) {
       { signInPlayer, replace: router.replace, refresh: router.refresh },
       email,
       password,
+      redirectTo,
     );
     setPending(false);
     if (message) {
