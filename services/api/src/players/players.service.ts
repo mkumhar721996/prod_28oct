@@ -51,7 +51,7 @@ export class PlayersService {
         STARTING_GRANT,
       ]);
       await client.query(
-        "insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits) values ($1, 'grant', $2, $2)",
+        "insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits, created_at) values ($1, 'grant', $2, $2, clock_timestamp())",
         [player.id, STARTING_GRANT],
       );
       await client.query('commit');
