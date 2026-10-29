@@ -21,6 +21,29 @@ const ORDERS = Array.from({ length: 14 }, (_, i) => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Game (GET /game, POST /game/spin): in-memory balance and pool per `e2e-game=<id>` cookie, so each
+// test starts fresh with its own id (a missing cookie shares the id "default"). An id starting with
+// `low` starts at 100 credits. Spins alternate win (two cherries, 1x) and loss.
+const SHARES = [40, 30, 20, 10];
+const games = new Map();
+function gameFor(cookie) {
+  const id = /e2e-game=([^;]+)/.exec(cookie)?.[1] ?? "default";
+  if (!games.has(id)) games.set(id, { balance: id.startsWith("low") ? 100 : 1000, tiers: [0, 0, 0, 0], spins: 0 });
+  return games.get(id);
+}
+const jackpotOf = (tiers) => ({
+  miniCents: tiers[0],
+  minorCents: tiers[1],
+  majorCents: tiers[2],
+  grandCents: tiers[3],
+  totalCents: tiers.reduce((a, b) => a + b, 0),
+});
+const readBody = async (req) => {
+  let raw = "";
+  for await (const chunk of req) raw += chunk;
+  return raw ? JSON.parse(raw) : {};
+};
+
 createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   const cookie = req.headers.cookie ?? "";
@@ -61,6 +84,46 @@ createServer(async (req, res) => {
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }));
     return;
+  }
+  if (url.pathname === "/game" || url.pathname === "/game/spin") {
+    if (!cookie.includes("e2e-session=1")) {
+      res.writeHead(401, { "content-type": "application/json" }).end("{}");
+      return;
+    }
+    const game = gameFor(cookie);
+    res.writeHead(200, { "content-type": "application/json" });
+    if (req.method === "GET" && url.pathname === "/game") {
+      res.end(JSON.stringify({ balanceCredits: game.balance, jackpot: jackpotOf(game.tiers) }));
+      return;
+    }
+    if (req.method === "POST" && url.pathname === "/game/spin") {
+      const { bet } = await readBody(req);
+      if (game.balance < bet) {
+        res.writeHead(409, { "content-type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: `Your balance of ${game.balance} does not cover a bet of ${bet}. Choose a lower bet.`,
+            balanceCredits: game.balance,
+          }),
+        );
+        return;
+      }
+      const won = game.spins++ % 2 === 0;
+      const winCredits = won ? bet : 0;
+      game.balance += winCredits - bet;
+      game.tiers = game.tiers.map((c, i) => c + Math.floor((bet * 5 * SHARES[i] + 50) / 100));
+      res.end(
+        JSON.stringify({
+          reels: won ? ["cherry", "cherry", "bar"] : ["bar", "bell", "seven"],
+          bet,
+          winCredits,
+          label: won ? "Two cherries pay 1× your bet." : null,
+          balanceCredits: game.balance,
+          jackpot: jackpotOf(game.tiers),
+        }),
+      );
+      return;
+    }
   }
   if (req.method === "GET" && url.pathname === "/orders") {
     const cursor = url.searchParams.get("cursor");

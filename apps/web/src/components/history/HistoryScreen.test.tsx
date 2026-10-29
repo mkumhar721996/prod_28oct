@@ -49,7 +49,7 @@ describe("HistoryScreen", () => {
   it("shows an empty state that points at Place a bet", () => {
     const html = render(history({ entries: [], total: 0, pageCount: 1 }));
     expect(html).toContain("No entries yet");
-    expect(html).toMatch(/href="\/wallet">Place a bet</);
+    expect(html).toMatch(/href="\/play">Place a bet</);
     expect(html).not.toContain("<table");
   });
 });

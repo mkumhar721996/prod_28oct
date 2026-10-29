@@ -18,4 +18,16 @@ describe("BalanceTile", () => {
   it("says '1 credit' for a balance of 1", () => {
     expect(renderToStaticMarkup(<BalanceTile credits={1} />)).toContain(">1 credit<");
   });
+
+  it("keeps the card output by default", () => {
+    const html = renderToStaticMarkup(<BalanceTile credits={1000} email="a@b.co" />);
+    expect(html).toContain('class="card balance-tile"');
+    expect(html).toContain(">1,000 credits<");
+  });
+
+  it("renders the compact balance box inline", () => {
+    const html = renderToStaticMarkup(<BalanceTile credits={1000} variant="inline" />);
+    expect(html).toContain('class="balance-box"');
+    expect(html).toContain('<strong aria-live="polite">1,000</strong>');
+  });
 });

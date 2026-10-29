@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { Icon } from "../orders/Icon";
+import { Icon, type IconName } from "../orders/Icon";
 
 export const TOAST_MS = 4000;
 
-/** A transient confirmation; asks to be hidden after TOAST_MS. */
-export function Toast({ message, onHide }: { message: string; onHide?: () => void }) {
+type Props = {
+  message: string;
+  onHide?: () => void;
+  icon?: IconName;
+  role?: "status" | "alert";
+};
+
+/** A transient message; asks to be hidden after TOAST_MS. */
+export function Toast({ message, onHide, icon = "check", role = "status" }: Props) {
   useEffect(() => {
     if (!onHide) return;
     const timer = setTimeout(onHide, TOAST_MS);
@@ -14,8 +21,8 @@ export function Toast({ message, onHide }: { message: string; onHide?: () => voi
   }, [onHide]);
 
   return (
-    <div className="toast is-open" role="status">
-      <Icon name="check" />
+    <div className="toast is-open" role={role}>
+      <Icon name={icon} />
       <span>{message}</span>
     </div>
   );
