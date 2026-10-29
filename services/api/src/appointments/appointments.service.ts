@@ -12,6 +12,8 @@ export type AppointmentView = {
   id: string;
   clinicId: string;
   clinicName: string;
+  /** The clinic's IANA time zone; date and time below are in it. */
+  timeZone: string;
   /** Clinic-local date (YYYY-MM-DD) and time (HH:mm). */
   date: string;
   time: string;
@@ -103,6 +105,7 @@ export class AppointmentsService {
       id: row.id,
       clinicId: clinic.id,
       clinicName: clinic.name,
+      timeZone: clinic.timeZone,
       date: local.date,
       time: local.time,
       startsAt: row.slot_start.toISOString(),
