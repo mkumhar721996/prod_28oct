@@ -1,6 +1,5 @@
 // Keep in sync with REASON_MAX in services/api/src/appointments/appointments.service.ts and the check in services/api/migrations/003_appointments.sql (pinned by appointments.service.spec.ts).
 export const REASON_MAX = 500;
-const REASON_PREVIEW_CHARS = 60;
 
 export type Clinic = { id: string; name: string; hoursText: string };
 export type Slot = { date: string; time: string };
@@ -53,17 +52,20 @@ export function dayLabel(date: string): string {
 }
 
 export function describeAppointment(a: Appointment): string {
-  const base = `${a.clinicName}, ${dayLabel(a.date)}, ${a.time}`;
-  return a.reason ? `${base} — ${a.reason.slice(0, REASON_PREVIEW_CHARS)}` : base;
+  return `${a.clinicName}, ${dayLabel(a.date)}, ${a.time}`;
 }
 
-/** Splits bookings (soonest first) into upcoming and past by their start instant. */
+/** Splits bookings by start instant: upcoming soonest first, past most recent first. */
 export function splitUpcoming(
   all: Appointment[],
   now: Date,
 ): { upcoming: Appointment[]; past: Appointment[] } {
-  const isUpcoming = (a: Appointment) => Date.parse(a.startsAt) >= now.getTime();
-  return { upcoming: all.filter(isUpcoming), past: all.filter((a) => !isUpcoming(a)) };
+  const start = (a: Appointment) => Date.parse(a.startsAt);
+  const isUpcoming = (a: Appointment) => start(a) >= now.getTime();
+  return {
+    upcoming: all.filter(isUpcoming).sort((a, b) => start(a) - start(b)),
+    past: all.filter((a) => !isUpcoming(a)).sort((a, b) => start(b) - start(a)),
+  };
 }
 
 /** "Tue 3 Nov, 09:30 at Central Clinic" for the soonest upcoming booking; null when none. */

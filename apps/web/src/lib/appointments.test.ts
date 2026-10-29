@@ -39,9 +39,21 @@ describe("formatting", () => {
     expect(dayLabel("2026-11-02")).toBe("Mon 2 Nov");
     const base = { id: "a", clinicId: "north", clinicName: "North Clinic", date: "2026-11-02", time: "09:00", startsAt: "2026-11-02T09:00:00.000Z" };
     expect(describeAppointment({ ...base, reason: "" })).toBe("North Clinic, Mon 2 Nov, 09:00");
-    expect(describeAppointment({ ...base, reason: "x".repeat(80) })).toBe(
-      `North Clinic, Mon 2 Nov, 09:00 — ${"x".repeat(60)}`,
-    );
+    expect(describeAppointment({ ...base, reason: "x".repeat(80) })).toBe("North Clinic, Mon 2 Nov, 09:00");
+  });
+
+  it("orders upcoming soonest first and past most recent first, around now", () => {
+    const mk = (startsAt: string) => ({ id: startsAt, clinicId: "", clinicName: "", date: "", time: "", reason: "", startsAt });
+    const input = [
+      mk("2026-11-20T08:00:00Z"),
+      mk("2026-10-29T15:00:00Z"),
+      mk("2026-10-01T09:00:00Z"),
+      mk("2026-10-29T08:00:00Z"),
+    ];
+    const { upcoming, past } = splitUpcoming(input, new Date("2026-10-29T10:00:00Z"));
+    expect(upcoming.map((a) => a.startsAt)).toEqual(["2026-10-29T15:00:00Z", "2026-11-20T08:00:00Z"]);
+    expect(past.map((a) => a.startsAt)).toEqual(["2026-10-29T08:00:00Z", "2026-10-01T09:00:00Z"]);
+    expect(input[0].startsAt).toBe("2026-11-20T08:00:00Z");
   });
 
   it("splits upcoming from past by start instant", () => {

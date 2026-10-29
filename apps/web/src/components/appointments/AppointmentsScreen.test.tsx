@@ -24,24 +24,58 @@ const render = (props: Partial<React.ComponentProps<typeof AppointmentsScreen>>)
 describe("AppointmentsScreen", () => {
   it("lists the new booking with a link to book another", () => {
     const html = render({ appointments: [booking] });
-    expect(html).toContain("North Clinic, Mon 2 Nov, 09:00 — Blood pressure check");
+    expect(html).toMatch(/<li class="card"[^>]*>North Clinic, Mon 2 Nov, 09:00<\/li>/);
+    expect(html).not.toContain("Blood pressure check");
     expect(html).toMatch(/<a[^>]*href="\/appointments\/book"[^>]*>Book appointment<\/a>/);
     expect(html).not.toContain("No upcoming appointments");
   });
 
-  it("shows the none-booked state with the same link", () => {
+  it("shows the none-booked state with one prompt and no tabs", () => {
     const html = render({});
-    const empty = html.slice(html.indexOf("No upcoming appointments"));
-    expect(empty).toContain("Pick a clinic and a time that suits you.");
-    expect(empty).toMatch(/<a[^>]*href="\/appointments\/book"[^>]*>Book appointment<\/a>/);
+    expect(html).toContain("No upcoming appointments");
+    expect(html).toContain("Pick a clinic and a time that suits you.");
+    expect(html).toMatch(/<a[^>]*href="\/appointments\/book"[^>]*>Book appointment<\/a>/);
+    expect(html).not.toContain('role="tablist"');
+    expect(html).not.toContain('role="tab"');
+    expect(html.match(/Book appointment<\/a>/g)).toHaveLength(1);
   });
 
-  it("has Upcoming and Past tabs; past bookings are under Past", () => {
+  it("shows both tabs with Upcoming selected", () => {
+    const html = render({ appointments: [booking] });
+    expect(html).toMatch(/role="tab"[^>]*aria-selected="true"[^>]*>Upcoming</);
+    expect(html).toMatch(/role="tab"[^>]*aria-selected="false"[^>]*>Past</);
+  });
+
+  it("puts past bookings under Past and shows a short message on Upcoming", () => {
     const past = { ...booking, startsAt: "2026-10-01T09:00:00.000Z", date: "2026-10-01" };
     const html = render({ appointments: [past] });
-    expect(html).toMatch(/role="tab"[^>]*aria-selected="true"[^>]*>Upcoming</);
+    expect(html).toContain("No upcoming appointments.");
+    expect(html).not.toContain("Pick a clinic and a time that suits you.");
+    expect(html.match(/Book appointment<\/a>/g)).toHaveLength(1);
     expect(html).not.toContain("North Clinic, Thu 1 Oct");
     expect(render({ appointments: [past], initialTab: "past" })).toContain("North Clinic, Thu 1 Oct, 09:00");
+  });
+
+  it("lists upcoming soonest first and past most recent first", () => {
+    const at = (id: string, date: string, startsAt: string) => ({ ...booking, id, date, startsAt });
+    const upcoming = render({
+      appointments: [at("u1", "2026-11-20", "2026-11-20T09:00:00.000Z"), at("u2", "2026-11-03", "2026-11-03T09:00:00.000Z")],
+    });
+    expect(upcoming.indexOf("Tue 3 Nov")).toBeLessThan(upcoming.indexOf("Fri 20 Nov"));
+    const past = render({
+      initialTab: "past",
+      appointments: [at("p1", "2026-10-01", "2026-10-01T09:00:00.000Z"), at("p2", "2026-10-15", "2026-10-15T09:00:00.000Z")],
+    });
+    expect(past.indexOf("Thu 15 Oct")).toBeLessThan(past.indexOf("Thu 1 Oct"));
+  });
+
+  it("splits today's bookings by start time", () => {
+    const later = { ...booking, id: "l", date: "2026-10-29", time: "15:00", startsAt: "2026-10-29T15:00:00.000Z" };
+    const earlier = { ...booking, id: "e", date: "2026-10-29", time: "08:00", startsAt: "2026-10-29T08:00:00.000Z" };
+    const html = render({ appointments: [later, earlier] });
+    expect(html).toContain("North Clinic, Thu 29 Oct, 15:00");
+    expect(html).not.toContain("North Clinic, Thu 29 Oct, 08:00");
+    expect(render({ appointments: [later, earlier], initialTab: "past" })).toContain("North Clinic, Thu 29 Oct, 08:00");
   });
 
   it("shows the Appointment booked toast only after a booking", () => {
