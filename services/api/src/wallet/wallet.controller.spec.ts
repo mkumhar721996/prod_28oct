@@ -1,7 +1,7 @@
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { PlayerRequest } from '../session/session.guard';
 import { WalletController } from './wallet.controller';
-import { TOP_UP_NOT_LOW_MESSAGE } from './wallet.constants';
+import { BET_ABOVE_BALANCE_MESSAGE, INVALID_BET_MESSAGE, TOP_UP_NOT_LOW_MESSAGE } from './wallet.constants';
 import { WalletService } from './wallet.service';
 
 const req = { player: { id: 'p1' } } as unknown as PlayerRequest;
@@ -45,6 +45,30 @@ describe('WalletController', () => {
     await expect(controller.topUp(req)).rejects.toBeInstanceOf(ConflictException);
     await expect(controller.topUp(req)).rejects.toThrow(TOP_UP_NOT_LOW_MESSAGE);
     expect(TOP_UP_NOT_LOW_MESSAGE).toMatch(/only available when your balance is 1 credit or less/);
+  });
+
+  it('POST /wallet/bet returns the new balance', async () => {
+    const placeBet = jest.fn(async () => ({ ok: true, balanceCredits: 0 }));
+    const { controller } = setup({ placeBet });
+    expect(await controller.bet(req, { amount: 100 })).toEqual({ balanceCredits: 0 });
+    expect(placeBet).toHaveBeenCalledWith('p1', 100);
+  });
+
+  it('POST /wallet/bet is a 409 with the message when the bet is above the balance', async () => {
+    const { controller } = setup({
+      placeBet: jest.fn(async () => ({ ok: false, reason: 'insufficient_balance' })),
+    });
+    await expect(controller.bet(req, { amount: 101 })).rejects.toBeInstanceOf(ConflictException);
+    await expect(controller.bet(req, { amount: 101 })).rejects.toThrow(BET_ABOVE_BALANCE_MESSAGE);
+    expect(BET_ABOVE_BALANCE_MESSAGE).toMatch(/larger than your balance/);
+  });
+
+  it.each([1.5, undefined, '5'])('POST /wallet/bet is a 400 for amount %p', async (amount) => {
+    const { controller } = setup({
+      placeBet: jest.fn(async () => ({ ok: false, reason: 'invalid_amount' })),
+    });
+    await expect(controller.bet(req, { amount })).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.bet(req, { amount })).rejects.toThrow(INVALID_BET_MESSAGE);
   });
 
   it.each([
