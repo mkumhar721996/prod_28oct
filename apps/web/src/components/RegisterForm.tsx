@@ -66,7 +66,7 @@ export function RegisterForm() {
     );
     setPending(false);
     setErrors(result);
-    if (result.alert || result.password) setPassword("");
+    if (result.alert || result.email || result.password) setPassword("");
   }
 
   return (
