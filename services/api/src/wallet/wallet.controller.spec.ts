@@ -1,6 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { PlayerRequest } from '../session/session.guard';
 import { WalletController } from './wallet.controller';
+import { TOP_UP_NOT_LOW_MESSAGE } from './wallet.constants';
 import { WalletService } from './wallet.service';
 
 const req = { player: { id: 'p1' } } as unknown as PlayerRequest;
@@ -42,6 +43,8 @@ describe('WalletController', () => {
       claimTopUp: jest.fn(async () => ({ ok: false, reason: 'balance_not_low' })),
     });
     await expect(controller.topUp(req)).rejects.toBeInstanceOf(ConflictException);
+    await expect(controller.topUp(req)).rejects.toThrow(TOP_UP_NOT_LOW_MESSAGE);
+    expect(TOP_UP_NOT_LOW_MESSAGE).toMatch(/only available when your balance is 1 credit or less/);
   });
 
   it.each([
