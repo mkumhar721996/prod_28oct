@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       { source: "/session/:path*", destination: `${apiUrl}/session/:path*` },
       // Under /api because /orders is the Orders page itself.
       { source: "/api/orders", destination: `${apiUrl}/orders` },
+      // Same reason: /appointments is the page itself.
+      { source: "/api/appointments", destination: `${apiUrl}/appointments` },
+      { source: "/api/appointments/:path*", destination: `${apiUrl}/appointments/:path*` },
       // Same reason: /wallet is the page itself.
       { source: "/api/wallet/top-up", destination: `${apiUrl}/wallet/top-up` },
     ];

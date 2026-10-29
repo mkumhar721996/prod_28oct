@@ -1,4 +1,5 @@
 import { SignInForm } from "@/components/SignInForm";
+import { signInTarget } from "@/lib/shell";
 
 export default async function SignInPage({
   searchParams,
@@ -6,5 +7,5 @@ export default async function SignInPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  return <SignInForm redirected={next === "wallet"} />;
+  return <SignInForm redirected={next === "wallet"} redirectTo={signInTarget(next)} />;
 }
