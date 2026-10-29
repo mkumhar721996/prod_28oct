@@ -47,6 +47,16 @@ export function AppointmentsScreen({ appointments, now, justBooked = false, init
     if (justBooked) router.replace(APPOINTMENTS_HREF);
   }, [justBooked, router]);
 
+  if (appointments.length === 0) {
+    return (
+      <div className="page stack stack-4">
+        <h1>Appointments</h1>
+        <NoAppointments />
+        {toast && <Toast message="Appointment booked" onHide={hideToast} />}
+      </div>
+    );
+  }
+
   return (
     <div className="page stack stack-4">
       <div className="title-row">
@@ -76,7 +86,7 @@ export function AppointmentsScreen({ appointments, now, justBooked = false, init
       <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {tab === "upcoming" &&
           (upcoming.length === 0 ? (
-            <NoAppointments />
+            <p className="text-muted">No upcoming appointments.</p>
           ) : (
             <AppointmentList items={upcoming} label="Upcoming appointments" />
           ))}
