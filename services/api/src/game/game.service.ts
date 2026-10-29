@@ -67,10 +67,6 @@ export class GameService {
     rng: (max: number) => number = randomInt,
   ): Promise<SpinResult> {
     if (!isBet(bet)) return { ok: false, reason: 'invalid_bet' };
-    const reels = drawReels(rng);
-    const { winCredits, label } = payoutFor(reels, bet);
-    const tiers = splitContribution(bet);
-
     const client: PoolClient = await this.db.pool.connect();
     try {
       await client.query('begin');
@@ -82,6 +78,9 @@ export class GameService {
         await client.query('rollback');
         return { ok: false, reason: 'insufficient_balance', balanceCredits: await this.balanceOf(playerId) };
       }
+      const reels = drawReels(rng);
+      const { winCredits, label } = payoutFor(reels, bet);
+      const tiers = splitContribution(bet);
       let balanceCredits = Number(debit.rows[0].balance_credits);
       const ledger =
         'insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits) values ($1, $2, $3, $4)';

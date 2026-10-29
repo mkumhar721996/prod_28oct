@@ -1,5 +1,6 @@
 // Needs PostgreSQL: set DATABASE_URL to a throwaway database with migrations/*.sql applied.
 import 'reflect-metadata';
+import { connect, AddressInfo } from 'node:net';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
@@ -72,12 +73,29 @@ describe('Game (e2e)', () => {
 
   it('AC8: a spin whose response is discarded is still settled', async () => {
     const { agent, id } = await register();
-    await agent
-      .post('/game/spin')
-      .send({ bet: 100 })
-      .timeout(1)
-      .catch(() => undefined);
-    await new Promise((r) => setTimeout(r, 500));
+    const cookie = (
+      await request(server()).post('/session/sign-in').send(ana).expect(200)
+    ).headers['set-cookie'][0].split(';')[0];
+    await app.listen(0);
+    const { port } = server().address() as AddressInfo;
+    const body = JSON.stringify({ bet: 100 });
+    // The request is fully written before the connection is destroyed, so the server always receives it.
+    await new Promise<void>((resolve, reject) => {
+      const socket = connect(port, '127.0.0.1', () => {
+        socket.write(
+          `POST /game/spin HTTP/1.1\r\nHost: localhost\r\nCookie: ${cookie}\r\nContent-Type: application/json\r\n` +
+            `Content-Length: ${Buffer.byteLength(body)}\r\nConnection: close\r\n\r\n${body}`,
+          (err) => {
+            socket.destroy();
+            err ? reject(err) : resolve();
+          },
+        );
+      });
+      socket.on('error', () => undefined);
+    });
+    for (let i = 0; i < 50 && (await count('spins', id)) === 0; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
     const state = (await agent.get('/game').expect(200)).body;
     expect(await count('spins', id)).toBe(1);
     const { rows } = await pool.query('select win_credits from spins where player_id = $1', [id]);
