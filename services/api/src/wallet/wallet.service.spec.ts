@@ -31,7 +31,7 @@ const updated = (balance: number) => (sql: string) =>
   sql.trim().startsWith('update wallets') ? { rows: [{ balance_credits: String(balance) }] } : { rows: [] };
 
 describe('canBet', () => {
-  it('needs a balance strictly above the minimum bet', () => {
+  it('marks top-up eligibility: a balance strictly above the minimum is not eligible', () => {
     expect(canBet(1)).toBe(false);
     expect(canBet(2)).toBe(true);
   });
@@ -50,10 +50,10 @@ describe('WalletService.placeBet', () => {
     expect(calls[2][1]).toEqual(['p1', 'bet', 100, 400]);
   });
 
-  it('checks and changes in one statement with the balance > bet predicate', async () => {
+  it('checks and changes in one statement with the balance >= bet predicate', async () => {
     const { service, calls } = setup(updated(400));
     await service.placeBet('p1', 100);
-    expect(calls[1][0]).toMatch(/balance_credits > \$2/);
+    expect(calls[1][0]).toContain('balance_credits >= $2');
     expect(calls[1][0]).toMatch(/balance_credits - \$2/);
   });
 

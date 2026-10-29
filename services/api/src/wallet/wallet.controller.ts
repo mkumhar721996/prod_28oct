@@ -1,6 +1,22 @@
-import { ConflictException, Controller, Get, HttpCode, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { PlayerRequest, SessionGuard } from '../session/session.guard';
-import { TOP_UP_NOT_LOW_MESSAGE, canBet } from './wallet.constants';
+import {
+  BET_ABOVE_BALANCE_MESSAGE,
+  INVALID_BET_MESSAGE,
+  TOP_UP_NOT_LOW_MESSAGE,
+  canBet,
+} from './wallet.constants';
 import { HistoryRange, WalletService } from './wallet.service';
 
 @Controller('wallet')
@@ -27,6 +43,19 @@ export class WalletController {
       throw new ConflictException(TOP_UP_NOT_LOW_MESSAGE);
     }
     return { balanceCredits: result.balanceCredits, grantedCredits: this.wallet.topUpCredits };
+  }
+
+  /** Refused (balance and history untouched) when the bet is larger than the balance. */
+  @Post('bet')
+  @HttpCode(200)
+  async bet(@Req() req: PlayerRequest, @Body() body: { amount?: unknown }) {
+    const result = await this.wallet.placeBet(req.player.id, body?.amount);
+    if (!result.ok) {
+      throw result.reason === 'invalid_amount'
+        ? new BadRequestException(INVALID_BET_MESSAGE)
+        : new ConflictException(BET_ABOVE_BALANCE_MESSAGE);
+    }
+    return { balanceCredits: result.balanceCredits };
   }
 
   @Get('history')

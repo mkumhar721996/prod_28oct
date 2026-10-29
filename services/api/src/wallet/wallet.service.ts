@@ -44,13 +44,13 @@ export class WalletService {
     return rows[0] ? Number(rows[0].balance_credits) : 0;
   }
 
-  /** For the future Play feature: accepted only when the balance is strictly greater than the bet. */
+  /** For the future Play feature: accepted whenever the bet is no larger than the balance. */
   placeBet(playerId: string, amount: unknown): Promise<WalletResult> {
     return this.change(
       playerId,
       amount,
       'bet',
-      'update wallets set balance_credits = balance_credits - $2 where player_id = $1 and balance_credits > $2 returning balance_credits',
+      'update wallets set balance_credits = balance_credits - $2 where player_id = $1 and balance_credits >= $2 returning balance_credits',
       'insufficient_balance',
     );
   }
@@ -66,7 +66,7 @@ export class WalletService {
     );
   }
 
-  /** Free top-up: allowed whenever the balance is 1 or less (the same threshold a bet needs to exceed). */
+  /** Free top-up: allowed whenever the balance is 1 or less. */
   claimTopUp(playerId: string): Promise<WalletResult> {
     return this.change(
       playerId,
