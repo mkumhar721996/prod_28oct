@@ -14,6 +14,7 @@ const render = (props: Partial<React.ComponentProps<typeof ClinicSlotPicker>>) =
       days={days}
       selected={null}
       onSelect={() => {}}
+      onRetry={() => {}}
       {...props}
     />,
   );
@@ -45,6 +46,8 @@ describe("ClinicSlotPicker", () => {
 
   it("explains an empty or failed load", () => {
     expect(render({ days: [] })).toContain("No free times");
-    expect(render({ status: "error" })).toContain("couldn&#x27;t load free times");
+    const html = render({ status: "error" });
+    expect(html).toContain("couldn&#x27;t load free times");
+    expect(html).toContain("Try again");
   });
 });

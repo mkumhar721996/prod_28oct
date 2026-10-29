@@ -9,10 +9,12 @@ type Props = {
   days: SlotDay[];
   selected: Slot | null;
   onSelect: (slot: Slot) => void;
+  /** Reloads the free times after a failed load. */
+  onRetry: () => void;
 };
 
 /** Free times as one chip group per day; the chosen chip is `aria-pressed`. */
-export function ClinicSlotPicker({ clinicChosen, status, days, selected, onSelect }: Props) {
+export function ClinicSlotPicker({ clinicChosen, status, days, selected, onSelect, onRetry }: Props) {
   let body;
   if (!clinicChosen) {
     body = <p className="text-muted">Choose a clinic to see free times.</p>;
@@ -25,7 +27,14 @@ export function ClinicSlotPicker({ clinicChosen, status, days, selected, onSelec
       </div>
     );
   } else if (status === "error") {
-    body = <p className="text-muted">We couldn&apos;t load free times. Choose the clinic again to retry.</p>;
+    body = (
+      <div className="stack stack-2">
+        <p className="text-muted">We couldn&apos;t load free times.</p>
+        <button type="button" className="btn btn-secondary" onClick={onRetry}>
+          Try again
+        </button>
+      </div>
+    );
   } else if (days.length === 0) {
     body = <p className="text-muted">No free times in the next 14 days.</p>;
   } else {

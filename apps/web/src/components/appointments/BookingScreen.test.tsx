@@ -112,17 +112,17 @@ describe("afterFailure", () => {
 
   it("drops the slot and takes the refetched times when the slot was taken", () => {
     const fresh = [{ date: "2026-11-02", times: ["09:30"] }];
-    expect(afterFailure({ slot, days }, { type: "slot_taken", alert, days: fresh })).toEqual({
+    expect(afterFailure({ slot, days }, { type: "slot_taken", alert, days: fresh, taken: slot })).toEqual({
       slot: null,
       days: fresh,
       alert,
     });
   });
 
-  it("keeps the old times when the refetch failed, but still drops the slot", () => {
-    expect(afterFailure({ slot, days }, { type: "slot_taken", alert, days: null })).toEqual({
+  it("removes the taken time from the old list when the refetch failed", () => {
+    expect(afterFailure({ slot, days }, { type: "slot_taken", alert, days: null, taken: slot })).toEqual({
       slot: null,
-      days,
+      days: [{ date: "2026-11-02", times: ["09:30"] }],
       alert,
     });
   });

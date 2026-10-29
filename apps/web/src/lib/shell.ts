@@ -11,6 +11,19 @@ export const BOOK_APPOINTMENT_HREF = "/appointments/book";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 
+/** Where sign-in may send a patient back to; anything else (open redirects) falls back to the wallet. */
+const NEXT_TARGETS: Record<string, string> = {
+  wallet: WALLET_HREF,
+  history: HISTORY_HREF,
+  [ORDERS_HREF]: ORDERS_HREF,
+  [APPOINTMENTS_HREF]: APPOINTMENTS_HREF,
+  [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
+};
+
+export function signInTarget(next: string | undefined): string {
+  return (next !== undefined && Object.hasOwn(NEXT_TARGETS, next) && NEXT_TARGETS[next]) || WALLET_HREF;
+}
+
 export type NavEntry = { key: string; label: string; href: string };
 
 /** Append new sections to the end so existing positions stay stable. */

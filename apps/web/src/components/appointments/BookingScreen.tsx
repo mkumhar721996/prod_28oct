@@ -22,7 +22,7 @@ export type BookingAlert = { kind: "warning" | "danger"; title: string; text: st
 
 export type ConfirmOutcome =
   | { type: "booked" }
-  | { type: "slot_taken"; alert: BookingAlert; days: SlotDay[] | null }
+  | { type: "slot_taken"; alert: BookingAlert; days: SlotDay[] | null; taken: Slot }
   | { type: "already_booked"; alert: BookingAlert }
   | { type: "error"; alert: BookingAlert };
 
@@ -38,6 +38,7 @@ export async function runConfirm(
     return {
       type: "slot_taken",
       days,
+      taken: { date: input.date, time: input.time },
       alert: { kind: "warning", title: "That time is no longer available", text: result.message },
     };
   }
@@ -62,7 +63,12 @@ export function afterFailure(
   outcome: Exclude<ConfirmOutcome, { type: "booked" }>,
 ): { slot: Slot | null; days: SlotDay[]; alert: BookingAlert } {
   if (outcome.type === "slot_taken") {
-    return { slot: null, days: outcome.days ?? current.days, alert: outcome.alert };
+    // If the refetch failed, drop the taken slot from the stale list so it is not offered again.
+    const { taken } = outcome;
+    const stale = current.days
+      .map((d) => (d.date === taken.date ? { ...d, times: d.times.filter((t) => t !== taken.time) } : d))
+      .filter((d) => d.times.length > 0);
+    return { slot: null, days: outcome.days ?? stale, alert: outcome.alert };
   }
   return { ...current, alert: outcome.alert };
 }
@@ -86,6 +92,7 @@ export function BookingScreen({ clinics, initial }: { clinics: Clinic[]; initial
   const [slotsStatus, setSlotsStatus] = useState<SlotsStatus>(initial?.slotsStatus ?? "ready");
   const [alert, setAlert] = useState<BookingAlert | null>(initial?.alert ?? null);
   const [pending, setPending] = useState(initial?.pending ?? false);
+  const [retryCount, setRetryCount] = useState(0);
   const alertRef = useRef<HTMLDivElement>(null);
   // The clinic whose slots are loaded, so the initial (test) state does not trigger a fetch.
   const loadedFor = useRef(initial?.clinicId ?? "");
@@ -110,7 +117,7 @@ export function BookingScreen({ clinics, initial }: { clinics: Clinic[]; initial
     return () => {
       current = false;
     };
-  }, [clinicId]);
+  }, [clinicId, retryCount]);
 
   const clinic = clinics.find((c) => c.id === clinicId);
   const error = reasonError(reason.length);
@@ -204,6 +211,10 @@ export function BookingScreen({ clinics, initial }: { clinics: Clinic[]; initial
         status={slotsStatus}
         days={days}
         selected={slot}
+        onRetry={() => {
+          loadedFor.current = "";
+          setRetryCount((n) => n + 1);
+        }}
         onSelect={(next) => {
           setSlot(next);
           setAlert(null);
