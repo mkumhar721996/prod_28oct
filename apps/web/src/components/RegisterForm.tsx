@@ -31,7 +31,8 @@ export async function handleRegister(
   if (passwordError) return { password: passwordError };
   const result = await deps.registerPlayer(email, password);
   if (!result.ok) {
-    return { alert: result.status === CONFLICT ? DUPLICATE_EMAIL_ERROR : result.message };
+    if (result.status === CONFLICT) return { email: DUPLICATE_EMAIL_ERROR };
+    return { alert: result.message };
   }
   deps.replace(`${WALLET_HREF}?welcome=1`);
   deps.refresh();
@@ -65,7 +66,7 @@ export function RegisterForm() {
     );
     setPending(false);
     setErrors(result);
-    if (result.alert || result.password) setPassword("");
+    if (result.alert || result.email || result.password) setPassword("");
   }
 
   return (

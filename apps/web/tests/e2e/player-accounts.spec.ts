@@ -88,5 +88,6 @@ test("AC7: a duplicate email shows the alert", async ({ page }) => {
   await page.getByLabel("Email").fill("ana@example.com");
   await page.getByLabel("Password").fill("play-2026");
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("alert")).toContainText("An account with this email already exists");
+  await expect(page.locator("#rg-email-err")).toContainText("An account with this email already exists");
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
