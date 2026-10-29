@@ -8,13 +8,14 @@ export const WALLET_HREF = "/wallet";
 export const HISTORY_HREF = "/history";
 export const APPOINTMENTS_HREF = "/appointments";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
-/** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
-export const PLACE_BET_HREF = WALLET_HREF;
+export const PLAY_HREF = "/play";
+export const PLACE_BET_HREF = PLAY_HREF;
 
 /** Where sign-in may send a patient back to; anything else (open redirects) falls back to the wallet. */
 const NEXT_TARGETS: Record<string, string> = {
   wallet: WALLET_HREF,
   history: HISTORY_HREF,
+  play: PLAY_HREF,
   [ORDERS_HREF]: ORDERS_HREF,
   [APPOINTMENTS_HREF]: APPOINTMENTS_HREF,
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
@@ -33,6 +34,7 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "orders", label: "Orders", href: ORDERS_HREF },
   { key: "history", label: "History", href: HISTORY_HREF },
   { key: "appointments", label: "Appointments", href: APPOINTMENTS_HREF },
+  { key: "play", label: "Play", href: PLAY_HREF },
 ];
 
 export function brandHref(signedIn: boolean): string {

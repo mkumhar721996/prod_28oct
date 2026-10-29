@@ -6,6 +6,7 @@ import {
   WALLET_HREF,
   brandHref,
   isCurrent,
+  signInTarget,
   visibleNav,
 } from "./shell";
 
@@ -31,19 +32,22 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
 
-  it("appends Appointments at the end; its booking page is current there too", () => {
-    expect(MAIN_NAV.at(-1)).toEqual({
+  it("appends Play at the end and keeps Appointments before it; its booking page is current there", () => {
+    expect(MAIN_NAV.at(-1)).toEqual({ key: "play", label: "Play", href: "/play" });
+    expect(MAIN_NAV.at(-2)).toEqual({
       key: "appointments",
       label: "Appointments",
       href: "/appointments",
     });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/appointments/book")).toBe(true);
+    expect(isCurrent(MAIN_NAV.at(-2)!, "/appointments/book")).toBe(true);
   });
 
-  it("keeps History before Appointments and points Place a bet at the wallet for now", () => {
+  it("keeps History in place and points Place a bet at the game", () => {
     expect(MAIN_NAV[3]).toEqual({ key: "history", label: "History", href: "/history" });
     expect(isCurrent(MAIN_NAV[3], "/history")).toBe(true);
-    expect(PLACE_BET_HREF).toBe(WALLET_HREF);
+    expect(PLACE_BET_HREF).toBe("/play");
+    expect(PLACE_BET_HREF).not.toBe(WALLET_HREF);
+    expect(signInTarget("play")).toBe("/play");
   });
 
   it("appends Orders after Home", () => {
@@ -53,6 +57,7 @@ describe("shell", () => {
       "orders",
       "history",
       "appointments",
+      "play",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);

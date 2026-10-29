@@ -50,16 +50,21 @@ describe('WalletService.placeBet', () => {
     expect(calls[2][1]).toEqual(['p1', 'bet', 100, 400]);
   });
 
-  it('checks and changes in one statement with the balance > bet predicate', async () => {
+  it('checks and changes in one statement with the balance >= bet predicate', async () => {
     const { service, calls } = setup(updated(400));
     await service.placeBet('p1', 100);
-    expect(calls[1][0]).toMatch(/balance_credits > \$2/);
+    expect(calls[1][0]).toMatch(/balance_credits >= \$2/);
     expect(calls[1][0]).toMatch(/balance_credits - \$2/);
   });
 
   it('AC4/AC7: accepts a bet that leaves 1 credit', async () => {
     const { service } = setup(updated(1));
     expect(await service.placeBet('p1', 9)).toEqual({ ok: true, balanceCredits: 1 });
+  });
+
+  it('accepts a bet equal to the balance and leaves 0', async () => {
+    const { service } = setup(updated(0));
+    expect(await service.placeBet('p1', 100)).toEqual({ ok: true, balanceCredits: 0 });
   });
 
   it('AC5/8/9: refuses when the update matches no row, writing nothing', async () => {
