@@ -60,11 +60,23 @@ describe("shell", () => {
       "history",
       "appointments",
       "menu",
+      "onboarding-templates",
       "lobby",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
     expect(isCurrent(MAIN_NAV[2], "/")).toBe(false);
+  });
+
+  it("appends Templates after Menu, current on its nested routes, and a valid sign-in target", () => {
+    expect(MAIN_NAV.find((e) => e.key === "onboarding-templates")).toEqual({
+      key: "onboarding-templates",
+      label: "Templates",
+      href: "/onboarding-templates",
+    });
+    expect(isCurrent(MAIN_NAV.find((e) => e.key === "onboarding-templates")!, "/onboarding-templates/software-engineer")).toBe(true);
+    expect(signInTarget("/onboarding-templates")).toBe("/onboarding-templates");
+    expect(visibleNav(false).some((e) => e.key === "onboarding-templates")).toBe(false);
   });
 
   it("marks a section current on its nested routes", () => {

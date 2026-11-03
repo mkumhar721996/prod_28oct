@@ -63,7 +63,7 @@ export class SessionController {
     this.limiter.release(ipKey);
     this.limiter.reset(emailKey);
     await this.sessions.start(res, player.id);
-    return { role: 'player', email: player.email };
+    return { role: player.accountRole, email: player.email };
   }
 
   @Post('sign-out')
@@ -75,6 +75,6 @@ export class SessionController {
   @Get()
   @UseGuards(SessionGuard)
   current(@Req() req: PlayerRequest) {
-    return { role: 'player', email: req.player.email };
+    return { role: req.player.accountRole, email: req.player.email };
   }
 }
