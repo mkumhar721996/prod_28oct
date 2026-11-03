@@ -12,18 +12,21 @@ async function render() {
 }
 
 describe("Lobby page", () => {
-  it("renders without a session", async () => {
+  it("renders for a guest and passes signedIn false", async () => {
     getSession.mockResolvedValue(null);
+    expect((await LobbyPage()).props.signedIn).toBe(false);
     expect(await render()).toContain("Game lobby");
   });
 
-  it("renders for a signed-in player", async () => {
+  it("renders for a signed-in player and passes signedIn true", async () => {
     getSession.mockResolvedValue({ role: "player" });
+    expect((await LobbyPage()).props.signedIn).toBe(true);
     expect(await render()).toContain("Game lobby");
   });
 
-  it("still renders when the session lookup throws", async () => {
+  it("treats a failing session lookup as a guest", async () => {
     getSession.mockRejectedValue(new Error("down"));
+    expect((await LobbyPage()).props.signedIn).toBe(false);
     expect(await render()).toContain("Game lobby");
   });
 });

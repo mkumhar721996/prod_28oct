@@ -54,14 +54,19 @@ export async function playGame(
   },
 ): Promise<PlayOutcome> {
   if (!deps.signedIn) {
-    deps.goToSignIn();
+    try {
+      deps.goToSignIn();
+    } catch (error) {
+      console.error(`Could not go to sign-in from game ${game.id}`, error);
+    }
     return "sign-in";
   }
   if (!game.available) return "failed";
   try {
     await deps.open(game);
     return "opened";
-  } catch {
+  } catch (error) {
+    console.error(`Could not open game ${game.id}`, error);
     return "failed";
   }
 }

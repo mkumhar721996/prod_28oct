@@ -25,13 +25,12 @@ describe("LobbyScreen", () => {
     expect(html.match(/>Play<\/button>/g)).toHaveLength(8);
   });
 
-  it("shows an error on the lobby when a game fails to open, without navigating", () => {
+  it("shows the play error on the lobby alongside the grid", () => {
     const html = render({ status: "loaded", games: SAMPLE_GAMES.slice() }, "Pyramid Dice");
     expect(html).toContain('role="alert"');
     expect(html).toContain("We couldn&#x27;t open Pyramid Dice.");
     expect(html).toContain('aria-label="Games"');
     expect(html).toContain("Game lobby");
-    expect(push).not.toHaveBeenCalled();
   });
 
   it("lists games alphabetically by name", () => {

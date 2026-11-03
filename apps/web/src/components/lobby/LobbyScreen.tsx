@@ -53,6 +53,8 @@ export function LobbyScreen({
       setPlayError(undefined);
       const outcome = await playGame(game, {
         signedIn,
+        // router.push never rejects today, so only an unavailable game shows the error in
+        // practice; the async seam is for Game play to report a real open failure.
         open: (g) => router.push(gameHref(g.id)),
         goToSignIn: () => router.push(SIGN_IN_HREF),
       });
