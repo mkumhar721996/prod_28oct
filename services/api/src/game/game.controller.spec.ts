@@ -1,4 +1,5 @@
-import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import 'reflect-metadata';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { PlayerRequest, SessionGuard } from '../session/session.guard';
 import { GameController } from './game.controller';
 import { GameService } from './game.service';
@@ -42,9 +43,7 @@ describe('GameController', () => {
     });
   });
 
-  it('is behind the session guard: 401 without a session', () => {
-    const guard = new SessionGuard({ resolve: jest.fn(async () => null) } as never);
-    const context = { switchToHttp: () => ({ getRequest: () => ({ headers: {} }) }) } as never;
-    return expect(Promise.resolve(guard.canActivate(context))).rejects.toBeInstanceOf(UnauthorizedException);
+  it('is behind the session guard, so every route needs a session', () => {
+    expect(Reflect.getMetadata('__guards__', GameController)).toContain(SessionGuard);
   });
 });
