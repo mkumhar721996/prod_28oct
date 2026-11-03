@@ -42,6 +42,30 @@ export async function loadGames(
   }
 }
 
+export type PlayOutcome = "opened" | "sign-in" | "failed";
+
+/** What pressing Play does: guests sign in first; an unavailable game or a failed open is "failed". */
+export async function playGame(
+  game: Game,
+  deps: {
+    signedIn: boolean;
+    open: (game: Game) => Promise<void> | void;
+    goToSignIn: () => void;
+  },
+): Promise<PlayOutcome> {
+  if (!deps.signedIn) {
+    deps.goToSignIn();
+    return "sign-in";
+  }
+  if (!game.available) return "failed";
+  try {
+    await deps.open(game);
+    return "opened";
+  } catch {
+    return "failed";
+  }
+}
+
 export function lobbyReducer(state: LobbyState, action: LobbyAction): LobbyState {
   switch (action.type) {
     case "requested":

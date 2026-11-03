@@ -5,6 +5,7 @@ import {
   PLACE_BET_HREF,
   WALLET_HREF,
   brandHref,
+  gameHref,
   isCurrent,
   signInTarget,
   visibleNav,
@@ -83,5 +84,12 @@ describe("shell", () => {
     const hires = { key: "hires", label: "New hires", href: "/new-hires" };
     expect(isCurrent(hires, "/new-hires/42")).toBe(true);
     expect(isCurrent(hires, "/new-hires-archive")).toBe(false);
+  });
+});
+
+describe("gameHref", () => {
+  it("points at the game's route", () => {
+    expect(gameHref("g1")).toBe("/games/g1");
+    expect(gameHref("a/b")).toBe("/games/a%2Fb");
   });
 });

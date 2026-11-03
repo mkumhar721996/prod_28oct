@@ -13,6 +13,9 @@ export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
 export const MENU_HREF = "/menu";
 export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
+export function gameHref(id: string): string {
+  return `/games/${encodeURIComponent(id)}`;
+}
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 

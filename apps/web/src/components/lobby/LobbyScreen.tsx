@@ -1,20 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
   fetchGames as defaultFetchGames,
   loadGames,
-  lobbyReducer, sortGamesByName, type Game } from "@/lib/games";
+  lobbyReducer,
+  playGame,
+  sortGamesByName,
+  type Game,
+} from "@/lib/games";
+import { SIGN_IN_HREF, gameHref } from "@/lib/shell";
 import { Icon } from "../orders/Icon";
 import { GameGrid } from "./GameGrid";
 
 export type LobbyScreenProps = {
+  /** Whether a player is signed in; guests are sent to sign in when they press Play. */
+  signedIn: boolean;
   fetchGames?: () => Promise<Game[]>;
   /** Starting state, to render a given state without effects (tests). */
   initial?: { status: "loading" | "error" | "loaded"; games?: Game[] };
+  /** Name of a game that failed to open, to render the play error without effects (tests). */
+  initialPlayError?: string;
 };
 
-export function LobbyScreen({ fetchGames = defaultFetchGames, initial }: LobbyScreenProps) {
+export function LobbyScreen({
+  signedIn,
+  fetchGames = defaultFetchGames,
+  initial,
+  initialPlayError,
+}: LobbyScreenProps) {
+  const router = useRouter();
+  const [playError, setPlayError] = useState<string | undefined>(initialPlayError);
   const [state, dispatch] = useReducer(lobbyReducer, {
     status: initial?.status ?? "loading",
     games: sortGamesByName(initial?.games ?? []),
@@ -31,6 +48,19 @@ export function LobbyScreen({ fetchGames = defaultFetchGames, initial }: LobbySc
     load();
   }, [load]);
 
+  const onPlay = useCallback(
+    async (game: Game) => {
+      setPlayError(undefined);
+      const outcome = await playGame(game, {
+        signedIn,
+        open: (g) => router.push(gameHref(g.id)),
+        goToSignIn: () => router.push(SIGN_IN_HREF),
+      });
+      if (outcome === "failed") setPlayError(game.name);
+    },
+    [signedIn, router],
+  );
+
   return (
     <div className="stack stack-4">
       <div className="lobby-title stack stack-1">
@@ -39,6 +69,15 @@ export function LobbyScreen({ fetchGames = defaultFetchGames, initial }: LobbySc
           Browse every game and its category. You don&apos;t need to sign in to look around.
         </p>
       </div>
+      {playError !== undefined && (
+        <div className="alert alert-danger" role="alert">
+          <Icon name="alert" />
+          <div>
+            <strong>We couldn&apos;t open {playError}.</strong>
+            <p>Try again, or pick another game.</p>
+          </div>
+        </div>
+      )}
       {state.status === "loading" ? (
         <div aria-busy="true" className="stack stack-3">
           <p className="loading-note text-muted" role="status">
@@ -57,7 +96,7 @@ export function LobbyScreen({ fetchGames = defaultFetchGames, initial }: LobbySc
       ) : state.status === "error" ? (
         <LobbyError onRetry={load} />
       ) : (
-        <GameGrid games={state.games} />
+        <GameGrid games={state.games} onPlay={onPlay} />
       )}
     </div>
   );
