@@ -1,10 +1,15 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SAMPLE_GAMES } from "@/lib/games";
 import { LobbyScreen, type LobbyScreenProps } from "./LobbyScreen";
 
-const render = (initial: LobbyScreenProps["initial"]) =>
-  renderToStaticMarkup(<LobbyScreen initial={initial} />);
+const push = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+
+const render = (initial: LobbyScreenProps["initial"], initialPlayError?: string) =>
+  renderToStaticMarkup(
+    <LobbyScreen signedIn initial={initial} initialPlayError={initialPlayError} />,
+  );
 
 describe("LobbyScreen", () => {
   it("shows every game with name and category, no sign-in markup", () => {
@@ -17,6 +22,16 @@ describe("LobbyScreen", () => {
     expect(html).toContain('aria-label="Games"');
     expect(html).not.toContain("Sign in");
     expect(html).not.toContain('role="alert"');
+    expect(html.match(/>Play<\/button>/g)).toHaveLength(8);
+    expect(html.match(/<button[^>]*disabled[^>]*>Play<\/button>/g)).toHaveLength(2);
+  });
+
+  it("shows the play error above the grid, on the lobby", () => {
+    const html = render({ status: "loaded", games: SAMPLE_GAMES.slice() }, "Neon Roulette");
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("We couldn&#x27;t open Neon Roulette.");
+    expect(html).toContain("Game lobby");
+    expect(html.indexOf('role="alert"')).toBeLessThan(html.indexOf('aria-label="Games"'));
   });
 
   it("lists games alphabetically by name", () => {
