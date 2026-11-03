@@ -40,6 +40,10 @@ describe("AppointmentDetail", () => {
     expect(render({ ...booking, reason: "" })).toMatch(/class="d-value d-reason is-empty"[^>]*>No reason given</);
   });
 
+  it("names the details card for assistive technology", () => {
+    expect(render()).toMatch(/role="region"[^>]*aria-labelledby="detail-title"|aria-labelledby="detail-title"[^>]*role="region"/);
+  });
+
   it("labels it Upcoming or Past", () => {
     expect(render()).toMatch(/class="badge"[^>]*>Upcoming</);
     expect(render(booking, false)).toMatch(/class="badge"[^>]*>Past</);

@@ -158,7 +158,6 @@ describe("appointment detail helpers", () => {
 
   it("omits the zone name when the zone is missing or invalid", () => {
     expect(describeDateTime({ ...appt, timeZone: "Not/AZone" })).toBe("Tue 3 Nov 2026, 09:30");
-    expect(describeDateTime({ ...appt, timeZone: undefined } as never)).toBe("Tue 3 Nov 2026, 09:30");
   });
 
   it("shows the reason, or 'No reason given' when empty or blank", () => {
@@ -170,8 +169,15 @@ describe("appointment detail helpers", () => {
 
   it("notes the clinic zone only when the device zone differs", () => {
     expect(zoneNote(ny, "Europe/London")).toContain("clinic's local time");
-    expect(zoneNote(ny, "Europe/London")).toContain("Your device is on Europe/London");
+    expect(zoneNote(ny, "Europe/London")).toBe(
+      "Shown in Eastern Standard Time, the clinic's local time. Your device is on Greenwich Mean Time.",
+    );
     expect(zoneNote(appt, "Europe/London")).toBeNull();
-    expect(zoneNote({ ...appt, timeZone: undefined } as never, "Europe/London")).toBeNull();
+  });
+
+  it("gives no note for alias IDs of the same zone, or no zone note for an unknown zone", () => {
+    const kolkata = { ...appt, timeZone: "Asia/Kolkata" };
+    expect(zoneNote(kolkata, "Asia/Calcutta")).toBeNull();
+    expect(zoneNote({ ...appt, timeZone: "Not/AZone" }, "Europe/London")).toBeNull();
   });
 });

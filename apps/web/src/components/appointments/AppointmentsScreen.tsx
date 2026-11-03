@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { dayLabel, describeAppointment, splitUpcoming, type Appointment } from "@/lib/appointments";
 import { APPOINTMENTS_HREF, BOOK_APPOINTMENT_HREF } from "@/lib/shell";
 import { AppointmentDetail } from "./AppointmentDetail";
@@ -24,6 +24,8 @@ type Props = {
   initialTab?: TabId;
 };
 
+const cardId = (id: string) => `appt-${id}`;
+
 function AppointmentList({
   items,
   label,
@@ -40,6 +42,7 @@ function AppointmentList({
           <button
             type="button"
             className="card appt"
+            id={cardId(a.id)}
             aria-label={`Open appointment at ${describeAppointment(a)}`}
             onClick={() => onOpen(a.id)}
           >
@@ -58,6 +61,17 @@ export function AppointmentsScreen({ appointments, now, justBooked = false, init
   const router = useRouter();
   const [tab, setTab] = useState<TabId>(initialTab ?? "upcoming");
   const [openId, setOpenId] = useState<string | null>(null);
+  // The card last opened, so focus can return to it when the list remounts after Back.
+  const lastOpened = useRef<string | null>(null);
+  const openCard = useCallback((id: string) => {
+    lastOpened.current = id;
+    setOpenId(id);
+  }, []);
+  useEffect(() => {
+    if (openId === null && lastOpened.current) {
+      document.getElementById(cardId(lastOpened.current))?.focus();
+    }
+  }, [openId]);
   const [toast, setToast] = useState(justBooked);
   const hideToast = useCallback(() => setToast(false), []);
   const { upcoming, past } = splitUpcoming(appointments, new Date(now));
@@ -119,13 +133,13 @@ export function AppointmentsScreen({ appointments, now, justBooked = false, init
           (upcoming.length === 0 ? (
             <p className="text-muted">No upcoming appointments.</p>
           ) : (
-            <AppointmentList items={upcoming} label="Upcoming appointments" onOpen={setOpenId} />
+            <AppointmentList items={upcoming} label="Upcoming appointments" onOpen={openCard} />
           ))}
         {tab === "past" &&
           (past.length === 0 ? (
             <p className="text-muted">No past appointments.</p>
           ) : (
-            <AppointmentList items={past} label="Past appointments" onOpen={setOpenId} />
+            <AppointmentList items={past} label="Past appointments" onOpen={openCard} />
           ))}
       </div>
 

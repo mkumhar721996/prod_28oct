@@ -32,7 +32,7 @@ export function AppointmentDetail({ appointment, upcoming, onBack }: Props) {
         <h1 id="detail-title">Appointment</h1>
         <span className="badge">{upcoming ? "Upcoming" : "Past"}</span>
       </div>
-      <div className="card stack stack-3" aria-labelledby="detail-title">
+      <div className="card stack stack-3" role="region" aria-labelledby="detail-title">
         <div className="d-group">
           <span className="d-label">Clinic</span>
           <h2 className="d-value">{appointment.clinicName}</h2>

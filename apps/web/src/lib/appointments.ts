@@ -59,10 +59,10 @@ export function describeAppointment(a: Appointment): string {
 
 export const NO_REASON_TEXT = "No reason given";
 
-function zoneName(timeZone: unknown, at: string): string | null {
-  if (typeof timeZone !== "string") return null;
+/** The zone's name at an instant ("GMT", or "Greenwich Mean Time" when long); null for an unknown zone. */
+function zoneName(timeZone: string, at: string, style: "short" | "long"): string | null {
   try {
-    const parts = new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "short" }).formatToParts(
+    const parts = new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: style }).formatToParts(
       new Date(at),
     );
     return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
@@ -71,10 +71,17 @@ function zoneName(timeZone: unknown, at: string): string | null {
   }
 }
 
+/** The wall-clock reading of an instant in a zone; equal readings mean equal offsets, whatever the zone IDs. */
+function wallClock(timeZone: string, at: string): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone, dateStyle: "short", timeStyle: "short", hourCycle: "h23" }).format(
+    new Date(at),
+  );
+}
+
 /** "Tue 3 Nov 2026, 09:30 GMT": clinic-local date and time, then the clinic zone's short name at that instant. */
 export function describeDateTime(a: Appointment): string {
   const year = a.date.split("-")[0];
-  const zone = zoneName(a.timeZone, a.startsAt);
+  const zone = zoneName(a.timeZone, a.startsAt, "short");
   return `${dayLabel(a.date)} ${year}, ${a.time}${zone ? ` ${zone}` : ""}`;
 }
 
@@ -83,10 +90,17 @@ export function reasonText(a: Appointment): string {
   return a.reason.trim() === "" ? NO_REASON_TEXT : a.reason;
 }
 
-/** Note for the detail when the device zone differs from the clinic zone; null when equal. */
+/**
+ * Note for the detail when the device and the clinic read a different time at the appointment's
+ * instant; null when they agree (so alias IDs such as Asia/Calcutta and Asia/Kolkata give no note).
+ */
 export function zoneNote(a: Appointment, deviceZone: string): string | null {
-  if (typeof a.timeZone !== "string" || a.timeZone === deviceZone) return null;
-  return `Shown in ${a.timeZone}, the clinic's local time. Your device is on ${deviceZone}.`;
+  const clinic = zoneName(a.timeZone, a.startsAt, "long");
+  const device = zoneName(deviceZone, a.startsAt, "long");
+  if (!clinic || !device || wallClock(a.timeZone, a.startsAt) === wallClock(deviceZone, a.startsAt)) {
+    return null;
+  }
+  return `Shown in ${clinic}, the clinic's local time. Your device is on ${device}.`;
 }
 
 /** Splits bookings by start instant: upcoming soonest first, past most recent first. */
