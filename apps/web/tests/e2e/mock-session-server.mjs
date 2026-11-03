@@ -2,7 +2,7 @@
 // Session: signed in when the forwarded Cookie header contains `e2e-session=1`.
 // Orders (GET /orders?tab&limit&cursor): a fixed fixture, newest first. Cookie `e2e-orders=none`
 // returns no orders; `e2e-orders=fail-page-2` fails every request that carries a cursor (500);
-// `e2e-orders=slow-page-2` delays those requests.
+// `e2e-orders=slow-page-2` delays those requests; `e2e-placed=<6 chars>` adds a just-placed order.
 import { createServer } from "node:http";
 
 const port = Number(process.env.MOCK_SESSION_PORT ?? 3101);
@@ -72,7 +72,12 @@ createServer(async (req, res) => {
     const past = url.searchParams.get("tab") === "past";
     // Pages are capped at 5 so the small fixture spans several pages.
     const limit = Math.min(Number(url.searchParams.get("limit") ?? 20), 5);
-    const all = cookie.includes("e2e-orders=none") ? [] : ORDERS;
+    // Cookie `e2e-placed=<number>` stands in for an order just placed: newest, status Placed.
+    const placed = /e2e-placed=([A-Za-z0-9]{6})/.exec(cookie)?.[1];
+    const justPlaced = placed
+      ? [{ id: "o-new", number: placed, title: `Order title ${placed}`, status: "Placed", placedAt: new Date().toISOString() }]
+      : [];
+    const all = cookie.includes("e2e-orders=none") ? [] : [...justPlaced, ...ORDERS];
     const mine = all.filter((o) => (o.status === "Fulfilled" || o.status === "Cancelled") === past);
     const start = Number(cursor ?? 0);
     const items = mine.slice(start, start + limit);

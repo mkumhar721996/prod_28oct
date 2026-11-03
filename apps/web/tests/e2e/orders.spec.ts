@@ -69,6 +69,25 @@ test("no orders: empty state links to the Menu", async ({ page }) => {
   await expect(page).toHaveURL(/\/menu$/);
 });
 
+test("order confirmation: View orders lists the just-placed order as Placed", async ({ page }) => {
+  await signIn(page);
+  await page.context().addCookies([{ name: "e2e-placed", value: "AB12CD", url: ORIGIN }]);
+  await page.goto("/order-confirmed?order=AB12CD");
+  await expect(page.getByTestId("order-number")).toHaveText("AB12CD");
+  await page.getByRole("button", { name: "View orders" }).click();
+  await expect(page).toHaveURL(/\/orders$/);
+  const first = page.locator(".order-row").first();
+  await expect(first).toContainText("AB12CD");
+  await expect(first).toContainText("Placed");
+});
+
+test("order confirmation: Back to Menu goes to the Menu", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/order-confirmed?order=AB12CD");
+  await page.getByRole("button", { name: "Back to Menu" }).click();
+  await expect(page).toHaveURL(/\/menu$/);
+});
+
 test("signed out: redirected to sign-in, never shown Orders", async ({ page }) => {
   await page.goto("/orders");
   await expect(page).toHaveURL(/\/sign-in\?next=%2Forders$/);
