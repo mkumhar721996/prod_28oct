@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { claimFreeCredits, type TopUp } from "@/lib/session";
+import { useBalance } from "./BalanceProvider";
 import { formatCredits } from "./BalanceTile";
 
 type Outcome = { ok: true; message: string } | { ok: false; message: string };
@@ -13,9 +14,11 @@ const CLAIM_FAILED = "Couldn't claim free credits. Try again.";
 export async function runClaim(deps: {
   claimFreeCredits: typeof claimFreeCredits;
   refresh: () => void;
+  publish?: (credits: number) => void;
 }): Promise<Outcome> {
   const result = await deps.claimFreeCredits();
   if (!result.ok) return { ok: false, message: result.message ?? CLAIM_FAILED };
+  deps.publish?.(result.balanceCredits);
   deps.refresh();
   return {
     ok: true,
@@ -31,6 +34,7 @@ export function ClaimCreditsPanel({
   topUp: TopUp;
 }) {
   const router = useRouter();
+  const { setBalance } = useBalance();
   const [pending, setPending] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const failure = useRef<HTMLDivElement>(null);
@@ -42,7 +46,7 @@ export function ClaimCreditsPanel({
   async function claim() {
     setPending(true);
     setOutcome(null);
-    const next = await runClaim({ claimFreeCredits, refresh: router.refresh });
+    const next = await runClaim({ claimFreeCredits, refresh: router.refresh, publish: setBalance });
     setPending(false);
     setOutcome(next);
   }

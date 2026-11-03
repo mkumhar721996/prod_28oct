@@ -127,3 +127,28 @@ describe("handleSignOut", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 });
+
+describe("TopBar balance", () => {
+  it("shows the balance badge for a signed-in player", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn pathname="/" balance={1000} />);
+    expect(html).toMatch(/class="badge badge-info balance-badge"[^>]*>1,000 credits</);
+    expect(html).toContain('role="status"');
+  });
+
+  it("shows -- with an accessible label when the balance could not load", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn pathname="/" balance={null} />);
+    expect(html).toContain(">--<");
+    expect(html).toContain("badge-danger");
+    expect(html).toContain("Balance unavailable");
+  });
+
+  it("shows no balance to a signed-out visitor", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn={false} pathname="/" balance={1000} />);
+    expect(html).not.toContain("credits");
+    expect(html).not.toContain("badge");
+  });
+
+  it("shows no badge when balance is omitted", () => {
+    expect(renderToStaticMarkup(<TopBar signedIn pathname="/" />)).not.toContain("badge");
+  });
+});

@@ -101,6 +101,7 @@ svg.icon {
 .shell-nav a:hover { background: var(--color-bg-subtle); }
 .shell-nav a[aria-current="page"] { color: var(--color-primary); background: var(--color-bg-subtle); }
 .shell-nav a:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.balance-badge { min-height: var(--size-control-sm); font-size: var(--font-size-md); font-variant-numeric: tabular-nums; }
 .shell-error { flex-basis: 100%; }
 .shell-main { flex: 1; width: 100%; max-width: var(--size-shell-max); margin: 0 auto; padding: var(--space-4) var(--space-3); }
 /* Breakpoint literal: custom properties cannot be used in media queries */

@@ -1,3 +1,4 @@
+import { formatCredits } from "./BalanceTile";
 import { BRAND_NAME, brandHref, isCurrent, visibleNav } from "@/lib/shell";
 
 type TopBarProps = {
@@ -9,6 +10,8 @@ type TopBarProps = {
   onToggleMenu?: () => void;
   onSignOut?: () => void;
   signingOut?: boolean;
+  /** Credits to show; null = could not be loaded; omitted = no badge. */
+  balance?: number | null;
 };
 
 export function TopBar({
@@ -19,6 +22,7 @@ export function TopBar({
   onToggleMenu,
   onSignOut,
   signingOut = false,
+  balance,
 }: TopBarProps) {
   const brand = (
     <a className="shell-brand" href={brandHref(signedIn)}>
@@ -55,6 +59,22 @@ export function TopBar({
         </div>
         {signedIn && (
           <>
+            {balance === null && (
+              <span className="badge badge-danger balance-badge">
+                <span aria-hidden="true">--</span>
+                <span className="sr-only">Balance unavailable</span>
+              </span>
+            )}
+            {typeof balance === "number" && (
+              <span
+                className="badge badge-info balance-badge"
+                data-wf-id="balance"
+                role="status"
+                aria-live="polite"
+              >
+                {formatCredits(balance)}
+              </span>
+            )}
             <button
               className="btn btn-ghost btn-sm"
               type="button"
