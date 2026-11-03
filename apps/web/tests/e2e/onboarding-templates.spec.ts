@@ -3,6 +3,12 @@ import { expect, test, type Page } from "@playwright/test";
 // Templates live in memory in tests/e2e/mock-session-server.mjs; software engineer is seeded with
 // two tasks and 14 plans. Cookies steer the mock: `e2e-session=1` signs in, `e2e-hr=1` makes it HR.
 const ORIGIN = "http://localhost:3100";
+const MOCK_API = "http://localhost:3101";
+
+test.beforeEach(async ({ request }) => {
+  const res = await request.post(`${MOCK_API}/__reset`);
+  expect(res.ok()).toBe(true);
+});
 
 async function signIn(page: Page, { hr }: { hr: boolean }) {
   const cookies = [{ name: "e2e-session", value: "1", url: ORIGIN }];

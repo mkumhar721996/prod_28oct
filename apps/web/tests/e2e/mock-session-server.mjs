@@ -29,18 +29,21 @@ const ROLES = [
   { role: "customer-support-agent", name: "Customer support agent" },
   { role: "account-manager", name: "Account manager" },
 ];
-const templates = new Map([
-  [
-    "software-engineer",
-    {
-      planCount: 14,
-      tasks: [
-        { title: "Set up laptop", owner: "it", dueOffsetDays: -3 },
-        { title: "Hold 90-day review", owner: "hiring_manager", dueOffsetDays: 90 },
-      ],
-    },
-  ],
-]);
+const seedTemplates = () =>
+  new Map([
+    [
+      "software-engineer",
+      {
+        planCount: 14,
+        tasks: [
+          { title: "Set up laptop", owner: "it", dueOffsetDays: -3 },
+          { title: "Hold 90-day review", owner: "hiring_manager", dueOffsetDays: 90 },
+        ],
+      },
+    ],
+  ]);
+// `POST /__reset` restores the seed so e2e tests start from the same state on every run or retry.
+const templates = seedTemplates();
 const nameOf = (role) => ROLES.find((r) => r.role === role)?.name ?? role;
 const view = (role) => ({ role, name: nameOf(role), ...templates.get(role) });
 const readJson = async (req) => {
@@ -97,6 +100,11 @@ createServer(async (req, res) => {
     const role = cookie.includes("e2e-hr=1") ? "hr" : "player";
     res.end(JSON.stringify(signedIn ? { role, email: "ana@example.com" } : {}));
     return;
+  }
+  if (req.method === "POST" && url.pathname === "/__reset") {
+    templates.clear();
+    for (const [role, template] of seedTemplates()) templates.set(role, template);
+    return json(res, 200, { ok: true });
   }
   if (url.pathname === "/onboarding-templates" || url.pathname.startsWith("/onboarding-templates/")) {
     await handleTemplates(req, res, url, cookie);
