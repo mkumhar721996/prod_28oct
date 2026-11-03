@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "@/lib/session";
 import { SIGN_IN_HREF } from "@/lib/shell";
 import { TopBar } from "./TopBar";
@@ -30,13 +30,35 @@ export async function handleSignOut(
   deps.refresh();
 }
 
-/** Client wrapper: owns the pathname, Menu and sign-out state for the shared top bar. */
+/** Client wrapper: owns the pathname, Menu, account menu and sign-out state for the shared top bar. */
 export function TopBarControls({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+
+  // Escape or a click outside closes the account menu and returns focus to its button.
+  useEffect(() => {
+    if (!accountOpen) return;
+    const close = (refocus: boolean) => {
+      setAccountOpen(false);
+      if (refocus) document.getElementById("account-button")?.focus();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close(true);
+    };
+    const onPointer = (e: MouseEvent) => {
+      if (!(e.target as Element).closest(".account")) close(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+    };
+  }, [accountOpen]);
 
   async function onSignOut() {
     setSigningOut(true);
@@ -49,8 +71,10 @@ export function TopBarControls({ signedIn }: { signedIn: boolean }) {
       signedIn={signedIn}
       pathname={pathname}
       menuOpen={menuOpen}
+      accountOpen={accountOpen}
       error={error}
       onToggleMenu={() => setMenuOpen((open) => !open)}
+      onToggleAccount={() => setAccountOpen((open) => !open)}
       onSignOut={onSignOut}
       signingOut={signingOut}
     />

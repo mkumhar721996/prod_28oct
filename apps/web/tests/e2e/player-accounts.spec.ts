@@ -27,7 +27,8 @@ test("AC3: Sign out in the top bar returns to sign-in", async ({ page }) => {
   await signIn(page);
   await page.route("**/session/sign-out", (route) => route.fulfill({ status: 204, body: "" }));
   await page.goto("/wallet");
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("button", { name: "Account" }).click();
+  await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
 });
 

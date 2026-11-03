@@ -19,18 +19,18 @@ for (const path of ["/", "/elsewhere"]) {
     await stubSession(page, true);
     await page.goto(path);
     await expect(page.getByRole("banner")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Account" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Web App" })).toBeVisible();
   });
 }
 
-test("signed in wide: Home highlighted, Sign out at the right", async ({ page }) => {
+test("signed in wide: Dashboard highlighted, account menu at the right", async ({ page }) => {
   await stubSession(page, true);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
   const bar = (await page.locator(".shell-bar").boundingBox())!;
-  const out = (await page.getByRole("button", { name: "Sign out" }).boundingBox())!;
+  const out = (await page.getByRole("button", { name: "Account" }).boundingBox())!;
   const nav = (await page.locator("#main-nav").boundingBox())!;
   expect(out.x).toBeGreaterThan(nav.x + nav.width);
   expect(out.x + out.width).toBeGreaterThan(bar.x + bar.width - 40);
@@ -40,7 +40,7 @@ test("signed out: brand only, brand goes to sign-in", async ({ page }) => {
   await stubSession(page, false);
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Web App" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Sign out" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Account" })).toHaveCount(0);
   await expect(page.getByRole("navigation")).toHaveCount(0);
   await page.getByRole("link", { name: "Web App" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
@@ -59,12 +59,12 @@ test("narrow: nav collapses behind Menu, keyboard opens it", async ({ page }) =>
   await page.goto("/");
   const menu = page.getByRole("button", { name: "Menu" });
   await expect(menu).toBeVisible();
-  await expect(page.getByRole("link", { name: "Home" })).toBeHidden();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toBeHidden();
   await expect(menu).toHaveAttribute("aria-expanded", "false");
   await menu.focus();
   await page.keyboard.press("Enter");
   await expect(menu).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
 });
 
 test("768px: nav inline, no Menu", async ({ page }) => {
@@ -72,21 +72,23 @@ test("768px: nav inline, no Menu", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 800 });
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Menu" })).toBeHidden();
-  await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
 });
 
 test("sign out success shows sign-in", async ({ page }) => {
   await stubSession(page, true);
   await page.goto("/");
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("button", { name: "Account" }).click();
+  await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
 });
 
 test("sign out failure shows an error and stays signed in", async ({ page }) => {
   await stubSession(page, true, 500);
   await page.goto("/");
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("button", { name: "Account" }).click();
+  await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page.getByRole("alert")).toContainText("Sign out failed");
   await expect(page).not.toHaveURL(/\/sign-in$/);
-  await expect(page.getByRole("button", { name: "Sign out" })).toBeEnabled();
+  await expect(page.getByRole("menuitem", { name: "Sign out" })).toBeEnabled();
 });
