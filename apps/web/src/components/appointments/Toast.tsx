@@ -5,8 +5,18 @@ import { Icon } from "../orders/Icon";
 
 export const TOAST_MS = 4000;
 
-/** A transient confirmation; asks to be hidden after TOAST_MS. */
-export function Toast({ message, onHide }: { message: string; onHide?: () => void }) {
+type ToastAction = { label: string; onAction: () => void };
+
+/** A transient confirmation; asks to be hidden after TOAST_MS. An optional action (e.g. Undo) sits beside it. */
+export function Toast({
+  message,
+  onHide,
+  action,
+}: {
+  message: string;
+  onHide?: () => void;
+  action?: ToastAction;
+}) {
   useEffect(() => {
     if (!onHide) return;
     const timer = setTimeout(onHide, TOAST_MS);
@@ -17,6 +27,11 @@ export function Toast({ message, onHide }: { message: string; onHide?: () => voi
     <div className="toast is-open" role="status">
       <Icon name="check" />
       <span>{message}</span>
+      {action && (
+        <button type="button" className="btn btn-ghost btn-sm" onClick={action.onAction}>
+          {action.label}
+        </button>
+      )}
     </div>
   );
 }

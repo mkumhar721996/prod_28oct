@@ -6,6 +6,7 @@ import {
   WALLET_HREF,
   brandHref,
   isCurrent,
+  signInTarget,
   visibleNav,
 } from "./shell";
 
@@ -19,8 +20,10 @@ describe("shell", () => {
     expect(brandHref(false)).toBe("/sign-in");
   });
 
-  it("shows nav only when signed in", () => {
-    expect(visibleNav(false)).toEqual([]);
+  it("shows only public entries to guests, Menu last for everyone", () => {
+    expect(visibleNav(false)).toEqual([{ key: "menu", label: "Menu", href: "/menu", public: true }]);
+    expect(visibleNav(true).at(-1)?.key).toBe("menu");
+    expect(signInTarget("checkout")).toBe("/checkout");
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
     expect(visibleNav(true)[1]).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
@@ -31,13 +34,14 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
 
-  it("appends Appointments at the end; its booking page is current there too", () => {
-    expect(MAIN_NAV.at(-1)).toEqual({
+  it("keeps Appointments before Menu; its booking page is current there too", () => {
+    const appointments = MAIN_NAV.find((e) => e.key === "appointments")!;
+    expect(appointments).toEqual({
       key: "appointments",
       label: "Appointments",
       href: "/appointments",
     });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/appointments/book")).toBe(true);
+    expect(isCurrent(appointments, "/appointments/book")).toBe(true);
   });
 
   it("keeps History before Appointments and points Place a bet at the wallet for now", () => {
@@ -53,6 +57,7 @@ describe("shell", () => {
       "orders",
       "history",
       "appointments",
+      "menu",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);

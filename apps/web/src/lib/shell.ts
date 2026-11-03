@@ -8,6 +8,8 @@ export const WALLET_HREF = "/wallet";
 export const HISTORY_HREF = "/history";
 export const APPOINTMENTS_HREF = "/appointments";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
+export const MENU_HREF = "/menu";
+export const CHECKOUT_HREF = "/checkout";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 
@@ -18,13 +20,14 @@ const NEXT_TARGETS: Record<string, string> = {
   [ORDERS_HREF]: ORDERS_HREF,
   [APPOINTMENTS_HREF]: APPOINTMENTS_HREF,
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
+  checkout: CHECKOUT_HREF,
 };
 
 export function signInTarget(next: string | undefined): string {
   return (next !== undefined && Object.hasOwn(NEXT_TARGETS, next) && NEXT_TARGETS[next]) || WALLET_HREF;
 }
 
-export type NavEntry = { key: string; label: string; href: string };
+export type NavEntry = { key: string; label: string; href: string; public?: true };
 
 /** Append new sections to the end so existing positions stay stable. */
 export const MAIN_NAV: readonly NavEntry[] = [
@@ -33,6 +36,7 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "orders", label: "Orders", href: ORDERS_HREF },
   { key: "history", label: "History", href: HISTORY_HREF },
   { key: "appointments", label: "Appointments", href: APPOINTMENTS_HREF },
+  { key: "menu", label: "Menu", href: MENU_HREF, public: true },
 ];
 
 export function brandHref(signedIn: boolean): string {
@@ -40,7 +44,7 @@ export function brandHref(signedIn: boolean): string {
 }
 
 export function visibleNav(signedIn: boolean): readonly NavEntry[] {
-  return signedIn ? MAIN_NAV : [];
+  return signedIn ? MAIN_NAV : MAIN_NAV.filter((entry) => entry.public);
 }
 
 export function isCurrent(entry: NavEntry, pathname: string): boolean {
