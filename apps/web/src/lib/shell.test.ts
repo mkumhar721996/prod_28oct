@@ -68,13 +68,13 @@ describe("shell", () => {
     expect(isCurrent(MAIN_NAV[2], "/")).toBe(false);
   });
 
-  it("appends Templates last, current on its nested routes, and a valid sign-in target", () => {
-    expect(MAIN_NAV.at(-1)).toEqual({
+  it("appends Templates after Menu, current on its nested routes, and a valid sign-in target", () => {
+    expect(MAIN_NAV.find((e) => e.key === "onboarding-templates")).toEqual({
       key: "onboarding-templates",
       label: "Templates",
       href: "/onboarding-templates",
     });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/onboarding-templates/software-engineer")).toBe(true);
+    expect(isCurrent(MAIN_NAV.find((e) => e.key === "onboarding-templates")!, "/onboarding-templates/software-engineer")).toBe(true);
     expect(signInTarget("/onboarding-templates")).toBe("/onboarding-templates");
     expect(visibleNav(false).some((e) => e.key === "onboarding-templates")).toBe(false);
   });
