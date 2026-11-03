@@ -228,3 +228,20 @@ a.link { color: var(--color-primary); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(var(--size-drawer), 100%), 1fr)); gap: var(--space-3); }
 .menu-photo { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--color-bg-subtle); border-radius: var(--radius-md); }
 .menu-name { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); }
+
+/* Game lobby (from the approved prototype) */
+.lobby-title p { max-width: 60ch; }
+.game-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, 1fr); list-style: none; margin: 0; padding: 0; }
+@media (min-width: 768px) { .game-grid { grid-template-columns: repeat(4, 1fr); } }
+.game-card { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.game-thumb {
+  display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3;
+  background: var(--color-bg-subtle); color: var(--color-fg-muted); border-radius: var(--radius-md);
+}
+.game-thumb .icon { width: var(--size-spinner); height: var(--size-spinner); }
+.game-name { font-weight: var(--font-weight-semibold); overflow-wrap: anywhere; }
+.game-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); min-height: var(--size-control-sm); }
+.game-card.is-unavailable { background: var(--color-bg-subtle); border-style: dashed; color: var(--color-fg-muted); }
+.game-card.is-unavailable .game-thumb { background: var(--color-border); }
+.skeleton-thumb { aspect-ratio: 4 / 3; height: auto; }
+.loading-note { display: flex; align-items: center; gap: var(--space-2); }
