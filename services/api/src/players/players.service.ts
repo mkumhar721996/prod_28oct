@@ -33,7 +33,8 @@ export class PlayersService {
     if (!trimmedName) {
       throw new BadRequestException({ field: 'name', message: 'Enter your name' });
     }
-    if (trimmedName.length > MAX_NAME_LENGTH) {
+    // Code points, to match the database's char_length check.
+    if ([...trimmedName].length > MAX_NAME_LENGTH) {
       throw new BadRequestException({
         field: 'name',
         message: `Use ${MAX_NAME_LENGTH} characters or fewer`,

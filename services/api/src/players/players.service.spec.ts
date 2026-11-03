@@ -58,6 +58,7 @@ describe('PlayersService.register', () => {
       sql.includes('insert into players') ? { rows: [{ id: 'p1', email: 'a@b.co' }] } : { rows: [] },
     );
     await expect(service.register('x'.repeat(50), 'a@b.co', 'play-2026')).resolves.toBeDefined();
+    await expect(service.register('😀'.repeat(50), 'a@b.co', 'play-2026')).resolves.toBeDefined();
     await service.register('Alex', 'a1@b.co', 'play-2026');
     await expect(service.register('Alex', 'a2@b.co', 'play-2026')).resolves.toBeDefined();
   });

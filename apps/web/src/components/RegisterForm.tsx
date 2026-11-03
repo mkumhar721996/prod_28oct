@@ -39,6 +39,7 @@ export async function handleRegister(
   const result = await deps.registerPlayer(name, email, password);
   if (!result.ok) {
     if (result.status === CONFLICT) return { email: DUPLICATE_EMAIL_ERROR };
+    // Client checks mirror the server's; this surfaces a server-side rejection the client missed.
     const field = FIELDS.find((f) => f === result.field);
     return field ? { [field]: result.message } : { alert: result.message };
   }

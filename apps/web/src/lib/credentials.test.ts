@@ -21,5 +21,7 @@ describe("credentials", () => {
     expect(validateName("  ")).toBe("Enter your name");
     expect(validateName("x".repeat(50))).toBeNull();
     expect(validateName("x".repeat(51))).toBe("Use 50 characters or fewer");
+    expect(validateName("😀".repeat(50))).toBeNull();
+    expect(validateName("😀".repeat(51))).toBe("Use 50 characters or fewer");
   });
 });

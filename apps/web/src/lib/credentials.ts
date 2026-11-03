@@ -12,7 +12,8 @@ const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
 export function validateName(name: string): string | null {
   const trimmed = name.trim();
   if (!trimmed) return NAME_REQUIRED_ERROR;
-  return trimmed.length > MAX_NAME_LENGTH ? NAME_LENGTH_ERROR : null;
+  // Code points, to match the server and the database's char_length check.
+  return [...trimmed].length > MAX_NAME_LENGTH ? NAME_LENGTH_ERROR : null;
 }
 
 /** The error to show for this email, or null when it is fine. */
