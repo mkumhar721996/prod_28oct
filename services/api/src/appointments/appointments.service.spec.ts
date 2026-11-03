@@ -48,7 +48,7 @@ describe('AppointmentsService', () => {
       const result = await service.book('p1', input);
       expect(result).toMatchObject({
         ok: true,
-        appointment: { clinicName: 'North Clinic', date: '2026-11-02', time: '09:00' },
+        appointment: { clinicName: 'North Clinic', timeZone: 'Europe/London', date: '2026-11-02', time: '09:00' },
       });
       expect(query.mock.calls[0][1]).toEqual(['p1', 'north', '2026-11-02T09:00:00.000Z', '']);
     });
@@ -131,6 +131,7 @@ describe('AppointmentsService', () => {
       const { service } = setup(() => ({ rows: [inserted] }));
       const list = await service.listFor('p1');
       expect(list.map((a) => [a.date, a.time])).toContainEqual(['2026-11-02', '09:00']);
+      expect(list[0].timeZone).toBe('Europe/London');
     });
   });
 });

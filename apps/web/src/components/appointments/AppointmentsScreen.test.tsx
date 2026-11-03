@@ -13,6 +13,7 @@ const booking: Appointment = {
   id: "a1",
   clinicId: "north",
   clinicName: "North Clinic",
+  timeZone: "Europe/London",
   date: "2026-11-02",
   time: "09:00",
   startsAt: "2026-11-02T09:00:00.000Z",
@@ -24,10 +25,17 @@ const render = (props: Partial<React.ComponentProps<typeof AppointmentsScreen>>)
 describe("AppointmentsScreen", () => {
   it("lists the new booking with a link to book another", () => {
     const html = render({ appointments: [booking] });
-    expect(html).toMatch(/<li class="card"[^>]*>North Clinic, Mon 2 Nov, 09:00<\/li>/);
+    expect(html).toMatch(
+      /<button[^>]*class="card appt"[^>]*aria-label="Open appointment at North Clinic, Mon 2 Nov, 09:00"/,
+    );
     expect(html).not.toContain("Blood pressure check");
     expect(html).toMatch(/<a[^>]*href="\/appointments\/book"[^>]*>Book appointment<\/a>/);
     expect(html).not.toContain("No upcoming appointments");
+  });
+
+  it("makes each card on the Past tab a button too", () => {
+    const past = { ...booking, startsAt: "2026-10-01T09:00:00.000Z", date: "2026-10-01" };
+    expect(render({ appointments: [past], initialTab: "past" })).toMatch(/<button[^>]*class="card appt"/);
   });
 
   it("shows the none-booked state with one prompt and no tabs", () => {

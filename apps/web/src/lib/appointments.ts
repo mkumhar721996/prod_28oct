@@ -8,6 +8,8 @@ export type Appointment = {
   id: string;
   clinicId: string;
   clinicName: string;
+  /** The clinic's IANA time zone; date and time below are in it. */
+  timeZone: string;
   /** Clinic-local date (YYYY-MM-DD) and time (HH:mm), as the server formats them. */
   date: string;
   time: string;
@@ -53,6 +55,52 @@ export function dayLabel(date: string): string {
 
 export function describeAppointment(a: Appointment): string {
   return `${a.clinicName}, ${dayLabel(a.date)}, ${a.time}`;
+}
+
+export const NO_REASON_TEXT = "No reason given";
+
+/** The zone's name at an instant ("GMT", or "Greenwich Mean Time" when long); null for an unknown zone. */
+function zoneName(timeZone: string, at: string, style: "short" | "long"): string | null {
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: style }).formatToParts(
+      new Date(at),
+    );
+    return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** The wall-clock reading of an instant in a zone; equal readings mean equal offsets, whatever the zone IDs. */
+function wallClock(timeZone: string, at: string): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone, dateStyle: "short", timeStyle: "short", hourCycle: "h23" }).format(
+    new Date(at),
+  );
+}
+
+/** "Tue 3 Nov 2026, 09:30 GMT": clinic-local date and time, then the clinic zone's short name at that instant. */
+export function describeDateTime(a: Appointment): string {
+  const year = a.date.split("-")[0];
+  const zone = zoneName(a.timeZone, a.startsAt, "short");
+  return `${dayLabel(a.date)} ${year}, ${a.time}${zone ? ` ${zone}` : ""}`;
+}
+
+/** The detail's reason text: the reason, or NO_REASON_TEXT when empty or only whitespace. */
+export function reasonText(a: Appointment): string {
+  return a.reason.trim() === "" ? NO_REASON_TEXT : a.reason;
+}
+
+/**
+ * Note for the detail when the device and the clinic read a different time at the appointment's
+ * instant; null when they agree (so alias IDs such as Asia/Calcutta and Asia/Kolkata give no note).
+ */
+export function zoneNote(a: Appointment, deviceZone: string): string | null {
+  const clinic = zoneName(a.timeZone, a.startsAt, "long");
+  const device = zoneName(deviceZone, a.startsAt, "long");
+  if (!clinic || !device || wallClock(a.timeZone, a.startsAt) === wallClock(deviceZone, a.startsAt)) {
+    return null;
+  }
+  return `Shown in ${clinic}, the clinic's local time. Your device is on ${device}.`;
 }
 
 /** Splits bookings by start instant: upcoming soonest first, past most recent first. */
