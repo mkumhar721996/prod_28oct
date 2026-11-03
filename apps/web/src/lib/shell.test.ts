@@ -22,7 +22,7 @@ describe("shell", () => {
 
   it("shows only public entries to guests, Menu last for everyone", () => {
     expect(visibleNav(false)).toEqual([{ key: "menu", label: "Menu", href: "/menu", public: true }]);
-    expect(visibleNav(true).at(-1)?.key).toBe("menu");
+    expect(visibleNav(true).at(-1)?.key).toBe("onboarding-templates");
     expect(signInTarget("checkout")).toBe("/checkout");
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
@@ -58,10 +58,22 @@ describe("shell", () => {
       "history",
       "appointments",
       "menu",
+      "onboarding-templates",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
     expect(isCurrent(MAIN_NAV[2], "/")).toBe(false);
+  });
+
+  it("appends Templates last, current on its nested routes, and a valid sign-in target", () => {
+    expect(MAIN_NAV.at(-1)).toEqual({
+      key: "onboarding-templates",
+      label: "Templates",
+      href: "/onboarding-templates",
+    });
+    expect(isCurrent(MAIN_NAV.at(-1)!, "/onboarding-templates/software-engineer")).toBe(true);
+    expect(signInTarget("/onboarding-templates")).toBe("/onboarding-templates");
+    expect(visibleNav(false).some((e) => e.key === "onboarding-templates")).toBe(false);
   });
 
   it("marks a section current on its nested routes", () => {

@@ -32,7 +32,7 @@ describe('PlayersService.register', () => {
         : { rows: [] },
     );
     const player = await service.register(' ANA@example.com ', 'play-2026');
-    expect(player).toEqual({ id: 'p1', email: 'ana@example.com' });
+    expect(player).toEqual({ id: 'p1', email: 'ana@example.com', accountRole: 'player' });
     const sql = sqlOf(calls);
     expect(sql[0]).toBe('begin');
     expect(sql[1]).toMatch(/^insert into players/);
@@ -104,8 +104,8 @@ describe('PlayersService.authenticate', () => {
   it('returns the player for the right password and never touches wallets', async () => {
     const { service, passwords, pool } = setup();
     const hash = await passwords.hash('play-2026');
-    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', email: 'a@b.co', password_hash: hash }] });
-    expect(await service.authenticate(' A@B.co', 'play-2026')).toEqual({ id: 'p1', email: 'a@b.co' });
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 'p1', email: 'a@b.co', accountRole: 'hr', password_hash: hash }] });
+    expect(await service.authenticate(' A@B.co', 'play-2026')).toEqual({ id: 'p1', email: 'a@b.co', accountRole: 'hr' });
     expect(pool.query.mock.calls[0][0]).not.toMatch(/wallets/);
   });
 

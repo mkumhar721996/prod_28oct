@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       // Same reason: /appointments is the page itself.
       { source: "/api/appointments", destination: `${apiUrl}/appointments` },
       { source: "/api/appointments/:path*", destination: `${apiUrl}/appointments/:path*` },
+      // Same reason: /onboarding-templates is the page itself.
+      { source: "/api/onboarding-templates", destination: `${apiUrl}/onboarding-templates` },
+      {
+        source: "/api/onboarding-templates/:path*",
+        destination: `${apiUrl}/onboarding-templates/:path*`,
+      },
       // Same reason: /wallet is the page itself.
       { source: "/api/wallet/top-up", destination: `${apiUrl}/wallet/top-up` },
     ];

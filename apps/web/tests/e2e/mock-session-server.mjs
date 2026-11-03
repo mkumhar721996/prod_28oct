@@ -1,5 +1,6 @@
 // Stand-in for the Records API, used only by the e2e web server.
 // Session: signed in when the forwarded Cookie header contains `e2e-session=1`.
+// Cookie `e2e-hr=1` on top of that makes the session role `hr` and lets it write onboarding templates.
 // Orders (GET /orders?tab&limit&cursor): a fixed fixture, newest first. Cookie `e2e-orders=none`
 // returns no orders; `e2e-orders=fail-page-2` fails every request that carries a cursor (500);
 // `e2e-orders=slow-page-2` delays those requests.
@@ -21,13 +22,84 @@ const ORDERS = Array.from({ length: 14 }, (_, i) => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Onboarding templates, kept in memory. Cookie `e2e-hr=1` makes the signed-in user HR; only HR may
+// POST or PUT (403 otherwise). Software engineer is seeded; the other roles start without a template.
+const ROLES = [
+  { role: "software-engineer", name: "Software engineer" },
+  { role: "customer-support-agent", name: "Customer support agent" },
+  { role: "account-manager", name: "Account manager" },
+];
+const templates = new Map([
+  [
+    "software-engineer",
+    {
+      planCount: 14,
+      tasks: [
+        { title: "Set up laptop", owner: "it", dueOffsetDays: -3 },
+        { title: "Hold 90-day review", owner: "hiring_manager", dueOffsetDays: 90 },
+      ],
+    },
+  ],
+]);
+const nameOf = (role) => ROLES.find((r) => r.role === role)?.name ?? role;
+const view = (role) => ({ role, name: nameOf(role), ...templates.get(role) });
+const readJson = async (req) => {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  return JSON.parse(Buffer.concat(chunks).toString() || "{}");
+};
+const json = (res, status, body) => {
+  res.writeHead(status, { "content-type": "application/json" });
+  res.end(JSON.stringify(body));
+};
+const bad = (message) => ({ code: "invalid", message });
+
+async function handleTemplates(req, res, url, cookie) {
+  if (!cookie.includes("e2e-session=1")) return json(res, 401, {});
+  const parts = url.pathname.split("/").filter(Boolean);
+  const role = parts[1];
+  if (req.method === "GET" && parts.length === 1) {
+    return json(
+      res,
+      200,
+      [...templates].map(([r, t]) => ({
+        role: r,
+        name: nameOf(r),
+        taskCount: t.tasks.length,
+        planCount: t.planCount,
+      })),
+    );
+  }
+  if (req.method === "GET" && role === "roles") return json(res, 200, ROLES);
+  if (req.method === "GET") {
+    return templates.has(role) ? json(res, 200, view(role)) : json(res, 404, {});
+  }
+  if (!cookie.includes("e2e-hr=1")) return json(res, 403, {});
+  const body = await readJson(req);
+  const target = req.method === "POST" ? body.role : role;
+  if (req.method === "POST" && templates.has(target)) {
+    return json(res, 409, { code: "role_exists", message: `A template already exists for ${nameOf(target)}.` });
+  }
+  if (req.method === "PUT" && !templates.has(target)) return json(res, 404, {});
+  if (!Array.isArray(body.tasks) || body.tasks.length === 0) {
+    return json(res, 400, bad("Add at least one task before saving."));
+  }
+  templates.set(target, { planCount: templates.get(target)?.planCount ?? 0, tasks: body.tasks });
+  return json(res, req.method === "POST" ? 201 : 200, { ok: true });
+}
+
 createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   const cookie = req.headers.cookie ?? "";
   if (req.method === "GET" && url.pathname === "/session") {
     const signedIn = cookie.includes("e2e-session=1");
     res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
-    res.end(JSON.stringify(signedIn ? { role: "player", email: "ana@example.com" } : {}));
+    const role = cookie.includes("e2e-hr=1") ? "hr" : "player";
+    res.end(JSON.stringify(signedIn ? { role, email: "ana@example.com" } : {}));
+    return;
+  }
+  if (url.pathname === "/onboarding-templates" || url.pathname.startsWith("/onboarding-templates/")) {
+    await handleTemplates(req, res, url, cookie);
     return;
   }
   if (req.method === "GET" && url.pathname === "/wallet") {

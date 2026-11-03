@@ -8,7 +8,8 @@ import {
 } from './players.constants';
 import { PasswordService } from './password.service';
 
-export type Player = { id: string; email: string };
+export type AccountRole = 'player' | 'hr';
+export type Player = { id: string; email: string; accountRole: AccountRole };
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -45,7 +46,8 @@ export class PlayersService {
         'insert into players (email, password_hash) values ($1, $2) returning id, email',
         [normalised, passwordHash],
       );
-      const player = rows[0] as Player;
+      // A new account is always a player; HR accounts are set in the database.
+      const player: Player = { ...rows[0], accountRole: 'player' };
       await client.query('insert into wallets (player_id, balance_credits) values ($1, $2)', [
         player.id,
         STARTING_GRANT,
@@ -74,7 +76,7 @@ export class PlayersService {
     const candidate =
       typeof password === 'string' && password.length <= MAX_PASSWORD_LENGTH ? password : '';
     const { rows } = await this.db.pool.query(
-      'select id, email, password_hash from players where email = $1',
+      'select id, email, account_role as "accountRole", password_hash from players where email = $1',
       [normaliseEmail(email)],
     );
     const row = rows[0] as (Player & { password_hash: string }) | undefined;
@@ -84,7 +86,7 @@ export class PlayersService {
       return null;
     }
     return (await this.passwords.verify(row.password_hash, candidate))
-      ? { id: row.id, email: row.email }
+      ? { id: row.id, email: row.email, accountRole: row.accountRole }
       : null;
   }
 }
