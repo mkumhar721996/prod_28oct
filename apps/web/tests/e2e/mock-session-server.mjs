@@ -21,6 +21,22 @@ const ORDERS = Array.from({ length: 14 }, (_, i) => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Order placement (POST /orders): 401 without the session cookie; 400 for an empty cart; otherwise 201
+// with number 1001 (200 for a repeated idempotency key). Cookie `e2e-order=fail-once` fails the first
+// request after a reset with 500; `e2e-order=slow` delays the answer. The keys received are listed at
+// GET /e2e/order-keys and cleared by POST /e2e/reset-orders.
+let orderKeys = [];
+let orderFailures = 0;
+const readBody = async (req) => {
+  let raw = "";
+  for await (const chunk of req) raw += chunk;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+};
+
 createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   const cookie = req.headers.cookie ?? "";
@@ -60,6 +76,40 @@ createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/wallet/top-up") {
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }));
+    return;
+  }
+  if (req.method === "GET" && url.pathname === "/e2e/order-keys") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify(orderKeys));
+    return;
+  }
+  if (req.method === "POST" && url.pathname === "/e2e/reset-orders") {
+    orderKeys = [];
+    orderFailures = 0;
+    res.writeHead(204).end();
+    return;
+  }
+  if (req.method === "POST" && url.pathname === "/orders") {
+    if (!cookie.includes("e2e-session=1")) {
+      res.writeHead(401).end();
+      return;
+    }
+    const body = await readBody(req);
+    if (cookie.includes("e2e-order=slow")) await sleep(1500);
+    if (cookie.includes("e2e-order=fail-once") && orderFailures === 0) {
+      orderFailures += 1;
+      orderKeys.push(body.idempotencyKey);
+      res.writeHead(500).end();
+      return;
+    }
+    if (!Array.isArray(body.lines) || body.lines.length === 0) {
+      res.writeHead(400).end();
+      return;
+    }
+    const replay = orderKeys.slice(orderFailures).includes(body.idempotencyKey);
+    orderKeys.push(body.idempotencyKey);
+    res.writeHead(replay ? 200 : 201, { "content-type": "application/json" });
+    res.end(JSON.stringify({ order: { id: "o-new", number: "1001" } }));
     return;
   }
   if (req.method === "GET" && url.pathname === "/orders") {

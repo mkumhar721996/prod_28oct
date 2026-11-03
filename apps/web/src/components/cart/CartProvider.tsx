@@ -16,6 +16,10 @@ type CartContextValue = {
   remove: (id: string) => void;
   undoRemove: () => void;
   dismissRemoved: () => void;
+  /** Empties the cart; the persist effect writes the empty cart to storage. */
+  clear: () => void;
+  /** False until localStorage has been read, so an empty first render is not mistaken for an empty cart. */
+  hydrated: boolean;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -71,6 +75,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setRemoved(null);
   }, [removed]);
   const dismissRemoved = useCallback(() => setRemoved(null), []);
+  const clear = useCallback(() => setCart([]), []);
 
   const value = useMemo(
     () => ({
@@ -82,8 +87,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       remove,
       undoRemove,
       dismissRemoved,
+      clear,
+      hydrated,
     }),
-    [cart, removed, add, inc, dec, remove, undoRemove, dismissRemoved],
+    [cart, removed, add, inc, dec, remove, undoRemove, dismissRemoved, clear, hydrated],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { CheckoutScreen } from "@/components/checkout/CheckoutScreen";
 import { getSession } from "@/lib/session";
 import { SIGN_IN_HREF } from "@/lib/shell";
 
@@ -7,9 +8,5 @@ export default async function CheckoutPage() {
   if ((await getSession()) === null) {
     redirect(`${SIGN_IN_HREF}?next=checkout`);
   }
-  return (
-    <main>
-      <h1>Checkout</h1>
-    </main>
-  );
+  return <CheckoutScreen />;
 }

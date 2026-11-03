@@ -9,6 +9,7 @@ const { getSession, redirect } = vi.hoisted(() => ({
 vi.mock("@/lib/session", () => ({ getSession }));
 vi.mock("next/navigation", () => ({ redirect }));
 
+import { CheckoutScreen } from "@/components/checkout/CheckoutScreen";
 import CheckoutPage from "./page";
 
 beforeEach(() => vi.clearAllMocks());
@@ -22,6 +23,6 @@ describe("CheckoutPage", () => {
   it("shows the Checkout screen to a signed-in customer", async () => {
     getSession.mockResolvedValue({ role: "player" });
     const el = await CheckoutPage();
-    expect(JSON.stringify(el)).toContain("Checkout");
+    expect(el.type).toBe(CheckoutScreen);
   });
 });
