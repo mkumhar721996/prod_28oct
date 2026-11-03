@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { HISTORY_PAGE_SIZE } from '../src/wallet/wallet.constants';
 import { WalletService } from '../src/wallet/wallet.service';
 
 const ana = { email: 'ana@example.com', password: 'play-2026' };
@@ -147,6 +148,72 @@ describe('Wallet ledger (e2e)', () => {
       balanceCredits: expect.any(Number),
       createdAt: expect.stringMatching(/Z$/),
     });
+  });
+
+  it('AC1-AC4/AC7-AC10: welcome bonus, bet, win and top-up each list with amount and balance after', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    const latest = async () => (await service.historyFor(id, { page: 1, range: 'all' })).entries;
+    expect((await latest()).at(-1)).toMatchObject({ kind: 'grant', amountCredits: 1000, balanceCredits: 1000 });
+    await service.placeBet(id, 10);
+    expect((await latest())[0]).toMatchObject({ kind: 'bet', amountCredits: 10, balanceCredits: 990 });
+    await service.recordWin(id, 50);
+    expect((await latest())[0]).toMatchObject({ kind: 'win', amountCredits: 50, balanceCredits: 1040 });
+    await seed(id, 1);
+    await service.claimTopUp(id);
+    expect((await latest())[0]).toMatchObject({ kind: 'topup', amountCredits: 500, balanceCredits: 501 });
+  });
+
+  it('AC5/AC6: list order follows the balance chain even when created_at disagrees', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    for (let i = 0; i < 5; i++) {
+      await service.placeBet(id, 10);
+      await service.recordWin(id, 5);
+    }
+    // Simulate transaction-start timestamps that disagree with commit order: older ids get newer times.
+    await pool.query(
+      "update wallet_entries set created_at = now() - id * interval '1 minute' where player_id = $1",
+      [id],
+    );
+    const h = await service.historyFor(id, { page: 1, range: 'all' });
+    expect(h.entries[0].balanceCredits).toBe(await service.balanceFor(id));
+    const chrono = [...h.entries].reverse();
+    for (let i = 1; i < chrono.length; i++) {
+      const delta = chrono[i].kind === 'bet' ? -chrono[i].amountCredits : chrono[i].amountCredits;
+      expect(chrono[i].balanceCredits).toBe(chrono[i - 1].balanceCredits + delta);
+    }
+  });
+
+  it('AC6: after simultaneous bets and wins the balance equals the newest entry', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    for (let i = 0; i < 10; i++) await Promise.all([service.placeBet(id, 10), service.recordWin(id, 5)]);
+    const h = await service.historyFor(id, { page: 1, range: 'all' });
+    expect(h.entries[0].balanceCredits).toBe(await service.balanceFor(id));
+  });
+
+  it('AC11: newest first, older entries on later pages', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    for (let i = 0; i < HISTORY_PAGE_SIZE + 3; i++) await service.recordWin(id, 1);
+    const p1 = await service.historyFor(id, { page: 1, range: 'all' });
+    const p2 = await service.historyFor(id, { page: 2, range: 'all' });
+    expect(p1.entries).toHaveLength(HISTORY_PAGE_SIZE);
+    expect(BigInt(p1.entries[0].id)).toBeGreaterThan(BigInt(p1.entries[1].id));
+    expect(BigInt(p2.entries[0].id)).toBeLessThan(BigInt(p1.entries.at(-1)!.id));
+    expect(p2.entries.at(-1)).toMatchObject({ kind: 'grant' });
+  });
+
+  it('migration 005 is idempotent and leaves entries readable', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    const fs = await import('fs');
+    const path = await import('path');
+    const sql = fs.readFileSync(path.join(__dirname, '../migrations/005_wallet_entries_id_idx.sql'), 'utf8');
+    await pool.query(sql);
+    await pool.query(sql);
+    expect((await service.historyFor(id, { page: 1, range: 'all' })).entries.length).toBeGreaterThan(0);
   });
 
   it('AC12/AC13: pages of 10, and the oldest page lists the first entry', async () => {

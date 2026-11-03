@@ -97,7 +97,7 @@ export class WalletService {
     const total = Number(count.rows[0].total);
     const { rows } = await this.db.pool.query(
       `select id, kind, amount_credits, balance_after_credits, created_at from wallet_entries ${where}
-       order by created_at desc, id desc limit $${params.length + 1} offset $${params.length + 2}`,
+       order by id desc limit $${params.length + 1} offset $${params.length + 2}`,
       [...params, HISTORY_PAGE_SIZE, (page - 1) * HISTORY_PAGE_SIZE],
     );
     return {
@@ -139,7 +139,7 @@ export class WalletService {
       }
       const balanceCredits = Number(rows[0].balance_credits);
       await client.query(
-        'insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits) values ($1, $2, $3, $4)',
+        'insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits, created_at) values ($1, $2, $3, $4, clock_timestamp())',
         [playerId, kind, amount, balanceCredits],
       );
       await client.query('commit');
