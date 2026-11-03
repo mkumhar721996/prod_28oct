@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { validateSignInEmailRequired, validateSignInPasswordRequired } from "@/lib/credentials";
 import { signInPlayer, type AuthResult } from "@/lib/session";
 import { REGISTER_HREF, WALLET_HREF } from "@/lib/shell";
 
@@ -12,18 +13,30 @@ type SignInDeps = {
   refresh: () => void;
 };
 
-/** Returns the error to show, or null after a successful sign-in (which navigates to `redirectTo`). */
+export const SIGN_IN_FAILED_ERROR = "Email or password is incorrect";
+const UNAUTHORIZED = 401;
+
+export type SignInErrors = { email?: string; password?: string };
+
+/** Returns what to show; an empty object means we signed in and moved to `redirectTo`. */
 export async function handleSignIn(
   deps: SignInDeps,
   email: string,
   password: string,
   redirectTo: string = WALLET_HREF,
-): Promise<string | null> {
+): Promise<SignInErrors> {
+  const emailError = validateSignInEmailRequired(email);
+  if (emailError) return { email: emailError };
+  const passwordError = validateSignInPasswordRequired(password);
+  if (passwordError) return { password: passwordError };
   const result = await deps.signInPlayer(email, password);
-  if (!result.ok) return result.message;
+  if (!result.ok) {
+    // One message for an unknown email and a wrong password, so neither is revealed.
+    return { password: result.status === UNAUTHORIZED ? SIGN_IN_FAILED_ERROR : result.message };
+  }
   deps.replace(redirectTo);
   deps.refresh();
-  return null;
+  return {};
 }
 
 export function SignInForm({
@@ -36,30 +49,30 @@ export function SignInForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<SignInErrors>({});
   const [pending, setPending] = useState(false);
-  const alertRef = useRef<HTMLDivElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (error) alertRef.current?.focus();
-  }, [error]);
+    if (errors.email) emailRef.current?.focus();
+    else if (errors.password) passwordRef.current?.focus();
+  }, [errors]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    setError(null);
+    setErrors({});
     setPending(true);
-    const message = await handleSignIn(
+    const result = await handleSignIn(
       { signInPlayer, replace: router.replace, refresh: router.refresh },
       email,
       password,
       redirectTo,
     );
     setPending(false);
-    if (message) {
-      // Keep the email, clear only the password.
-      setPassword("");
-      setError(message);
-    }
+    setErrors(result);
+    // Keep the email, clear only the password.
+    if (result.email || result.password) setPassword("");
   }
 
   return (
@@ -74,32 +87,43 @@ export function SignInForm({
         <div className="field">
           <label htmlFor="si-email">Email</label>
           <input
-            className="input"
+            className={errors.email ? "input is-invalid" : "input"}
             id="si-email"
             type="email"
             autoComplete="email"
             placeholder="Email address"
+            ref={emailRef}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            aria-invalid={errors.email ? true : undefined}
+            aria-describedby={errors.email ? "si-email-err" : undefined}
           />
+          {errors.email && (
+            <span className="field-error" id="si-email-err">
+              {errors.email}
+            </span>
+          )}
         </div>
         <div className="field">
           <label htmlFor="si-pass">Password</label>
           <input
-            className="input"
+            className={errors.password ? "input is-invalid" : "input"}
             id="si-pass"
             type="password"
             autoComplete="current-password"
             placeholder="Password"
+            ref={passwordRef}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? "si-pass-err" : undefined}
           />
+          {errors.password && (
+            <span className="field-error" id="si-pass-err" role="alert">
+              {errors.password}
+            </span>
+          )}
         </div>
-        {error && (
-          <div className="alert alert-danger" role="alert" tabIndex={-1} ref={alertRef}>
-            <span>{error}</span>
-          </div>
-        )}
         <div className="form-actions stack stack-2">
           <button className="btn btn-primary" type="submit" disabled={pending}>
             {pending ? "Signing in…" : "Sign in"}

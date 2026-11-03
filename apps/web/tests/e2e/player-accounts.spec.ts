@@ -43,9 +43,51 @@ test("AC8: a wrong password shows the message and keeps the email", async ({ pag
   await page.getByLabel("Email").fill("ana@example.com");
   await page.getByLabel("Password").fill("nope-nope");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toHaveText("Email or password incorrect");
+  await expect(page.getByText("Email or password is incorrect")).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveValue("ana@example.com");
   await expect(page.getByLabel("Password")).toHaveValue("");
+});
+
+test("Sign in: empty submit shows both inline required messages and a link to register", async ({
+  page,
+}) => {
+  await page.goto("/sign-in");
+  await expect(page.getByRole("link", { name: "Create an account" })).toBeVisible();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Enter your email")).toBeVisible();
+  await page.getByLabel("Email").fill("ana@example.com");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Enter your password")).toBeVisible();
+});
+
+test("Sign in: the failed message goes away once the correct details are submitted", async ({
+  page,
+}) => {
+  let attempts = 0;
+  await page.route("**/session/sign-in", (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      return route.fulfill({
+        status: 401,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Email or password incorrect" }),
+      });
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({}),
+      headers: { "set-cookie": "e2e-session=1; Path=/" },
+    });
+  });
+  await page.goto("/sign-in");
+  await page.getByLabel("Email").fill("ana@example.com");
+  await page.getByLabel("Password").fill("nope-nope");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Email or password is incorrect")).toBeVisible();
+  await page.getByLabel("Password").fill("play-2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Email or password is incorrect")).toHaveCount(0);
 });
 
 test("History: the nav opens the history page with each entry", async ({ page }) => {
