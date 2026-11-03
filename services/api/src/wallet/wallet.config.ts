@@ -1,12 +1,12 @@
 import { Logger } from '@nestjs/common';
 
-export const DEFAULT_TOP_UP_CREDITS = 500;
+export const DEFAULT_TOP_UP_CREDITS = 1000;
 export const INVALID_TOP_UP_WARNING =
-  'Invalid WALLET_TOP_UP_CREDITS value detected. Falling back to default value: 500.';
+  'Invalid WALLET_TOP_UP_CREDITS value detected. Falling back to default value: 1000.';
 
 /**
- * WALLET_TOP_UP_CREDITS. Unset or empty means 500 with no warning. A value that is not a whole
- * number of 1 or more logs INVALID_TOP_UP_WARNING and returns 500. Never throws.
+ * WALLET_TOP_UP_CREDITS. Unset or empty means 1000 with no warning. A value that is not a whole
+ * number of 1 or more logs INVALID_TOP_UP_WARNING and returns 1000. Never throws.
  */
 export function topUpCredits(
   env: NodeJS.ProcessEnv = process.env,

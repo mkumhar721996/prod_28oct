@@ -4,30 +4,42 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/session", () => ({ claimFreeCredits: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
+import { Toast } from "./appointments/Toast";
 import { ClaimCreditsPanel, runClaim } from "./ClaimCreditsPanel";
 
 const render = (balanceCredits: number, eligible: boolean) =>
   renderToStaticMarkup(
-    <ClaimCreditsPanel balanceCredits={balanceCredits} topUp={{ eligible, credits: 500 }} />,
+    <ClaimCreditsPanel balanceCredits={balanceCredits} topUp={{ eligible, credits: 1000 }} />,
   );
 
 describe("ClaimCreditsPanel", () => {
-  it("is available, with an enabled button, at a balance of 1", () => {
-    const html = render(1, true);
-    expect(html).toContain("Free credits</h2>");
-    expect(html).toContain('badge-success">Available<');
-    expect(html).toContain("Your balance is 1 credit.");
-    expect(html).toContain("A claim adds 500 credits.");
-    expect(html).toContain("1 credit or less, so you can claim free credits");
-    expect(html).toMatch(/<button(?![^>]*disabled="")[^>]*>Claim free credits<\/button>/);
+  it.each([1, 0])("offers an enabled claim at a balance of %i", (balance) => {
+    const html = render(balance, true);
+    expect(html).toMatch(
+      /<button(?![^>]*disabled)[^>]*class="btn btn-primary"[^>]*>Claim free top-up<\/button>/,
+    );
+    expect(html).toContain("Your balance is too low to bet.");
   });
 
-  it("is still shown, with a disabled button, at a balance of 2", () => {
+  it("offers no claim control at a balance of 2", () => {
     const html = render(2, false);
-    expect(html).toContain('badge-neutral">Not available<');
-    expect(html).toContain("Your balance is 2 credits.");
-    expect(html).toContain("Free credits are available when your balance is 1 credit or less.");
-    expect(html).toMatch(/<button[^>]*disabled=""[^>]*aria-disabled="true"[^>]*>Claim free credits</);
+    expect(html).not.toContain("Claim free top-up");
+    expect(html).not.toContain("<button");
+    expect(html).toContain("You have enough credits to place a bet.");
+  });
+});
+
+describe("Toast variants", () => {
+  it("keeps the default fixed success toast", () => {
+    const html = renderToStaticMarkup(<Toast message="Saved" />);
+    expect(html).toContain('class="toast is-open"');
+    expect(html).toContain('role="status"');
+  });
+
+  it("renders an inline error toast as an alert", () => {
+    const html = renderToStaticMarkup(<Toast inline tone="error" message="No" />);
+    expect(html).toContain("toast is-open is-inline");
+    expect(html).toContain('role="alert"');
   });
 });
 
@@ -36,12 +48,12 @@ describe("runClaim", () => {
     const refresh = vi.fn();
     const claimFreeCredits = vi.fn(async () => ({
       ok: true as const,
-      balanceCredits: 501,
-      grantedCredits: 500,
+      balanceCredits: 1001,
+      grantedCredits: 1000,
     }));
     expect(await runClaim({ claimFreeCredits, refresh })).toEqual({
       ok: true,
-      message: "Free credits claimed: 500 credits. Balance 501 credits.",
+      message: "Free top-up added: 1,000 credits",
     });
     expect(refresh).toHaveBeenCalledTimes(1);
   });

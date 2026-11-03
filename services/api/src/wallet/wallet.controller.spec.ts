@@ -8,9 +8,9 @@ const req = { player: { id: 'p1' } } as unknown as PlayerRequest;
 
 function setup(overrides: Partial<Record<keyof WalletService, unknown>> = {}) {
   const wallet = {
-    topUpCredits: 500,
+    topUpCredits: 1000,
     balanceFor: jest.fn(async () => 1),
-    claimTopUp: jest.fn(async () => ({ ok: true, balanceCredits: 501 })),
+    claimTopUp: jest.fn(async () => ({ ok: true, balanceCredits: 1001 })),
     historyFor: jest.fn(async () => ({ entries: [] })),
     ...overrides,
   };
@@ -22,7 +22,7 @@ describe('WalletController', () => {
     const { controller, wallet } = setup();
     expect(await controller.balance(req)).toEqual({
       balanceCredits: 1,
-      topUp: { eligible: true, credits: 500 },
+      topUp: { eligible: true, credits: 1000 },
     });
     expect(wallet.balanceFor).toHaveBeenCalledWith('p1');
   });
@@ -34,7 +34,7 @@ describe('WalletController', () => {
 
   it('POST /wallet/top-up returns the new balance and granted credits', async () => {
     const { controller, wallet } = setup();
-    expect(await controller.topUp(req)).toEqual({ balanceCredits: 501, grantedCredits: 500 });
+    expect(await controller.topUp(req)).toEqual({ balanceCredits: 1001, grantedCredits: 1000 });
     expect(wallet.claimTopUp).toHaveBeenCalledWith('p1');
   });
 

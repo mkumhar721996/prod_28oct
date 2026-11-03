@@ -12,10 +12,14 @@ export function Toast({
   message,
   onHide,
   action,
+  inline,
+  tone = "success",
 }: {
   message: string;
   onHide?: () => void;
   action?: ToastAction;
+  inline?: boolean;
+  tone?: "success" | "error";
 }) {
   useEffect(() => {
     if (!onHide) return;
@@ -24,8 +28,11 @@ export function Toast({
   }, [onHide]);
 
   return (
-    <div className="toast is-open" role="status">
-      <Icon name="check" />
+    <div
+      className={`toast is-open${inline ? " is-inline" : ""}`}
+      role={tone === "error" ? "alert" : "status"}
+    >
+      <Icon name={tone === "error" ? "alert" : "check"} />
       <span>{message}</span>
       {action && (
         <button type="button" className="btn btn-ghost btn-sm" onClick={action.onAction}>

@@ -121,13 +121,34 @@ describe('Wallet ledger (e2e)', () => {
     expect(await service.balanceFor(id)).toBe(2);
     await seed(id, 1);
     const res = await agent.post('/wallet/top-up').expect(200);
-    expect(res.body).toEqual({ balanceCredits: 501, grantedCredits: 500 });
+    expect(res.body).toEqual({ balanceCredits: 1001, grantedCredits: 1000 });
     expect(await service.claimTopUp(id)).toEqual({ ok: false, reason: 'balance_not_low' });
     expect((await agent.get('/wallet')).body).toEqual({
-      balanceCredits: 501,
-      topUp: { eligible: false, credits: 500 },
+      balanceCredits: 1001,
+      topUp: { eligible: false, credits: 1000 },
     });
     await request(server()).post('/wallet/top-up').expect(401);
+  });
+
+  it('AC7: claims repeat with no cooldown or cap, offered again at 1 credit', async () => {
+    const { agent } = await register();
+    const id = await playerId(ana.email);
+    for (let i = 0; i < 3; i += 1) {
+      await seed(id, 1);
+      expect((await agent.get('/wallet')).body.topUp.eligible).toBe(true);
+      await agent.post('/wallet/top-up').expect(200);
+    }
+    expect(await entryCount(id, 'topup')).toBe(3);
+  });
+
+  it('AC9: two simultaneous claims at 1 credit, exactly one wins', async () => {
+    const { agent } = await register();
+    const id = await playerId(ana.email);
+    await seed(id, 1);
+    const [a, b] = await Promise.all([agent.post('/wallet/top-up'), agent.post('/wallet/top-up')]);
+    expect([a.status, b.status].sort()).toEqual([200, 409]);
+    expect(await service.balanceFor(id)).toBe(1001);
+    expect(await entryCount(id, 'topup')).toBe(1);
   });
 
   it('AC11 and the welcome bonus: every entry is listed with time and balance', async () => {

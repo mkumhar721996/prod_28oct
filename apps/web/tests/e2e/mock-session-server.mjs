@@ -118,7 +118,7 @@ createServer(async (req, res) => {
     const balanceCredits = low ? 1 : 1000;
     res.end(
       JSON.stringify(
-        signedIn ? { balanceCredits, topUp: { eligible: low, credits: 500 } } : {},
+        signedIn ? { balanceCredits, topUp: { eligible: low, credits: 1000 } } : {},
       ),
     );
     return;
@@ -139,7 +139,7 @@ createServer(async (req, res) => {
   }
   if (req.method === "POST" && url.pathname === "/wallet/top-up") {
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }));
+    res.end(JSON.stringify({ balanceCredits: 1001, grantedCredits: 1000 }));
     return;
   }
   if (req.method === "GET" && url.pathname === "/orders") {

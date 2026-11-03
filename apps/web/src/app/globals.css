@@ -197,6 +197,7 @@ a.link { color: var(--color-primary); }
   width: min(var(--size-toast), calc(100% - var(--space-4)));
   padding: var(--space-2) var(--space-3); background: var(--color-fg); color: var(--color-bg); border-radius: var(--radius-md);
 }
+.toast.is-inline { position: static; margin: 0; width: auto; max-width: var(--size-modal); }
 
 /* Cart: drawer, lines and stepper, and the Menu grid (from the approved prototype) */
 .btn-lg { min-height: var(--size-control-lg); padding: 0 var(--space-4); font-size: var(--font-size-lg); }

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { claimFreeCredits, type TopUp } from "@/lib/session";
 import { formatCredits } from "./BalanceTile";
+import { Toast } from "./appointments/Toast";
 
 type Outcome = { ok: true; message: string } | { ok: false; message: string };
 
@@ -19,12 +20,11 @@ export async function runClaim(deps: {
   deps.refresh();
   return {
     ok: true,
-    message: `Free credits claimed: ${formatCredits(result.grantedCredits)}. Balance ${formatCredits(result.balanceCredits)}.`,
+    message: `Free top-up added: ${formatCredits(result.grantedCredits)}`,
   };
 }
 
 export function ClaimCreditsPanel({
-  balanceCredits,
   topUp,
 }: {
   balanceCredits: number;
@@ -47,42 +47,25 @@ export function ClaimCreditsPanel({
     setOutcome(next);
   }
 
-  const disabled = !topUp.eligible || pending;
-
   return (
     <div className="card stack stack-2">
       <h2>Free credits</h2>
-      <p>Your balance is {formatCredits(balanceCredits)}.</p>
-      <p>
-        <span className={`badge ${topUp.eligible ? "badge-success" : "badge-neutral"}`}>
-          {topUp.eligible ? "Available" : "Not available"}
-        </span>
-      </p>
-      <p className="text-sm text-muted">
-        {topUp.eligible
-          ? "Your balance is 1 credit or less, so you can claim free credits."
-          : "Free credits are available when your balance is 1 credit or less."}
-      </p>
-      <p className="text-sm text-muted">A claim adds {formatCredits(topUp.credits)}.</p>
-      <div>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          disabled={disabled}
-          aria-disabled={disabled}
-          onClick={claim}
-        >
-          {pending ? "Claiming…" : "Claim free credits"}
-        </button>
-      </div>
-      {outcome?.ok && (
-        <div className="alert alert-success" role="status">
-          <span>{outcome.message}</span>
-        </div>
+      {topUp.eligible ? (
+        <>
+          <p>Your balance is too low to bet. Claim a free top-up to keep playing.</p>
+          <div>
+            <button type="button" className="btn btn-primary" disabled={pending} onClick={claim}>
+              {pending ? "Claiming…" : "Claim free top-up"}
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>You have enough credits to place a bet.</p>
       )}
+      {outcome?.ok && <Toast inline message={outcome.message} />}
       {outcome && !outcome.ok && (
-        <div className="alert alert-danger" role="alert" tabIndex={-1} ref={failure}>
-          <span>{outcome.message}</span>
+        <div tabIndex={-1} ref={failure}>
+          <Toast inline tone="error" message={outcome.message} />
         </div>
       )}
     </div>

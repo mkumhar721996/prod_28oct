@@ -69,14 +69,14 @@ test("Free credits: a player with 1 credit claims and sees the success message",
     route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }),
+      body: JSON.stringify({ balanceCredits: 1001, grantedCredits: 1000 }),
     }),
   );
   await page.goto("/wallet");
-  await expect(page.getByText("Available")).toBeVisible();
-  await page.getByRole("button", { name: "Claim free credits" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Free credits claimed" })).toContainText(
-    "Free credits claimed: 500 credits. Balance 501 credits.",
+  await expect(page.getByText("Your balance is too low to bet.")).toBeVisible();
+  await page.getByRole("button", { name: "Claim free top-up" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Free top-up added" })).toContainText(
+    "Free top-up added: 1,000 credits",
   );
 });
 

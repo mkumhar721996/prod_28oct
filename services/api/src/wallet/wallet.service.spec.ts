@@ -105,10 +105,10 @@ describe('WalletService.recordWin', () => {
 
 describe('WalletService.claimTopUp', () => {
   it('AC10: adds the default amount when the balance is 1 or less', async () => {
-    const { service, calls } = setup(updated(501));
-    expect(await service.claimTopUp('p1')).toEqual({ ok: true, balanceCredits: 501 });
+    const { service, calls } = setup(updated(1001));
+    expect(await service.claimTopUp('p1')).toEqual({ ok: true, balanceCredits: 1001 });
     expect(calls[1][0]).toMatch(/balance_credits <= 1/);
-    expect(calls[2][1]).toEqual(['p1', 'topup', 500, 501]);
+    expect(calls[2][1]).toEqual(['p1', 'topup', 1000, 1001]);
   });
 
   it('refuses when the balance is not low', async () => {
@@ -122,10 +122,10 @@ describe('WalletService.claimTopUp', () => {
     expect(calls[1][1]).toEqual(['p1', 750]);
   });
 
-  it('falls back to 500 for a bad setting without throwing', async () => {
-    const { service } = setup(updated(501), { WALLET_TOP_UP_CREDITS: 'abc' });
-    expect(service.topUpCredits).toBe(500);
-    expect(await service.claimTopUp('p1')).toEqual({ ok: true, balanceCredits: 501 });
+  it('falls back to 1000 for a bad setting without throwing', async () => {
+    const { service } = setup(updated(1001), { WALLET_TOP_UP_CREDITS: 'abc' });
+    expect(service.topUpCredits).toBe(1000);
+    expect(await service.claimTopUp('p1')).toEqual({ ok: true, balanceCredits: 1001 });
   });
 });
 

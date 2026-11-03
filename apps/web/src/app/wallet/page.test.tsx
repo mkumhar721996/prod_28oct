@@ -31,29 +31,29 @@ describe("WalletPage", () => {
     getSession.mockResolvedValue(signedIn);
     getWallet.mockResolvedValue({
       balanceCredits: 1000,
-      topUp: { eligible: false, credits: 500 },
+      topUp: { eligible: false, credits: 1000 },
     });
     const html = renderToStaticMarkup(await WalletPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain("1,000 credits");
     expect(html).toContain("Signed in as ana@example.com");
     expect(html).toContain("Free credits");
-    expect(html).toContain("Not available");
+    expect(html).not.toContain("Claim free top-up");
     expect(html).not.toContain("Welcome!");
   });
 
   it("shows 1 credit and an available claim panel at a balance of 1", async () => {
     getSession.mockResolvedValue(signedIn);
-    getWallet.mockResolvedValue({ balanceCredits: 1, topUp: { eligible: true, credits: 500 } });
+    getWallet.mockResolvedValue({ balanceCredits: 1, topUp: { eligible: true, credits: 1000 } });
     const html = renderToStaticMarkup(await WalletPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain("1 credit<");
-    expect(html).toContain("Available");
+    expect(html).toContain("Claim free top-up");
   });
 
   it("shows the welcome note right after registration", async () => {
     getSession.mockResolvedValue(signedIn);
     getWallet.mockResolvedValue({
       balanceCredits: 1000,
-      topUp: { eligible: false, credits: 500 },
+      topUp: { eligible: false, credits: 1000 },
     });
     const html = renderToStaticMarkup(
       await WalletPage({ searchParams: Promise.resolve({ welcome: "1" }) }),
