@@ -18,7 +18,7 @@ test("shows Active and Past tabs with rows, newest first", async ({ page }) => {
   const rows = page.locator(".order-row");
   await expect(rows.first()).toContainText("Order title 1060");
   await expect(rows.first()).toContainText("Order #1060");
-  await expect(rows.first()).toContainText("Received");
+  await expect(rows.first()).toContainText("Placed");
   await expect(rows.nth(1)).toContainText("Order title 1059");
 });
 
@@ -66,6 +66,25 @@ test("no orders: empty state links to the Menu", async ({ page }) => {
   await page.goto("/orders");
   await expect(page.getByText("You have no orders yet")).toBeVisible();
   await page.getByRole("link", { name: "Browse the menu" }).click();
+  await expect(page).toHaveURL(/\/menu$/);
+});
+
+test("order confirmation: View orders lists the just-placed order as Placed", async ({ page }) => {
+  await signIn(page);
+  await page.context().addCookies([{ name: "e2e-placed", value: "AB12CD", url: ORIGIN }]);
+  await page.goto("/order-confirmed?order=AB12CD");
+  await expect(page.getByTestId("order-number")).toHaveText("AB12CD");
+  await page.getByRole("button", { name: "View orders" }).click();
+  await expect(page).toHaveURL(/\/orders$/);
+  const first = page.locator(".order-row").first();
+  await expect(first).toContainText("AB12CD");
+  await expect(first).toContainText("Placed");
+});
+
+test("order confirmation: Back to Menu goes to the Menu", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/order-confirmed?order=AB12CD");
+  await page.getByRole("button", { name: "Back to Menu" }).click();
   await expect(page).toHaveURL(/\/menu$/);
 });
 

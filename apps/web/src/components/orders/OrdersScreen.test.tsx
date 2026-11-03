@@ -25,6 +25,12 @@ describe("OrdersScreen", () => {
     expect(html).toMatch(/role="tab"[^>]*aria-selected="false"[^>]*>Past</);
   });
 
+  it("shows a newly placed order as Placed on the Active tab", () => {
+    const placed: Order = { ...lunch, id: "o2", number: "AB12CD", status: "Placed" };
+    const html = render({ active: { items: [placed], nextCursor: null, status: "idle" } });
+    expect(html).toMatch(/AB12CD[\s\S]*Placed/);
+  });
+
   it("lists the loaded orders", () => {
     const html = render({ active: loaded("idle") });
     expect(html).toContain("Lunch for two");

@@ -10,6 +10,11 @@ export const APPOINTMENTS_HREF = "/appointments";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
 export const MENU_HREF = "/menu";
 export const CHECKOUT_HREF = "/checkout";
+export const ORDER_CONFIRMED_HREF = "/order-confirmed";
+/** For the future place-order step to navigate to. */
+export function orderConfirmedHref(orderNumber: string): string {
+  return `${ORDER_CONFIRMED_HREF}?order=${encodeURIComponent(orderNumber)}`;
+}
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 

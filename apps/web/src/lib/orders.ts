@@ -1,6 +1,12 @@
 import { ORDERS_HREF } from "./shell";
 
-export type OrderStatus = "Received" | "Preparing" | "Ready for pickup" | "Fulfilled" | "Cancelled";
+/** An order number is exactly 6 letters or digits. */
+export const ORDER_NUMBER_PATTERN = /^[A-Za-z0-9]{6}$/;
+export function isOrderNumber(value: unknown): value is string {
+  return typeof value === "string" && ORDER_NUMBER_PATTERN.test(value);
+}
+
+export type OrderStatus = "Placed" | "Preparing" | "Ready for pickup" | "Fulfilled" | "Cancelled";
 export type Order = {
   id: string;
   number: string;

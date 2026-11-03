@@ -21,7 +21,7 @@ describe("OrderRow", () => {
   });
 
   it("pairs every status word with an icon", () => {
-    const statuses: OrderStatus[] = ["Received", "Preparing", "Ready for pickup", "Fulfilled", "Cancelled"];
+    const statuses: OrderStatus[] = ["Placed", "Preparing", "Ready for pickup", "Fulfilled", "Cancelled"];
     for (const status of statuses) {
       const html = render({ ...order, status });
       expect(html).toContain(`${status}</span>`);
