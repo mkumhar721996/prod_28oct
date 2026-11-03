@@ -6,8 +6,8 @@ import { Pool } from 'pg';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
-const ana = { email: 'ana@example.com', password: 'play-2026' };
-const ben = { email: 'ben@example.com', password: 'ben-pass-1' };
+const ana = { name: 'Ana', email: 'ana@example.com', password: 'play-2026' };
+const ben = { name: 'Ben', email: 'ben@example.com', password: 'ben-pass-1' };
 
 describe('Player accounts (e2e)', () => {
   let app: INestApplication;
@@ -35,6 +35,25 @@ describe('Player accounts (e2e)', () => {
     const res = await agent.post('/session/register').send(ana);
     expect(res.status).toBe(201);
     expect((await agent.get('/session')).status).toBe(200);
+  });
+
+  it('register: a shared name is fine, a duplicate email is 409, a bad name creates nothing', async () => {
+    await request(server()).post('/session/register').send(ana).expect(201);
+    await request(server()).post('/session/register').send({ ...ben, name: 'Ana' }).expect(201);
+    await request(server()).post('/session/sign-in').send(ben).expect(200);
+    await request(server()).post('/session/register').send(ana).expect(409);
+    const bad = await request(server()).post('/session/register').send({ ...ana, email: 'c@d.co', name: ' ' });
+    expect(bad.status).toBe(400);
+    expect(bad.headers['set-cookie']).toBeUndefined();
+    expect((await pool.query('select 1 from players where email = $1', ['c@d.co'])).rowCount).toBe(0);
+  });
+
+  it('register: concurrent sign-ups for one email yield one success and one 409', async () => {
+    const results = await Promise.all([
+      request(server()).post('/session/register').send(ana),
+      request(server()).post('/session/register').send(ana),
+    ]);
+    expect(results.map((r) => r.status).sort()).toEqual([201, 409]);
   });
 
   it('AC2: sign-in with the right credentials sets an HttpOnly session cookie', async () => {

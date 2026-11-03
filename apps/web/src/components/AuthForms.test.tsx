@@ -32,22 +32,61 @@ describe("handleSignIn", () => {
 });
 
 describe("handleRegister", () => {
-  it("validates before calling the API", async () => {
+  it("validates each field before calling the API", async () => {
     const deps = { ...nav(), registerPlayer: vi.fn() };
-    expect(await handleRegister(deps, "nope", "play-2026")).toEqual({
+    expect(await handleRegister(deps, "  ", "a@b.co", "play-2026")).toEqual({
+      name: "Enter your name",
+    });
+    expect(await handleRegister(deps, "x".repeat(51), "a@b.co", "play-2026")).toEqual({
+      name: "Use 50 characters or fewer",
+    });
+    expect(await handleRegister(deps, "Ana", "player-at-example", "play-2026")).toEqual({
       email: "Enter an email like name@example.com",
     });
-    expect(await handleRegister(deps, "a@b.co", "short")).toEqual({
+    expect(await handleRegister(deps, "Ana", "a@b.co", "1234567")).toEqual({
       password: "Use at least 8 characters",
     });
     expect(deps.registerPlayer).not.toHaveBeenCalled();
   });
 
-  it("lands on the wallet with the welcome note on success", async () => {
+  it("returns every failing field at once and stays put", async () => {
+    const deps = { ...nav(), registerPlayer: vi.fn() };
+    expect(await handleRegister(deps, "", "nope", "short")).toEqual({
+      name: "Enter your name",
+      email: "Enter an email like name@example.com",
+      password: "Use at least 8 characters",
+    });
+    expect(deps.replace).not.toHaveBeenCalled();
+    expect(deps.registerPlayer).not.toHaveBeenCalled();
+  });
+
+  it("lands on the lobby on success, with a 50-character name", async () => {
     const deps = { ...nav(), registerPlayer: vi.fn(async () => ({ ok: true as const })) };
-    expect(await handleRegister(deps, "a@b.co", "play-2026")).toEqual({});
-    expect(deps.replace).toHaveBeenCalledWith("/wallet?welcome=1");
+    expect(await handleRegister(deps, "x".repeat(50), "a@b.co", "exactly8")).toEqual({});
+    expect(deps.registerPlayer).toHaveBeenCalledWith("x".repeat(50), "a@b.co", "exactly8");
+    expect(deps.replace).toHaveBeenCalledWith("/lobby");
     expect(deps.refresh).toHaveBeenCalled();
+  });
+
+  it("shows a server field error beside its field and other failures as an alert", async () => {
+    const field = {
+      ...nav(),
+      registerPlayer: vi.fn(async () => ({
+        ok: false as const,
+        status: 400,
+        message: "Enter your name",
+        field: "name",
+      })),
+    };
+    expect(await handleRegister(field, "Ana", "a@b.co", "play-2026")).toEqual({
+      name: "Enter your name",
+    });
+    const down = {
+      ...nav(),
+      registerPlayer: vi.fn(async () => ({ ok: false as const, status: 500, message: "Oops" })),
+    };
+    expect(await handleRegister(down, "Ana", "a@b.co", "play-2026")).toEqual({ alert: "Oops" });
+    expect(down.replace).not.toHaveBeenCalled();
   });
 
   it("AC9: shows the duplicate-email field error on 409", async () => {
@@ -55,7 +94,7 @@ describe("handleRegister", () => {
       ...nav(),
       registerPlayer: vi.fn(async () => ({ ok: false as const, status: 409, message: "x" })),
     };
-    expect(await handleRegister(deps, "a@b.co", "play-2026")).toEqual({
+    expect(await handleRegister(deps, "Ana", "a@b.co", "play-2026")).toEqual({
       email: DUPLICATE_EMAIL_ERROR,
     });
     expect(DUPLICATE_EMAIL_ERROR).toBe(
@@ -79,6 +118,11 @@ describe("form markup", () => {
     const html = renderToStaticMarkup(<RegisterForm />);
     expect(html).toContain("New accounts start with 1,000 credits.");
     expect(html).toContain("At least 8 characters.");
+    expect(html).toContain('for="rg-name"');
+    expect(html).toContain('autoComplete="name"');
+    expect(html).not.toContain("maxLength");
+    expect(html).toContain("Create an account");
     expect(html).toContain('href="/sign-in"');
+    expect(html).toContain("Already have an account? Sign in");
   });
 });

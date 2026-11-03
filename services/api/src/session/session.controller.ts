@@ -15,7 +15,7 @@ import { AttemptLimiter } from './attempt-limiter.service';
 import { PlayerRequest, SessionGuard } from './session.guard';
 import { SessionService } from './session.service';
 
-type Credentials = { email?: unknown; password?: unknown };
+type Credentials = { name?: unknown; email?: unknown; password?: unknown };
 
 // Each password check costs a scrypt derivation, so both entry points are throttled.
 const MAX_SIGN_IN_FAILURES = 10;
@@ -38,7 +38,7 @@ export class SessionController {
     const ipKey = `register:${req.ip}`;
     this.limiter.assertAllowed(ipKey, MAX_REGISTRATIONS_PER_IP);
     this.limiter.record(ipKey);
-    const player = await this.players.register(body?.email, body?.password);
+    const player = await this.players.register(body?.name, body?.email, body?.password);
     await this.sessions.start(res, player.id);
     return { role: 'player', email: player.email };
   }

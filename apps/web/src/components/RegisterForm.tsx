@@ -3,54 +3,65 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { validateEmail, validatePassword } from "@/lib/credentials";
+import { validateEmail, validateName, validatePassword } from "@/lib/credentials";
 import { registerPlayer, type AuthResult } from "@/lib/session";
-import { SIGN_IN_HREF, WALLET_HREF } from "@/lib/shell";
+import { LOBBY_HREF, SIGN_IN_HREF } from "@/lib/shell";
 
 export const DUPLICATE_EMAIL_ERROR =
   "An account with this email already exists. Sign in instead, or use a different email.";
 const CONFLICT = 409;
 
 type RegisterDeps = {
-  registerPlayer: (email: string, password: string) => Promise<AuthResult>;
+  registerPlayer: (name: string, email: string, password: string) => Promise<AuthResult>;
   replace: (href: string) => void;
   refresh: () => void;
 };
 
-export type RegisterErrors = { email?: string; password?: string; alert?: string };
+export type RegisterErrors = { name?: string; email?: string; password?: string; alert?: string };
 
-/** Returns what to show; an empty object means the account was created and we moved to the wallet. */
+const FIELDS = ["name", "email", "password"] as const;
+
+/** Returns what to show; an empty object means the account was created and we moved to the lobby. */
 export async function handleRegister(
   deps: RegisterDeps,
+  name: string,
   email: string,
   password: string,
 ): Promise<RegisterErrors> {
+  const errors: RegisterErrors = {};
+  const nameError = validateName(name);
+  if (nameError) errors.name = nameError;
   const emailError = validateEmail(email);
-  if (emailError) return { email: emailError };
+  if (emailError) errors.email = emailError;
   const passwordError = validatePassword(password);
-  if (passwordError) return { password: passwordError };
-  const result = await deps.registerPlayer(email, password);
+  if (passwordError) errors.password = passwordError;
+  if (nameError || emailError || passwordError) return errors;
+  const result = await deps.registerPlayer(name, email, password);
   if (!result.ok) {
     if (result.status === CONFLICT) return { email: DUPLICATE_EMAIL_ERROR };
-    return { alert: result.message };
+    const field = FIELDS.find((f) => f === result.field);
+    return field ? { [field]: result.message } : { alert: result.message };
   }
-  deps.replace(`${WALLET_HREF}?welcome=1`);
+  deps.replace(LOBBY_HREF);
   deps.refresh();
   return {};
 }
 
 export function RegisterForm() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [pending, setPending] = useState(false);
   const alertRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (errors.alert) alertRef.current?.focus();
+    else if (errors.name) nameRef.current?.focus();
     else if (errors.email) emailRef.current?.focus();
     else if (errors.password) passwordRef.current?.focus();
   }, [errors]);
@@ -61,19 +72,40 @@ export function RegisterForm() {
     setPending(true);
     const result = await handleRegister(
       { registerPlayer, replace: router.replace, refresh: router.refresh },
+      name,
       email,
       password,
     );
     setPending(false);
     setErrors(result);
-    if (result.alert || result.email || result.password) setPassword("");
+    if (result.alert || result.name || result.email || result.password) setPassword("");
   }
 
   return (
     <div className="narrow">
       <form className="card stack" onSubmit={onSubmit} noValidate>
-        <h1>Create account</h1>
+        <h1>Create an account</h1>
         <p className="text-muted">New accounts start with 1,000 credits.</p>
+        <div className="field">
+          <label htmlFor="rg-name">Name</label>
+          <input
+            className={errors.name ? "input is-invalid" : "input"}
+            id="rg-name"
+            type="text"
+            autoComplete="name"
+            placeholder="Name"
+            ref={nameRef}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            aria-invalid={errors.name ? true : undefined}
+            aria-describedby={errors.name ? "rg-name-err" : undefined}
+          />
+          {errors.name && (
+            <span className="field-error" id="rg-name-err">
+              {errors.name}
+            </span>
+          )}
+        </div>
         <div className="field">
           <label htmlFor="rg-email">Email</label>
           <input
