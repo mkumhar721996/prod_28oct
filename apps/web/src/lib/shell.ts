@@ -10,6 +10,7 @@ export const APPOINTMENTS_HREF = "/appointments";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
 export const ONBOARDING_TEMPLATES_HREF = "/onboarding-templates";
 export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
+export const HIRES_HREF = "/hires";
 export const MENU_HREF = "/menu";
 export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";

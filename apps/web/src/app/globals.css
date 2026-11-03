@@ -267,3 +267,15 @@ fieldset.field legend { padding: 0; font-size: var(--font-size-sm); font-weight:
 .game-card.is-unavailable .game-thumb { background: var(--color-border); }
 .skeleton-thumb { aspect-ratio: 4 / 3; height: auto; }
 .loading-note { display: flex; align-items: center; gap: var(--space-2); }
+
+/* Hire plans */
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); list-style: none; margin: 0; padding: 0; font-size: var(--font-size-sm); color: var(--color-fg-muted); }
+.crumbs li + li::before { content: "/"; margin-right: var(--space-2); }
+.plan-table { width: 100%; min-width: 34rem; border-collapse: collapse; }
+.plan-table th, .plan-table td { padding: var(--space-2) var(--space-3); text-align: left; border-bottom: var(--border-width) solid var(--color-border); }
+.plan-table th { background: var(--color-bg-subtle); color: var(--color-fg-muted); font-weight: var(--font-weight-medium); }
+.plan-table caption { padding: var(--space-2) var(--space-3); text-align: left; }
+.plan-table td.due { white-space: nowrap; }
+.plan-table td.due.moved { font-weight: var(--font-weight-semibold); }
+.progress-tile { display: flex; flex-direction: column; gap: var(--space-2); }
+.progress-tile strong { font-size: var(--font-size-lg); }
