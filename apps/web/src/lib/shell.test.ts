@@ -21,8 +21,10 @@ describe("shell", () => {
   });
 
   it("shows only public entries to guests, Menu last for everyone", () => {
-    expect(visibleNav(false)).toEqual([{ key: "menu", label: "Menu", href: "/menu", public: true }]);
-    expect(visibleNav(true).at(-1)?.key).toBe("onboarding-templates");
+    expect(visibleNav(false).map((e) => e.key)).toEqual(["menu", "lobby"]);
+    expect(visibleNav(true).at(-1)?.key).toBe("lobby");
+    expect(MAIN_NAV.at(-1)).toEqual({ key: "lobby", label: "Lobby", href: "/lobby", public: true });
+    expect(isCurrent(MAIN_NAV.at(-1)!, "/lobby")).toBe(true);
     expect(signInTarget("checkout")).toBe("/checkout");
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
@@ -59,6 +61,7 @@ describe("shell", () => {
       "appointments",
       "menu",
       "onboarding-templates",
+      "lobby",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);
