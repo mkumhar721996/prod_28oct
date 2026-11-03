@@ -43,7 +43,9 @@ test("AC8: a wrong password shows the message and keeps the email", async ({ pag
   await page.getByLabel("Email").fill("ana@example.com");
   await page.getByLabel("Password").fill("nope-nope");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toHaveText("Email or password incorrect");
+  await expect(page.getByRole("alert")).toHaveText(
+    "Email or password is incorrect. Check both and try again.",
+  );
   await expect(page.getByLabel("Email")).toHaveValue("ana@example.com");
   await expect(page.getByLabel("Password")).toHaveValue("");
 });
@@ -88,6 +90,14 @@ test("AC7: a duplicate email shows the alert", async ({ page }) => {
   await page.getByLabel("Email").fill("ana@example.com");
   await page.getByLabel("Password").fill("play-2026");
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.locator("#rg-email-err")).toContainText("An account with this email already exists");
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("alert")).toContainText("This email is already in use.");
+  await page.getByRole("button", { name: "Sign in instead" }).click();
+  await expect(page.getByRole("tab", { name: "Sign in" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByLabel("Email")).toHaveValue("ana@example.com");
+});
+
+test("AC6: the sign-in page offers Create account", async ({ page }) => {
+  await page.goto("/sign-in");
+  await page.getByRole("tab", { name: "Create account" }).click();
+  await expect(page.getByRole("button", { name: "Create account" })).toBeVisible();
 });

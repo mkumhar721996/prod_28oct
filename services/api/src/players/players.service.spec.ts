@@ -78,6 +78,10 @@ describe('PlayersService.register', () => {
   it('rejects a bad email or short password without touching the database', async () => {
     const { service, pool } = setup();
     await expect(service.register('nope', 'play-2026')).rejects.toBeInstanceOf(BadRequestException);
+    for (const bad of ['a@b', 'a@@b.co', 'a b@c.de', 'a@b.c', '@b.co']) {
+      await expect(service.register(bad, 'play-2026')).rejects.toBeInstanceOf(BadRequestException);
+    }
+    await expect(service.register('a@b.co', 'abc1234')).rejects.toBeInstanceOf(BadRequestException);
     await expect(service.register('a@b.co', 'short')).rejects.toBeInstanceOf(BadRequestException);
     expect(pool.connect).not.toHaveBeenCalled();
   });

@@ -1,5 +1,5 @@
-import { RegisterForm } from "@/components/RegisterForm";
+import { AccountScreen } from "@/components/AccountScreen";
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return <AccountScreen initialMode="register" />;
 }

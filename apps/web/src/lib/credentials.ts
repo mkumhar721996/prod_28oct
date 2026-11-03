@@ -1,8 +1,8 @@
 export const MIN_PASSWORD_LENGTH = 8;
-export const EMAIL_ERROR = "Enter an email like name@example.com";
-export const PASSWORD_ERROR = `Use at least ${MIN_PASSWORD_LENGTH} characters`;
+export const EMAIL_ERROR = "Enter an email like name@example.com.";
+export const PASSWORD_ERROR = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
 
-const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** The error to show for this email, or null when it is fine. */
 export function validateEmail(email: string): string | null {
