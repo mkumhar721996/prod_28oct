@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { PlayerRequest } from '../session/session.guard';
 import { WalletController } from './wallet.controller';
-import { TOP_UP_NOT_LOW_MESSAGE } from './wallet.constants';
+import { BET_ABOVE_BALANCE_MESSAGE, TOP_UP_NOT_LOW_MESSAGE } from './wallet.constants';
 import { WalletService } from './wallet.service';
 
 const req = { player: { id: 'p1' } } as unknown as PlayerRequest;
@@ -30,6 +30,30 @@ describe('WalletController', () => {
   it('GET /wallet reports not eligible at a balance of 2', async () => {
     const { controller } = setup({ balanceFor: jest.fn(async () => 2) });
     expect((await controller.balance(req)).topUp.eligible).toBe(false);
+  });
+
+  it('POST /wallet/bet returns the new balance for the session player', async () => {
+    const placeBet = jest.fn(async () => ({ ok: true, balanceCredits: 0 }));
+    const { controller } = setup({ placeBet });
+    expect(await controller.bet(req, { amount: 100 })).toEqual({ balanceCredits: 0 });
+    expect(placeBet).toHaveBeenCalledWith('p1', 100);
+  });
+
+  it('POST /wallet/bet is a 409 with the message when the bet is above the balance', async () => {
+    const { controller } = setup({
+      placeBet: jest.fn(async () => ({ ok: false, reason: 'insufficient_balance' })),
+    });
+    await expect(controller.bet(req, { amount: 101 })).rejects.toMatchObject({
+      status: 409,
+      message: BET_ABOVE_BALANCE_MESSAGE,
+    });
+  });
+
+  it.each([1.5, undefined, '5'])('POST /wallet/bet is a 400 for amount %p', async (amount) => {
+    const { controller } = setup({
+      placeBet: jest.fn(async () => ({ ok: false, reason: 'invalid_amount' })),
+    });
+    await expect(controller.bet(req, { amount })).rejects.toMatchObject({ status: 400 });
   });
 
   it('POST /wallet/top-up returns the new balance and granted credits', async () => {
