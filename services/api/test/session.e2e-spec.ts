@@ -113,4 +113,42 @@ describe('Player accounts (e2e)', () => {
   it('AC10: a signed-out wallet request is refused', async () => {
     expect((await request(server()).get('/wallet')).status).toBe(401);
   });
+
+  it('AC2: a self-registered customer signs out and signs in again', async () => {
+    const agent = request.agent(server());
+    await agent.post('/session/register').send(ana).expect(201);
+    await agent.post('/session/sign-out').expect(204);
+    await agent.post('/session/sign-in').send({ email: 'Ana@Example.com ', password: ana.password }).expect(200);
+  });
+
+  it('AC3: an account not created through register signs in', async () => {
+    const { PasswordService } = await import('../src/players/password.service');
+    const hash = await new PasswordService().hash('invited-pass1');
+    await pool.query('insert into players (email, password_hash) values ($1, $2)', ['invited@example.com', hash]);
+    await request
+      .agent(server())
+      .post('/session/sign-in')
+      .send({ email: 'invited@example.com', password: 'invited-pass1' })
+      .expect(200);
+  });
+
+  it('AC8: a 7-character password is refused and no account is created', async () => {
+    const creds = { email: 'a@b.co', password: 'abc1234' };
+    await request.agent(server()).post('/session/register').send(creds).expect(400);
+    await request.agent(server()).post('/session/sign-in').send(creds).expect(401);
+    const { rows } = await pool.query("select count(*)::int as n from players where email = 'a@b.co'");
+    expect(rows[0].n).toBe(0);
+  });
+
+  it('AC9: an 8-character password creates the account', async () => {
+    await request.agent(server()).post('/session/register').send({ email: 'b@c.de', password: 'abcd1234' }).expect(201);
+  });
+
+  it('AC10: non-standard addresses are refused and nothing is created', async () => {
+    for (const email of ['nope', 'a@b', 'a@@b.co', 'a b@c.de', 'a@b.c', '@b.co']) {
+      await request.agent(server()).post('/session/register').send({ email, password: 'play-2026' }).expect(400);
+    }
+    const { rows } = await pool.query('select count(*)::int as n from players');
+    expect(rows[0].n).toBe(0);
+  });
 });

@@ -1,4 +1,4 @@
-import { SignInForm } from "@/components/SignInForm";
+import { AccountScreen } from "@/components/AccountScreen";
 import { signInTarget } from "@/lib/shell";
 
 export default async function SignInPage({
@@ -7,5 +7,11 @@ export default async function SignInPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  return <SignInForm redirected={next === "wallet"} redirectTo={signInTarget(next)} />;
+  return (
+    <AccountScreen
+      initialMode="sign-in"
+      redirected={next === "wallet"}
+      redirectTo={signInTarget(next)}
+    />
+  );
 }

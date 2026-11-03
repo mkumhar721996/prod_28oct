@@ -1,10 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { signInPlayer, type AuthResult } from "@/lib/session";
-import { REGISTER_HREF, WALLET_HREF } from "@/lib/shell";
+import { WALLET_HREF } from "@/lib/shell";
+import { Icon } from "./orders/Icon";
+
+/** Shown for any refused sign-in; never says whether the email or the password was wrong. */
+export const SIGN_IN_ERROR = "Email or password is incorrect. Check both and try again.";
+const UNAUTHORIZED = 401;
 
 type SignInDeps = {
   signInPlayer: (email: string, password: string) => Promise<AuthResult>;
@@ -20,21 +24,22 @@ export async function handleSignIn(
   redirectTo: string = WALLET_HREF,
 ): Promise<string | null> {
   const result = await deps.signInPlayer(email, password);
-  if (!result.ok) return result.message;
+  if (!result.ok) return result.status === UNAUTHORIZED ? SIGN_IN_ERROR : result.message;
   deps.replace(redirectTo);
   deps.refresh();
   return null;
 }
 
 export function SignInForm({
-  redirected = false,
+  email,
+  onEmailChange,
   redirectTo = WALLET_HREF,
 }: {
-  redirected?: boolean;
+  email: string;
+  onEmailChange: (email: string) => void;
   redirectTo?: string;
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -63,54 +68,41 @@ export function SignInForm({
   }
 
   return (
-    <div className="narrow">
-      <form className="card stack" onSubmit={onSubmit} noValidate>
-        <h1>Sign in</h1>
-        {redirected && (
-          <div className="alert alert-info" role="status">
-            <span>Sign in to see your wallet.</span>
-          </div>
-        )}
-        <div className="field">
-          <label htmlFor="si-email">Email</label>
-          <input
-            className="input"
-            id="si-email"
-            type="email"
-            autoComplete="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+    <form className="card stack" onSubmit={onSubmit} noValidate>
+      <div className="field">
+        <label htmlFor="si-email">Email</label>
+        <input
+          className="input"
+          id="si-email"
+          type="email"
+          autoComplete="email"
+          placeholder="name@example.com"
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="si-pass">Password</label>
+        <input
+          className="input"
+          id="si-pass"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </div>
+      {error && (
+        <div className="alert alert-danger" role="alert" tabIndex={-1} ref={alertRef}>
+          <Icon name="alert" />
+          <span>{error}</span>
         </div>
-        <div className="field">
-          <label htmlFor="si-pass">Password</label>
-          <input
-            className="input"
-            id="si-pass"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        {error && (
-          <div className="alert alert-danger" role="alert" tabIndex={-1} ref={alertRef}>
-            <span>{error}</span>
-          </div>
-        )}
-        <div className="form-actions stack stack-2">
-          <button className="btn btn-primary" type="submit" disabled={pending}>
-            {pending ? "Signing in…" : "Sign in"}
-          </button>
-        </div>
-        <p className="text-sm">
-          <Link className="link" href={REGISTER_HREF}>
-            Create an account
-          </Link>
-        </p>
-      </form>
-    </div>
+      )}
+      <div className="form-actions stack stack-2">
+        <button className="btn btn-primary" type="submit" disabled={pending}>
+          {pending ? "Signing in…" : "Sign in"}
+        </button>
+      </div>
+    </form>
   );
 }
