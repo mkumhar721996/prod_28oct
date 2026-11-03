@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CartProvider } from "@/components/cart/CartProvider";
 import { TopBarControls } from "@/components/TopBarControls";
 import { getSession } from "@/lib/session";
 import { BRAND_NAME } from "@/lib/shell";
@@ -14,10 +15,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
-        <div className="shell">
-          <TopBarControls signedIn={session !== null} />
-          <main className="shell-main">{children}</main>
-        </div>
+        <CartProvider>
+          <div className="shell">
+            <TopBarControls signedIn={session !== null} />
+            <main className="shell-main">{children}</main>
+          </div>
+        </CartProvider>
       </body>
     </html>
   );

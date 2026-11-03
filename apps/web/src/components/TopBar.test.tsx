@@ -63,11 +63,19 @@ describe("TopBar signed in", () => {
 describe("TopBar signed out", () => {
   const html = renderToStaticMarkup(<TopBar signedIn={false} pathname="/sign-in" />);
 
-  it("shows the brand only", () => {
+  it("shows the brand and the public Menu entry, without Sign out", () => {
     expect(html).toContain(">Web App<");
     expect(html).not.toContain("Sign out");
-    expect(html).not.toContain("data-nav-key");
-    expect(html).not.toContain("Menu");
+    expect(html).toMatch(
+      /<a[^>]*data-nav-key="menu"[^>]*href="\/menu"|<a[^>]*href="\/menu"[^>]*data-nav-key="menu"/,
+    );
+    expect(html).not.toContain('data-nav-key="wallet"');
+  });
+
+  it("marks Menu current on /menu", () => {
+    expect(renderToStaticMarkup(<TopBar signedIn={false} pathname="/menu" />)).toMatch(
+      /data-nav-key="menu"[^>]*aria-current="page"/,
+    );
   });
 
   it("links the brand to sign-in", () => {

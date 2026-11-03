@@ -29,32 +29,32 @@ export function TopBar({
   return (
     <header className="shell-header">
       <div className="shell-bar">
-        {signedIn ? (
-          <>
-            <div className="shell-group">
-              {brand}
-              <button
-                className="btn btn-secondary btn-sm shell-menu-btn"
-                type="button"
-                aria-controls="main-nav"
-                aria-expanded={menuOpen}
-                onClick={onToggleMenu}
+        <div className="shell-group">
+          {brand}
+          <button
+            className="btn btn-secondary btn-sm shell-menu-btn"
+            type="button"
+            aria-controls="main-nav"
+            aria-expanded={menuOpen}
+            onClick={onToggleMenu}
+          >
+            Menu
+          </button>
+          <nav id="main-nav" className="shell-nav" aria-label="Main">
+            {visibleNav(signedIn).map((entry) => (
+              <a
+                key={entry.key}
+                href={entry.href}
+                data-nav-key={entry.key}
+                aria-current={isCurrent(entry, pathname) ? "page" : undefined}
               >
-                Menu
-              </button>
-              <nav id="main-nav" className="shell-nav" aria-label="Main">
-                {visibleNav(signedIn).map((entry) => (
-                  <a
-                    key={entry.key}
-                    href={entry.href}
-                    data-nav-key={entry.key}
-                    aria-current={isCurrent(entry, pathname) ? "page" : undefined}
-                  >
-                    {entry.label}
-                  </a>
-                ))}
-              </nav>
-            </div>
+                {entry.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+        {signedIn && (
+          <>
             <button
               className="btn btn-ghost btn-sm"
               type="button"
@@ -70,8 +70,6 @@ export function TopBar({
               </div>
             )}
           </>
-        ) : (
-          brand
         )}
       </div>
     </header>
