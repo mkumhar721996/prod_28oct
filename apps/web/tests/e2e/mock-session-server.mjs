@@ -57,6 +57,44 @@ const json = (res, status, body) => {
 };
 const bad = (message) => ({ code: "invalid", message });
 
+// Game (GET /game, POST /game/spin), in memory. The balance starts at 1000, or at 100 with cookie
+// `e2e-game-balance=100`. Spins alternate win (two cherries, pays 1x the bet) then loss; a bet above the
+// balance is a 409. `POST /__reset` clears it.
+const newGame = () => ({ balance: null, spins: 0, tiers: [0, 0, 0, 0] });
+let game = newGame();
+const share = (bet, pct) => Math.floor((bet * 5 * pct + 50) / 100);
+const gameBalance = (cookie) => game.balance ?? (cookie.includes("e2e-game-balance=100") ? 100 : 1000);
+const jackpotView = () => {
+  const [miniCents, minorCents, majorCents, grandCents] = game.tiers;
+  return { miniCents, minorCents, majorCents, grandCents, totalCents: game.tiers.reduce((a, b) => a + b, 0) };
+};
+
+async function handleGame(req, res, url, cookie) {
+  if (!cookie.includes("e2e-session=1")) return json(res, 401, {});
+  const balance = gameBalance(cookie);
+  if (req.method === "GET") return json(res, 200, { balanceCredits: balance, jackpot: jackpotView() });
+  const { bet } = await readJson(req);
+  if (![10, 25, 50, 100, 250].includes(bet)) return json(res, 400, bad("Choose a bet."));
+  if (balance < bet) {
+    return json(res, 409, {
+      message: `Your balance of ${balance} does not cover a bet of ${bet}. Choose a lower bet.`,
+      balanceCredits: balance,
+    });
+  }
+  const won = game.spins++ % 2 === 0;
+  const winCredits = won ? bet : 0;
+  game.balance = balance - bet + winCredits;
+  game.tiers = game.tiers.map((cents, i) => cents + share(bet, [40, 30, 20, 10][i]));
+  return json(res, 200, {
+    reels: won ? ["cherry", "cherry", "bar"] : ["bar", "seven", "bell"],
+    bet,
+    winCredits,
+    label: won ? "Two cherries pay 1× your bet." : null,
+    balanceCredits: game.balance,
+    jackpot: jackpotView(),
+  });
+}
+
 async function handleTemplates(req, res, url, cookie) {
   if (!cookie.includes("e2e-session=1")) return json(res, 401, {});
   const parts = url.pathname.split("/").filter(Boolean);
@@ -104,7 +142,12 @@ createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/__reset") {
     templates.clear();
     for (const [role, template] of seedTemplates()) templates.set(role, template);
+    game = newGame();
     return json(res, 200, { ok: true });
+  }
+  if (url.pathname === "/game" || url.pathname === "/game/spin") {
+    await handleGame(req, res, url, cookie);
+    return;
   }
   if (url.pathname === "/onboarding-templates" || url.pathname.startsWith("/onboarding-templates/")) {
     await handleTemplates(req, res, url, cookie);

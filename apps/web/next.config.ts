@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
       },
       // Same reason: /wallet is the page itself.
       { source: "/api/wallet/top-up", destination: `${apiUrl}/wallet/top-up` },
+      // Same reason: /play is the page itself.
+      { source: "/api/game/spin", destination: `${apiUrl}/game/spin` },
     ];
   },
 };

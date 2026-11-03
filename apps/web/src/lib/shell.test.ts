@@ -20,11 +20,12 @@ describe("shell", () => {
     expect(brandHref(false)).toBe("/sign-in");
   });
 
-  it("shows only public entries to guests, Menu last for everyone", () => {
+  it("shows only public entries to guests; Lobby is public and Play is last for players", () => {
     expect(visibleNav(false).map((e) => e.key)).toEqual(["menu", "lobby"]);
-    expect(visibleNav(true).at(-1)?.key).toBe("lobby");
-    expect(MAIN_NAV.at(-1)).toEqual({ key: "lobby", label: "Lobby", href: "/lobby", public: true });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/lobby")).toBe(true);
+    expect(visibleNav(true).at(-1)?.key).toBe("play");
+    const lobby = MAIN_NAV.find((e) => e.key === "lobby");
+    expect(lobby).toEqual({ key: "lobby", label: "Lobby", href: "/lobby", public: true });
+    expect(isCurrent(lobby!, "/lobby")).toBe(true);
     expect(signInTarget("checkout")).toBe("/checkout");
     expect(visibleNav(true)).toEqual(MAIN_NAV);
     expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
@@ -46,10 +47,19 @@ describe("shell", () => {
     expect(isCurrent(appointments, "/appointments/book")).toBe(true);
   });
 
-  it("keeps History before Appointments and points Place a bet at the wallet for now", () => {
+  it("keeps History before Appointments and points Place a bet at the game", () => {
     expect(MAIN_NAV[3]).toEqual({ key: "history", label: "History", href: "/history" });
     expect(isCurrent(MAIN_NAV[3], "/history")).toBe(true);
-    expect(PLACE_BET_HREF).toBe(WALLET_HREF);
+    expect(PLACE_BET_HREF).toBe("/play");
+    expect(PLACE_BET_HREF).not.toBe(WALLET_HREF);
+  });
+
+  it("appends Play at the end, leaving earlier positions alone, with a sign-in target", () => {
+    expect(MAIN_NAV.at(-1)).toEqual({ key: "play", label: "Play", href: "/play" });
+    expect(MAIN_NAV.at(-2)?.key).toBe("lobby");
+    expect(isCurrent(MAIN_NAV.at(-1)!, "/play")).toBe(true);
+    expect(signInTarget("play")).toBe("/play");
+    expect(visibleNav(false).some((e) => e.key === "play")).toBe(false);
   });
 
   it("appends Orders after Home", () => {
@@ -62,6 +72,7 @@ describe("shell", () => {
       "menu",
       "onboarding-templates",
       "lobby",
+      "play",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);

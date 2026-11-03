@@ -18,4 +18,17 @@ describe("BalanceTile", () => {
   it("says '1 credit' for a balance of 1", () => {
     expect(renderToStaticMarkup(<BalanceTile credits={1} />)).toContain(">1 credit<");
   });
+
+  it("keeps the card layout by default", () => {
+    const html = renderToStaticMarkup(<BalanceTile credits={500} email="ana@example.com" />);
+    expect(html).toContain('class="card balance-tile"');
+    expect(html).toContain("Credit balance");
+  });
+
+  it("AC5: the inline variant is a compact live readout of the balance", () => {
+    const html = renderToStaticMarkup(<BalanceTile credits={1000} variant="inline" />);
+    expect(html).toContain('class="balance-box"');
+    expect(html).toContain('<strong aria-live="polite">1,000</strong>');
+    expect(html).not.toContain("card");
+  });
 });
