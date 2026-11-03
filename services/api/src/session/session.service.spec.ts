@@ -32,8 +32,9 @@ describe('SessionService', () => {
   });
 
   it('resolves a cookie to its player and null without a cookie', async () => {
-    pool.query.mockResolvedValue({ rows: [{ id: 'p1', email: 'a@b.co' }] });
-    expect(await service.resolve('session=tok')).toEqual({ id: 'p1', email: 'a@b.co' });
+    pool.query.mockResolvedValue({ rows: [{ id: 'p1', email: 'a@b.co', accountRole: 'hr' }] });
+    expect(await service.resolve('session=tok')).toEqual({ id: 'p1', email: 'a@b.co', accountRole: 'hr' });
+    expect(pool.query.mock.calls[0][0]).toContain('account_role as "accountRole"');
     expect(await service.resolve(undefined)).toBeNull();
   });
 

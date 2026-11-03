@@ -45,7 +45,7 @@ export class SessionService {
     const token = readCookie(cookieHeader, SESSION_COOKIE);
     if (!token) return null;
     const { rows } = await this.db.pool.query(
-      `select p.id, p.email from sessions s join players p on p.id = s.player_id
+      `select p.id, p.email, p.account_role as "accountRole" from sessions s join players p on p.id = s.player_id
        where s.token_hash = $1 and s.expires_at > now()`,
       [hashToken(token)],
     );

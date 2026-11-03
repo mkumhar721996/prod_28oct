@@ -8,7 +8,10 @@ export const WALLET_HREF = "/wallet";
 export const HISTORY_HREF = "/history";
 export const APPOINTMENTS_HREF = "/appointments";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
+export const ONBOARDING_TEMPLATES_HREF = "/onboarding-templates";
+export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
 export const MENU_HREF = "/menu";
+export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
@@ -21,6 +24,7 @@ const NEXT_TARGETS: Record<string, string> = {
   [APPOINTMENTS_HREF]: APPOINTMENTS_HREF,
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
   checkout: CHECKOUT_HREF,
+  [ONBOARDING_TEMPLATES_HREF]: ONBOARDING_TEMPLATES_HREF,
 };
 
 export function signInTarget(next: string | undefined): string {
@@ -37,6 +41,8 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "history", label: "History", href: HISTORY_HREF },
   { key: "appointments", label: "Appointments", href: APPOINTMENTS_HREF },
   { key: "menu", label: "Menu", href: MENU_HREF, public: true },
+  { key: "onboarding-templates", label: "Templates", href: ONBOARDING_TEMPLATES_HREF },
+  { key: "lobby", label: "Lobby", href: LOBBY_HREF, public: true },
 ];
 
 export function brandHref(signedIn: boolean): string {

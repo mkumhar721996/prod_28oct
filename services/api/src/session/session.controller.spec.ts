@@ -34,7 +34,7 @@ describe('SessionController throttling', () => {
 
   it('a right password after a few wrong ones still signs in and clears the count', async () => {
     const { controller, players, sessions, req, res } = setup();
-    players.authenticate.mockResolvedValueOnce(null).mockResolvedValue({ id: 'p1', email: creds.email });
+    players.authenticate.mockResolvedValueOnce(null).mockResolvedValue({ id: 'p1', email: creds.email, accountRole: 'player' });
     await expect(controller.signIn(creds, req, res)).rejects.toBeInstanceOf(UnauthorizedException);
     await expect(controller.signIn(creds, req, res)).resolves.toEqual({
       role: 'player',
