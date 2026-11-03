@@ -2,7 +2,7 @@ import type { OrderStatus } from "@/lib/orders";
 import { Icon, type IconName } from "./Icon";
 
 const BADGES: Record<OrderStatus, { tone: string; icon: IconName }> = {
-  Received: { tone: "badge-info", icon: "info" },
+  Placed: { tone: "badge-info", icon: "info" },
   Preparing: { tone: "badge-warning", icon: "loader" },
   "Ready for pickup": { tone: "badge-success", icon: "bell" },
   Fulfilled: { tone: "badge-success", icon: "check" },

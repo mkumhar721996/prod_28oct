@@ -18,7 +18,7 @@ test("shows Active and Past tabs with rows, newest first", async ({ page }) => {
   const rows = page.locator(".order-row");
   await expect(rows.first()).toContainText("Order title 1060");
   await expect(rows.first()).toContainText("Order #1060");
-  await expect(rows.first()).toContainText("Received");
+  await expect(rows.first()).toContainText("Placed");
   await expect(rows.nth(1)).toContainText("Order title 1059");
 });
 

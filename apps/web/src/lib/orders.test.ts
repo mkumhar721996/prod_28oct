@@ -7,22 +7,34 @@ import {
   tabOf,
   type Order,
   type TabState,
+  isOrderNumber,
 } from "./orders";
 
 const order = (id: string, placedAt: string): Order => ({
   id,
   number: id,
   title: `Order ${id}`,
-  status: "Received",
+  status: "Placed",
   placedAt,
 });
 const old = order("old", "2026-10-26T10:00:00Z");
 const mid = order("mid", "2026-10-27T10:00:00Z");
 const newest = order("new", "2026-10-28T10:00:00Z");
 
+describe("isOrderNumber", () => {
+  it("accepts exactly 6 letters or digits", () => {
+    expect(isOrderNumber("AB12CD")).toBe(true);
+    expect(isOrderNumber("ab12cd")).toBe(true);
+    expect(isOrderNumber("AB12C")).toBe(false);
+    expect(isOrderNumber("AB12CD7")).toBe(false);
+    expect(isOrderNumber("AB-2CD")).toBe(false);
+    expect(isOrderNumber(undefined)).toBe(false);
+  });
+});
+
 describe("tabOf", () => {
   it("puts unfulfilled statuses under active", () => {
-    for (const s of ["Received", "Preparing", "Ready for pickup"] as const) {
+    for (const s of ["Placed", "Preparing", "Ready for pickup"] as const) {
       expect(tabOf(s)).toBe("active");
     }
   });

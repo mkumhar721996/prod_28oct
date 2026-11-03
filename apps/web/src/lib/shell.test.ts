@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   BRAND_NAME,
   MAIN_NAV,
+  ORDER_CONFIRMED_HREF,
   PLACE_BET_HREF,
   WALLET_HREF,
   brandHref,
   isCurrent,
+  orderConfirmedHref,
   signInTarget,
   visibleNav,
 } from "./shell";
@@ -68,5 +70,11 @@ describe("shell", () => {
     const hires = { key: "hires", label: "New hires", href: "/new-hires" };
     expect(isCurrent(hires, "/new-hires/42")).toBe(true);
     expect(isCurrent(hires, "/new-hires-archive")).toBe(false);
+  });
+
+  it("builds the order confirmation href", () => {
+    expect(ORDER_CONFIRMED_HREF).toBe("/order-confirmed");
+    expect(orderConfirmedHref("AB12CD")).toBe("/order-confirmed?order=AB12CD");
+    expect(MAIN_NAV.some((e) => e.href === ORDER_CONFIRMED_HREF)).toBe(false);
   });
 });

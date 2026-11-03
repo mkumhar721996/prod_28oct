@@ -7,7 +7,7 @@ import { createServer } from "node:http";
 
 const port = Number(process.env.MOCK_SESSION_PORT ?? 3101);
 
-const ACTIVE = ["Received", "Preparing", "Ready for pickup"];
+const ACTIVE = ["Placed", "Preparing", "Ready for pickup"];
 const ORDERS = Array.from({ length: 14 }, (_, i) => {
   const status = i < 8 ? ACTIVE[i % 3] : i % 2 ? "Fulfilled" : "Cancelled";
   return {
