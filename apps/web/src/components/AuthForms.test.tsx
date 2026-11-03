@@ -21,7 +21,7 @@ describe("handleSignIn", () => {
 
   it("shows the same failed message beside the password for a wrong password or unknown email", async () => {
     const deps = { ...nav(), signInPlayer: vi.fn(async () => failed) };
-    const expected = { password: "Email or password is incorrect" };
+    const expected = { alert: "Email or password is incorrect" };
     expect(await handleSignIn(deps, "a@b.co", "nope-nope")).toEqual(expected);
     expect(await handleSignIn(deps, "nobody@x.co", "whatever1")).toEqual(expected);
     expect(deps.replace).not.toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe("handleSignIn", () => {
       })),
     };
     expect(await handleSignIn(deps, "a@b.co", "play-2026")).toEqual({
-      password: "Something went wrong. Try again.",
+      alert: "Something went wrong. Try again.",
     });
   });
 

@@ -16,7 +16,8 @@ type SignInDeps = {
 export const SIGN_IN_FAILED_ERROR = "Email or password is incorrect";
 const UNAUTHORIZED = 401;
 
-export type SignInErrors = { email?: string; password?: string };
+/** Field errors are for the required checks; `alert` is the form-level sign-in failure. */
+export type SignInErrors = { email?: string; password?: string; alert?: string };
 
 /** Returns what to show; an empty object means we signed in and moved to `redirectTo`. */
 export async function handleSignIn(
@@ -32,7 +33,7 @@ export async function handleSignIn(
   const result = await deps.signInPlayer(email, password);
   if (!result.ok) {
     // One message for an unknown email and a wrong password, so neither is revealed.
-    return { password: result.status === UNAUTHORIZED ? SIGN_IN_FAILED_ERROR : result.message };
+    return { alert: result.status === UNAUTHORIZED ? SIGN_IN_FAILED_ERROR : result.message };
   }
   deps.replace(redirectTo);
   deps.refresh();
@@ -53,9 +54,11 @@ export function SignInForm({
   const [pending, setPending] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const alertRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (errors.email) emailRef.current?.focus();
+    if (errors.alert) alertRef.current?.focus();
+    else if (errors.email) emailRef.current?.focus();
     else if (errors.password) passwordRef.current?.focus();
   }, [errors]);
 
@@ -71,8 +74,8 @@ export function SignInForm({
     );
     setPending(false);
     setErrors(result);
-    // Keep the email, clear only the password.
-    if (result.email || result.password) setPassword("");
+    // After a failed sign-in keep the email, clear only the password; a required-field error keeps both.
+    if (result.alert) setPassword("");
   }
 
   return (
@@ -119,11 +122,16 @@ export function SignInForm({
             aria-describedby={errors.password ? "si-pass-err" : undefined}
           />
           {errors.password && (
-            <span className="field-error" id="si-pass-err" role="alert">
+            <span className="field-error" id="si-pass-err">
               {errors.password}
             </span>
           )}
         </div>
+        {errors.alert && (
+          <div className="alert alert-danger" role="alert" tabIndex={-1} ref={alertRef}>
+            <span>{errors.alert}</span>
+          </div>
+        )}
         <div className="form-actions stack stack-2">
           <button className="btn btn-primary" type="submit" disabled={pending}>
             {pending ? "Signing in…" : "Sign in"}

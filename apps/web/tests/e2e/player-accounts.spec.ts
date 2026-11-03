@@ -64,7 +64,11 @@ test("Sign in: the failed message goes away once the correct details are submitt
   page,
 }) => {
   let attempts = 0;
-  await page.route("**/session/sign-in", (route) => {
+  let releaseSecond!: () => void;
+  const secondHeld = new Promise<void>((resolve) => {
+    releaseSecond = resolve;
+  });
+  await page.route("**/session/sign-in", async (route) => {
     attempts += 1;
     if (attempts === 1) {
       return route.fulfill({
@@ -73,11 +77,13 @@ test("Sign in: the failed message goes away once the correct details are submitt
         body: JSON.stringify({ message: "Email or password incorrect" }),
       });
     }
+    // Hold the second response so the page state while it is pending can be checked.
+    await secondHeld;
+    await signIn(page);
     return route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({}),
-      headers: { "set-cookie": "e2e-session=1; Path=/" },
     });
   });
   await page.goto("/sign-in");
@@ -87,7 +93,11 @@ test("Sign in: the failed message goes away once the correct details are submitt
   await expect(page.getByText("Email or password is incorrect")).toBeVisible();
   await page.getByLabel("Password").fill("play-2026");
   await page.getByRole("button", { name: "Sign in" }).click();
+  // Still on Sign in with the request pending: the failed message is already gone.
+  await expect(page.getByRole("button", { name: "Signing in…" })).toBeVisible();
   await expect(page.getByText("Email or password is incorrect")).toHaveCount(0);
+  releaseSecond();
+  await expect(page).toHaveURL(/\/wallet/);
 });
 
 test("History: the nav opens the history page with each entry", async ({ page }) => {
