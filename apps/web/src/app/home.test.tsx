@@ -16,6 +16,16 @@ import Home from "./page";
 beforeEach(() => vi.clearAllMocks());
 
 describe("Home", () => {
+  it("offers a View Menu link to a guest only", async () => {
+    getSession.mockResolvedValue(null);
+    expect(renderToStaticMarkup(await Home())).toMatch(
+      /<a[^>]*href="\/menu"[^>]*>View Menu<\/a>/,
+    );
+    getSession.mockResolvedValue({ role: "player" });
+    getAppointments.mockResolvedValue([]);
+    expect(renderToStaticMarkup(await Home())).not.toContain("View Menu");
+  });
+
   it("shows no appointment card to a signed-out visitor", async () => {
     getSession.mockResolvedValue(null);
     const html = renderToStaticMarkup(await Home());

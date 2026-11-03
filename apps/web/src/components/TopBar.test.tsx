@@ -8,6 +8,21 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }),
 }));
 
+describe("TopBar cart control", () => {
+  it("shows a Cart link and the count to a signed-in user", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn pathname="/menu" cartCount={1} />);
+    expect(html).toMatch(/<a[^>]*href="\/cart"[^>]*>Cart<\/a>/);
+    expect(html).toMatch(/data-testid="cart-count"[^>]*>1</);
+    expect(html).toContain('aria-label="Cart, 1 item"');
+  });
+
+  it("shows the control with 0 to a guest", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn={false} pathname="/menu" />);
+    expect(html).toMatch(/data-testid="cart-count"[^>]*>0</);
+    expect(html).toContain('aria-label="Cart, 0 items"');
+  });
+});
+
 describe("TopBar signed in", () => {
   const html = renderToStaticMarkup(<TopBar signedIn pathname="/" />);
 

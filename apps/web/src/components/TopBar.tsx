@@ -1,4 +1,4 @@
-import { BRAND_NAME, brandHref, isCurrent, visibleNav } from "@/lib/shell";
+import { BRAND_NAME, CART_HREF, brandHref, isCurrent, visibleNav } from "@/lib/shell";
 
 type TopBarProps = {
   signedIn: boolean;
@@ -9,6 +9,8 @@ type TopBarProps = {
   onToggleMenu?: () => void;
   onSignOut?: () => void;
   signingOut?: boolean;
+  /** Items in the cart, shown in the top bar's cart control. */
+  cartCount?: number;
 };
 
 export function TopBar({
@@ -19,11 +21,27 @@ export function TopBar({
   onToggleMenu,
   onSignOut,
   signingOut = false,
+  cartCount = 0,
 }: TopBarProps) {
   const brand = (
     <a className="shell-brand" href={brandHref(signedIn)}>
       {BRAND_NAME}
     </a>
+  );
+
+  const cartControl = (
+    <div className="cart-control" data-testid="cart-control">
+      <a className="btn btn-ghost btn-sm" href={CART_HREF} data-testid="open-cart">
+        Cart
+      </a>
+      <span
+        className="badge badge-neutral"
+        data-testid="cart-count"
+        aria-label={`Cart, ${cartCount} ${cartCount === 1 ? "item" : "items"}`}
+      >
+        {cartCount}
+      </span>
+    </div>
   );
 
   return (
@@ -55,6 +73,7 @@ export function TopBar({
                 ))}
               </nav>
             </div>
+            {cartControl}
             <button
               className="btn btn-ghost btn-sm"
               type="button"
@@ -71,7 +90,10 @@ export function TopBar({
             )}
           </>
         ) : (
-          brand
+          <>
+            {brand}
+            {cartControl}
+          </>
         )}
       </div>
     </header>

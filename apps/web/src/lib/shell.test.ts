@@ -26,18 +26,29 @@ describe("shell", () => {
     expect(visibleNav(true)[1]).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
   });
 
+  it("appends Menu at the end and keeps earlier entries in place", () => {
+    expect(MAIN_NAV[MAIN_NAV.length - 1]).toEqual({ key: "menu", label: "Menu", href: "/menu" });
+    expect(MAIN_NAV.slice(0, 5).map((e) => e.key)).toEqual([
+      "home",
+      "wallet",
+      "orders",
+      "history",
+      "appointments",
+    ]);
+  });
+
   it("marks the current entry", () => {
     expect(isCurrent(MAIN_NAV[0], "/")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/other")).toBe(false);
   });
 
-  it("appends Appointments at the end; its booking page is current there too", () => {
-    expect(MAIN_NAV.at(-1)).toEqual({
+  it("keeps Appointments after History; its booking page is current there too", () => {
+    expect(MAIN_NAV[4]).toEqual({
       key: "appointments",
       label: "Appointments",
       href: "/appointments",
     });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/appointments/book")).toBe(true);
+    expect(isCurrent(MAIN_NAV[4], "/appointments/book")).toBe(true);
   });
 
   it("keeps History before Appointments and points Place a bet at the wallet for now", () => {
@@ -53,6 +64,7 @@ describe("shell", () => {
       "orders",
       "history",
       "appointments",
+      "menu",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);

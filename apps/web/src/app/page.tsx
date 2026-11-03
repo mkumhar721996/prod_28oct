@@ -1,6 +1,6 @@
 import { describeNext, getAppointments } from "@/lib/appointments";
 import { getSession } from "@/lib/session";
-import { BOOK_APPOINTMENT_HREF } from "@/lib/shell";
+import { BOOK_APPOINTMENT_HREF, MENU_HREF } from "@/lib/shell";
 import { appTitle } from "@/lib/title";
 
 export default async function Home() {
@@ -18,6 +18,13 @@ export default async function Home() {
   return (
     <div className="stack stack-4">
       <h1 className="text-3xl font-semibold">{appTitle()}</h1>
+      {!signedIn && (
+        <div>
+          <a className="btn btn-primary" href={MENU_HREF}>
+            View Menu
+          </a>
+        </div>
+      )}
       {signedIn && (
         <div className="card stack stack-2" aria-labelledby="next-appointment">
           <h2 id="next-appointment">Next appointment</h2>
