@@ -266,4 +266,9 @@ fieldset.field legend { padding: 0; font-size: var(--font-size-sm); font-weight:
 .game-card.is-unavailable { background: var(--color-bg-subtle); border-style: dashed; color: var(--color-fg-muted); }
 .game-card.is-unavailable .game-thumb { background: var(--color-border); }
 .skeleton-thumb { aspect-ratio: 4 / 3; height: auto; }
+.cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.lobby-search-row { display: flex; gap: var(--space-2); }
+.lobby-search-row .field { flex: 1; max-width: var(--size-modal); }
+.result-status { min-height: var(--size-control-sm); }
+.no-games { overflow-wrap: anywhere; }
 .loading-note { display: flex; align-items: center; gap: var(--space-2); }

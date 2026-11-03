@@ -17,6 +17,38 @@ export function sortGamesByName(games: readonly Game[]): Game[] {
   return [...games].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
 }
 
+export type GameFilters = { search: string; category: string | null };
+export const NO_FILTERS: GameFilters = { search: "", category: null };
+
+export type FilterAction =
+  | { type: "search"; text: string }
+  | { type: "toggleCategory"; category: string }
+  | { type: "clear" };
+
+/** Name-only, case-insensitive match ANDed with the selected category; keeps input order. */
+export function filterGames(games: readonly Game[], f: GameFilters): Game[] {
+  const text = f.search.trim().toLowerCase();
+  return games.filter(
+    (g) => g.name.toLowerCase().includes(text) && (f.category === null || g.category === f.category),
+  );
+}
+
+export function filterReducer(state: GameFilters, action: FilterAction): GameFilters {
+  switch (action.type) {
+    case "search":
+      return { ...state, search: action.text };
+    case "toggleCategory":
+      return { ...state, category: state.category === action.category ? null : action.category };
+    case "clear":
+      return NO_FILTERS;
+  }
+}
+
+/** Each category once, A-Z. */
+export function categoriesOf(games: readonly Game[]): string[] {
+  return [...new Set(games.map((g) => g.category))].sort((a, b) => a.localeCompare(b, "en"));
+}
+
 /** Resolves the sample set; a real API can replace this without touching the UI. */
 export async function fetchGames(): Promise<Game[]> {
   return SAMPLE_GAMES.slice();
