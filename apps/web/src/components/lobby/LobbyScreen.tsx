@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { fetchGames as defaultFetchGames, lobbyReducer, sortGamesByName, type Game } from "@/lib/games";
+import {
+  fetchGames as defaultFetchGames,
+  loadGames,
+  lobbyReducer, sortGamesByName, type Game } from "@/lib/games";
 import { Icon } from "../orders/Icon";
 import { GameGrid } from "./GameGrid";
 
@@ -19,11 +22,7 @@ export function LobbyScreen({ fetchGames = defaultFetchGames, initial }: LobbySc
   const started = useRef(initial !== undefined);
 
   const load = useCallback(() => {
-    dispatch({ type: "requested" });
-    fetchGames().then(
-      (games) => dispatch({ type: "loaded", games }),
-      () => dispatch({ type: "failed" }),
-    );
+    void loadGames(fetchGames, dispatch);
   }, [fetchGames]);
 
   useEffect(() => {

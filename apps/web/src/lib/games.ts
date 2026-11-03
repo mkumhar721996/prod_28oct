@@ -29,6 +29,19 @@ export type LobbyAction =
   | { type: "failed" }
   | { type: "loaded"; games: Game[] };
 
+/** One load attempt: used for the first load and for Retry. */
+export async function loadGames(
+  fetchGames: () => Promise<Game[]>,
+  dispatch: (action: LobbyAction) => void,
+): Promise<void> {
+  dispatch({ type: "requested" });
+  try {
+    dispatch({ type: "loaded", games: await fetchGames() });
+  } catch {
+    dispatch({ type: "failed" });
+  }
+}
+
 export function lobbyReducer(state: LobbyState, action: LobbyAction): LobbyState {
   switch (action.type) {
     case "requested":

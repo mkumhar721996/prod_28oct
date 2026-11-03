@@ -19,6 +19,6 @@ describe("GameCard", () => {
     expect(html).not.toContain("Coming soon");
     expect(html).not.toContain("is-unavailable");
     expect(html).toContain("Dice Duel");
-    expect(html).toContain("Dice");
+    expect(html).toContain(">Dice</span>");
   });
 });

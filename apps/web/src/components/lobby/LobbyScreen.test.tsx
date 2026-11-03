@@ -11,7 +11,7 @@ describe("LobbyScreen", () => {
     const html = render({ status: "loaded", games: SAMPLE_GAMES.slice() });
     for (const g of SAMPLE_GAMES) {
       expect(html).toContain(g.name);
-      expect(html).toContain(g.category);
+      expect(html).toContain(`>${g.category}</span>`);
     }
     expect(html.match(/class="card game-card/g)).toHaveLength(SAMPLE_GAMES.length);
     expect(html).toContain('aria-label="Games"');

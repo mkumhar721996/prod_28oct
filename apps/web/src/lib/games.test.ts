@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { SAMPLE_GAMES, fetchGames, lobbyReducer, sortGamesByName } from "./games";
+import {
+  SAMPLE_GAMES,
+  fetchGames,
+  loadGames,
+  lobbyReducer,
+  sortGamesByName,
+  type LobbyAction,
+  type LobbyState,
+} from "./games";
 
 const SORTED = [
   "Blackjack Classic",
@@ -46,6 +54,18 @@ describe("games", () => {
   it("reducer sorts on load", () => {
     const s = lobbyReducer({ status: "loading", games: [] }, { type: "loaded", games: SAMPLE_GAMES.slice() });
     expect(s.games.map((g) => g.name)).toEqual(SORTED);
+  });
+
+  it("loadGames: a rejected load fails, and a retry with a working loader shows the sorted grid", async () => {
+    let state: LobbyState = { status: "loading", games: [] };
+    const dispatch = (a: LobbyAction) => {
+      state = lobbyReducer(state, a);
+    };
+    await loadGames(() => Promise.reject(new Error("down")), dispatch);
+    expect(state.status).toBe("error");
+    await loadGames(async () => SAMPLE_GAMES.slice(), dispatch);
+    expect(state.status).toBe("loaded");
+    expect(state.games.map((g) => g.name)).toEqual(SORTED);
   });
 
   it("failed then retry then loaded", () => {
