@@ -39,6 +39,7 @@ describe('PlayersService.register', () => {
     expect(sql[2]).toMatch(/^insert into wallets/);
     expect(calls[2][1]).toEqual(['p1', STARTING_GRANT]);
     expect(sql[3]).toMatch(/^insert into wallet_entries/);
+    expect(sql[3]).toMatch(/clock_timestamp\(\)/);
     expect(calls[3][1]).toEqual(['p1', STARTING_GRANT]);
     expect(sql[4]).toBe('commit');
     expect(calls[1][1]![0]).toBe('ana@example.com');
