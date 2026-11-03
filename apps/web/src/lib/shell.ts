@@ -13,6 +13,10 @@ export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
 export const MENU_HREF = "/menu";
 export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
+/** Back-office pages: deliberately not in MAIN_NAV or NEXT_TARGETS, so customers are never sent there. */
+export const BACK_OFFICE_HREF = "/back-office";
+export const STAFF_SIGN_IN_HREF = "/back-office/sign-in";
+export const STAFF_REGISTER_HREF = "/back-office/register";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 

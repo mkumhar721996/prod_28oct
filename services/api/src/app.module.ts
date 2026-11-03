@@ -5,10 +5,19 @@ import { DatabaseModule } from './database/database.module';
 import { OnboardingTemplatesModule } from './onboarding-templates/onboarding-templates.module';
 import { RecordsModule } from './records/records.module';
 import { SessionModule } from './session/session.module';
+import { StaffModule } from './staff/staff.module';
 import { WalletModule } from './wallet/wallet.module';
 
 @Module({
-  imports: [DatabaseModule, RecordsModule, SessionModule, WalletModule, AppointmentsModule, OnboardingTemplatesModule],
+  imports: [
+    DatabaseModule,
+    RecordsModule,
+    SessionModule,
+    WalletModule,
+    AppointmentsModule,
+    OnboardingTemplatesModule,
+    StaffModule,
+  ],
   controllers: [AppController],
 })
 export class AppModule {}

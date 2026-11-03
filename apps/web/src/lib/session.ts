@@ -112,7 +112,7 @@ export type AuthResult = { ok: true } | { ok: false; status: number; message: st
 
 const GENERIC_ERROR = "Something went wrong. Try again.";
 
-async function postCredentials(path: string, email: string, password: string): Promise<AuthResult> {
+export async function postCredentials(path: string, email: string, password: string): Promise<AuthResult> {
   try {
     const res = await fetch(path, {
       method: "POST",
