@@ -2,6 +2,12 @@ import type { ReactNode } from "react";
 
 // Same paths as the approved prototype's icon sprite.
 const PATHS: Record<string, ReactNode> = {
+  search: (
+    <>
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </>
+  ),
   info: (
     <>
       <circle cx="12" cy="12" r="10" />

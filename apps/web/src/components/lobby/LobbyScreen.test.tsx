@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { SAMPLE_GAMES } from "@/lib/games";
+import { NO_FILTERS, SAMPLE_GAMES, type GameFilters } from "@/lib/games";
 import { LobbyScreen, type LobbyScreenProps } from "./LobbyScreen";
 
 const render = (initial: LobbyScreenProps["initial"]) =>
@@ -41,5 +41,62 @@ describe("LobbyScreen", () => {
     expect(html).toContain("We couldn&#x27;t load the games.");
     expect(html).toContain(">Retry<");
     expect(html).not.toContain('aria-label="Games"');
+  });
+});
+
+describe("LobbyScreen search and filter", () => {
+  const games = SAMPLE_GAMES.slice();
+  const withFilters = (filters: GameFilters) => render({ status: "loaded", games, filters });
+  const cards = (html: string) => html.match(/class="card game-card/g) ?? [];
+
+  it("renders a search field with no submit control, and category chips (AC2)", () => {
+    const html = withFilters(NO_FILTERS);
+    expect(html).toContain('type="search"');
+    expect(html).toContain('for="game-search-input"');
+    expect(html).not.toContain('type="submit"');
+    expect(html).toContain('aria-label="Categories"');
+    expect(html).toContain("8 of 8 games");
+  });
+
+  it("filters the grid by name (AC1, AC3, AC12)", () => {
+    const html = withFilters({ search: "lu", category: null });
+    expect(cards(html)).toHaveLength(1);
+    expect(html).toContain("Lucky Sevens");
+    expect(html).toContain("1 of 8 games");
+    expect(cards(withFilters({ search: "slots", category: null }))).toHaveLength(0);
+  });
+
+  it("filters by the selected chip and marks only it pressed (AC4, AC13)", () => {
+    const html = withFilters({ search: "", category: "Dice" });
+    expect(cards(html)).toHaveLength(2);
+    expect(html).toMatch(/aria-pressed="true"[^>]*>Dice</);
+    expect(html).toMatch(/aria-pressed="false"[^>]*>Slots</);
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
+  });
+
+  it("combines chip and search (AC5)", () => {
+    expect(cards(withFilters({ search: "lucky", category: "Slots" }))).toHaveLength(1);
+    expect(cards(withFilters({ search: "lucky", category: "Dice" }))).toHaveLength(0);
+  });
+
+  it("shows No games found with Clear filters instead of the grid (AC6, AC8)", () => {
+    const html = withFilters({ search: "zzz", category: null });
+    expect(html).toContain("No games found");
+    expect(html).toContain(">Clear filters<");
+    expect(html).not.toContain('aria-label="Games"');
+  });
+
+  it("hides No games found when something matches (AC7)", () => {
+    const html = withFilters({ search: "lucky", category: null });
+    expect(html).not.toContain("No games found");
+    expect(html).toContain('aria-label="Games"');
+  });
+
+  it("does not render search or chips while loading or on error", () => {
+    for (const status of ["loading", "error"] as const) {
+      const html = render({ status });
+      expect(html).not.toContain('type="search"');
+      expect(html).not.toContain("aria-pressed");
+    }
   });
 });

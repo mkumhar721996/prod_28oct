@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  NO_FILTERS,
   SAMPLE_GAMES,
+  categoriesOf,
   fetchGames,
+  filterGames,
+  filterReducer,
+  type Game,
   loadGames,
   lobbyReducer,
   sortGamesByName,
@@ -76,5 +81,57 @@ describe("games", () => {
     const loaded = lobbyReducer(retrying, { type: "loaded", games: SAMPLE_GAMES.slice() });
     expect(loaded.status).toBe("loaded");
     expect(loaded.games).toHaveLength(SAMPLE_GAMES.length);
+  });
+});
+
+describe("game filters", () => {
+  const names = (g: Game[]) => g.map((x) => x.name);
+
+  it("matches part of the name, case-insensitively (AC1, AC12)", () => {
+    expect(names(filterGames(SAMPLE_GAMES, { search: "dice", category: null })).sort()).toEqual([
+      "Dice Duel",
+      "Pyramid Dice",
+    ]);
+    expect(names(filterGames(SAMPLE_GAMES, { search: "LUCKY", category: null }))).toContain("Lucky Sevens");
+  });
+
+  it("never matches on category (AC3)", () => {
+    expect(filterGames(SAMPLE_GAMES, { search: "slots", category: null })).toEqual([]);
+  });
+
+  it("filters by category alone (AC4) and combines with search (AC5)", () => {
+    expect(filterGames(SAMPLE_GAMES, { search: "", category: "Dice" }).map((g) => g.category)).toEqual([
+      "Dice",
+      "Dice",
+    ]);
+    expect(names(filterGames(SAMPLE_GAMES, { search: "lucky", category: "Slots" }))).toEqual(["Lucky Sevens"]);
+    expect(filterGames(SAMPLE_GAMES, { search: "lucky", category: "Dice" })).toEqual([]);
+  });
+
+  it("returns every game with no filters and keeps input order", () => {
+    expect(filterGames(SAMPLE_GAMES, NO_FILTERS)).toEqual(SAMPLE_GAMES);
+  });
+
+  it("updates search text on each change (AC2)", () => {
+    expect(filterReducer(NO_FILTERS, { type: "search", text: "lu" }).search).toBe("lu");
+  });
+
+  it("switches and deselects category chips (AC13, AC14)", () => {
+    const s1 = filterReducer(NO_FILTERS, { type: "toggleCategory", category: "Slots" });
+    const s2 = filterReducer(s1, { type: "toggleCategory", category: "Dice" });
+    expect(s2.category).toBe("Dice");
+    expect(filterGames(SAMPLE_GAMES, s2).every((g) => g.category === "Dice")).toBe(true);
+    expect(filterReducer(s1, { type: "toggleCategory", category: "Slots" }).category).toBeNull();
+  });
+
+  it("clear resets search and category (AC9-11)", () => {
+    const cleared = filterReducer({ search: "zzz", category: "Slots" }, { type: "clear" });
+    expect(cleared.search).toBe("");
+    expect(cleared.category).toBeNull();
+    expect(filterGames(SAMPLE_GAMES, cleared)).toHaveLength(SAMPLE_GAMES.length);
+  });
+
+  it("lists each category once", () => {
+    expect(categoriesOf(SAMPLE_GAMES)).toEqual(["Blackjack", "Dice", "Roulette", "Slots"]);
   });
 });
