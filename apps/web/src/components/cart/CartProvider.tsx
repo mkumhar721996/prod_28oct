@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { addItem, decrease, increase, removeLine, type Cart, type CartLine } from "@/lib/cart";
 import { CART_STORAGE_KEY, parseCart, serializeCart } from "@/lib/cartStorage";
 
@@ -25,11 +25,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Cart>([]);
   const [removed, setRemoved] = useState<Removed | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const cartRef = useRef(cart);
+  cartRef.current = cart;
 
   // localStorage is only readable after mount, so the first render is always empty.
   useEffect(() => {
     try {
-      setCart(parseCart(window.localStorage.getItem(CART_STORAGE_KEY)));
+      const stored = parseCart(window.localStorage.getItem(CART_STORAGE_KEY));
+      // Edits made before hydration win over what was stored.
+      setCart((c) => (c.length === 0 ? stored : [...stored.filter((s) => !c.some((l) => l.id === s.id)), ...c]));
     } catch {
       // Storage blocked: carry on with an in-memory cart.
     }
@@ -48,15 +52,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const add = useCallback((item: Omit<CartLine, "quantity">) => setCart((c) => addItem(c, item)), []);
   const inc = useCallback((id: string) => setCart((c) => increase(c, id)), []);
   const dec = useCallback((id: string) => setCart((c) => decrease(c, id)), []);
-  const remove = useCallback(
-    (id: string) => {
-      const index = cart.findIndex((l) => l.id === id);
-      if (index < 0) return;
-      setRemoved({ line: cart[index], index });
-      setCart((c) => removeLine(c, id));
-    },
-    [cart],
-  );
+  const remove = useCallback((id: string) => {
+    // Read the latest cart, not a render-time closure, so a quick second edit can't record a stale line.
+    const latest = cartRef.current;
+    const index = latest.findIndex((l) => l.id === id);
+    if (index < 0) return;
+    setRemoved({ line: latest[index], index });
+    cartRef.current = removeLine(latest, id);
+    setCart(cartRef.current);
+  }, []);
   const undoRemove = useCallback(() => {
     if (!removed) return;
     setCart((c) =>
