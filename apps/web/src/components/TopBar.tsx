@@ -1,4 +1,4 @@
-import { BRAND_NAME, CART_HREF, brandHref, isCurrent, visibleNav } from "@/lib/shell";
+import { BRAND_NAME,brandHref, isCurrent, visibleNav } from "@/lib/shell";
 
 type TopBarProps = {
   signedIn: boolean;
@@ -31,9 +31,8 @@ export function TopBar({
 
   const cartControl = (
     <div className="cart-control" data-testid="cart-control">
-      <a className="btn btn-ghost btn-sm" href={CART_HREF} data-testid="open-cart">
-        Cart
-      </a>
+      {/* A label, not a link: the /cart page ships with the cart story. */}
+      <span aria-hidden="true">Cart</span>
       <span
         className="badge badge-neutral"
         data-testid="cart-count"

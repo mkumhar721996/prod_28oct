@@ -3,7 +3,6 @@ export const BRAND_NAME = "Web App";
 export const HOME_HREF = "/";
 export const ORDERS_HREF = "/orders";
 export const MENU_HREF = "/menu";
-export const CART_HREF = "/cart";
 export const SIGN_IN_HREF = "/sign-in";
 export const REGISTER_HREF = "/register";
 export const WALLET_HREF = "/wallet";

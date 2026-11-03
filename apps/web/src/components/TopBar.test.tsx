@@ -9,9 +9,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("TopBar cart control", () => {
-  it("shows a Cart link and the count to a signed-in user", () => {
+  it("shows the Cart label (not a link to the unshipped /cart page) and the count to a signed-in user", () => {
     const html = renderToStaticMarkup(<TopBar signedIn pathname="/menu" cartCount={1} />);
-    expect(html).toMatch(/<a[^>]*href="\/cart"[^>]*>Cart<\/a>/);
+    expect(html).not.toContain('href="/cart"');
     expect(html).toMatch(/data-testid="cart-count"[^>]*>1</);
     expect(html).toContain('aria-label="Cart, 1 item"');
   });
