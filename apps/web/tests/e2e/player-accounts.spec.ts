@@ -43,9 +43,61 @@ test("AC8: a wrong password shows the message and keeps the email", async ({ pag
   await page.getByLabel("Email").fill("ana@example.com");
   await page.getByLabel("Password").fill("nope-nope");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toHaveText("Email or password incorrect");
+  await expect(page.getByText("Email or password is incorrect")).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveValue("ana@example.com");
   await expect(page.getByLabel("Password")).toHaveValue("");
+});
+
+test("Sign in: empty submit shows both inline required messages and a link to register", async ({
+  page,
+}) => {
+  await page.goto("/sign-in");
+  await expect(page.getByRole("link", { name: "Create an account" })).toBeVisible();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Enter your email")).toBeVisible();
+  await page.getByLabel("Email").fill("ana@example.com");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Enter your password")).toBeVisible();
+});
+
+test("Sign in: the failed message goes away once the correct details are submitted", async ({
+  page,
+}) => {
+  let attempts = 0;
+  let releaseSecond!: () => void;
+  const secondHeld = new Promise<void>((resolve) => {
+    releaseSecond = resolve;
+  });
+  await page.route("**/session/sign-in", async (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      return route.fulfill({
+        status: 401,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Email or password incorrect" }),
+      });
+    }
+    // Hold the second response so the page state while it is pending can be checked.
+    await secondHeld;
+    await signIn(page);
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({}),
+    });
+  });
+  await page.goto("/sign-in");
+  await page.getByLabel("Email").fill("ana@example.com");
+  await page.getByLabel("Password").fill("nope-nope");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Email or password is incorrect")).toBeVisible();
+  await page.getByLabel("Password").fill("play-2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  // Still on Sign in with the request pending: the failed message is already gone.
+  await expect(page.getByRole("button", { name: "Signing in…" })).toBeVisible();
+  await expect(page.getByText("Email or password is incorrect")).toHaveCount(0);
+  releaseSecond();
+  await expect(page).toHaveURL(/\/wallet/);
 });
 
 test("History: the nav opens the history page with each entry", async ({ page }) => {

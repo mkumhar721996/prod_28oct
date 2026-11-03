@@ -10,24 +10,59 @@ vi.mock("next/navigation", () => ({
 const nav = () => ({ replace: vi.fn(), refresh: vi.fn() });
 
 describe("handleSignIn", () => {
+  const failed = { ok: false as const, status: 401, message: "Email or password incorrect" };
+
   it("goes to the wallet and refreshes on success", async () => {
     const deps = { ...nav(), signInPlayer: vi.fn(async () => ({ ok: true as const })) };
-    expect(await handleSignIn(deps, "a@b.co", "play-2026")).toBeNull();
+    expect(await handleSignIn(deps, "a@b.co", "play-2026")).toEqual({});
     expect(deps.replace).toHaveBeenCalledWith("/wallet");
     expect(deps.refresh).toHaveBeenCalled();
   });
 
-  it("returns the message and stays put on a wrong password", async () => {
+  it("shows the same failed message beside the password for a wrong password or unknown email", async () => {
+    const deps = { ...nav(), signInPlayer: vi.fn(async () => failed) };
+    const expected = { alert: "Email or password is incorrect" };
+    expect(await handleSignIn(deps, "a@b.co", "nope-nope")).toEqual(expected);
+    expect(await handleSignIn(deps, "nobody@x.co", "whatever1")).toEqual(expected);
+    expect(deps.replace).not.toHaveBeenCalled();
+  });
+
+  it("shows other failures' own message", async () => {
     const deps = {
       ...nav(),
       signInPlayer: vi.fn(async () => ({
         ok: false as const,
-        status: 401,
-        message: "Email or password incorrect",
+        status: 0,
+        message: "Something went wrong. Try again.",
       })),
     };
-    expect(await handleSignIn(deps, "a@b.co", "nope-nope")).toBe("Email or password incorrect");
-    expect(deps.replace).not.toHaveBeenCalled();
+    expect(await handleSignIn(deps, "a@b.co", "play-2026")).toEqual({
+      alert: "Something went wrong. Try again.",
+    });
+  });
+
+  it("succeeds after a failure", async () => {
+    const signInPlayer = vi.fn().mockResolvedValueOnce(failed).mockResolvedValueOnce({ ok: true });
+    await handleSignIn({ ...nav(), signInPlayer }, "a@b.co", "bad-bad-bad");
+    expect(await handleSignIn({ ...nav(), signInPlayer }, "a@b.co", "play-2026")).toEqual({});
+  });
+
+  it("passes a padded email through to the API", async () => {
+    const deps = { ...nav(), signInPlayer: vi.fn(async () => ({ ok: true as const })) };
+    await handleSignIn(deps, " player@example.com ", "play-2026");
+    expect(deps.signInPlayer).toHaveBeenCalledWith(" player@example.com ", "play-2026");
+  });
+
+  it("requires an email without calling the API", async () => {
+    const deps = { ...nav(), signInPlayer: vi.fn() };
+    expect(await handleSignIn(deps, "  ", "play-2026")).toEqual({ email: "Enter your email" });
+    expect(deps.signInPlayer).not.toHaveBeenCalled();
+  });
+
+  it("requires a password without calling the API", async () => {
+    const deps = { ...nav(), signInPlayer: vi.fn() };
+    expect(await handleSignIn(deps, "a@b.co", "")).toEqual({ password: "Enter your password" });
+    expect(deps.signInPlayer).not.toHaveBeenCalled();
   });
 });
 

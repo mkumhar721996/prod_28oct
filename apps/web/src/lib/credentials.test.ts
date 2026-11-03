@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { EMAIL_ERROR, PASSWORD_ERROR, validateEmail, validatePassword } from "./credentials";
+import {
+  EMAIL_ERROR,
+  EMAIL_REQUIRED_ERROR,
+  PASSWORD_REQUIRED_ERROR,
+  validateSignInEmailRequired,
+  validateSignInPasswordRequired, PASSWORD_ERROR, validateEmail, validatePassword,
+} from "./credentials";
 
 describe("credentials", () => {
   it("accepts an email shape, ignoring surrounding spaces", () => {
@@ -15,5 +21,12 @@ describe("credentials", () => {
     expect(validatePassword("1234567")).toBe(PASSWORD_ERROR);
     expect(PASSWORD_ERROR).toBe("Use at least 8 characters");
     expect(validatePassword("12345678")).toBeNull();
+  });
+
+  it("sign-in only requires something to be entered", () => {
+    expect(validateSignInEmailRequired("  ")).toBe(EMAIL_REQUIRED_ERROR);
+    expect(validateSignInEmailRequired("name")).toBeNull();
+    expect(validateSignInPasswordRequired("")).toBe(PASSWORD_REQUIRED_ERROR);
+    expect(validateSignInPasswordRequired("x")).toBeNull();
   });
 });
