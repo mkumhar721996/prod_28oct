@@ -18,6 +18,7 @@ import {
   type Index,
   type Insight,
   type Performance,
+  type Period,
   type Sip,
   type Summary,
   type Transaction,
@@ -57,9 +58,11 @@ export type StocksDashboardProps = {
     >;
   };
   initial?: DashboardInitial;
+  /** Starting chart tab, to render a given period without clicks (tests). */
+  initialPeriod?: Period;
 };
 
-export function StocksDashboard({ fetchers = {}, initial = {} }: StocksDashboardProps) {
+export function StocksDashboard({ fetchers = {}, initial = {}, initialPeriod }: StocksDashboardProps) {
   const [indices, loadIndices] = useCard(fetchers.indices ?? fetchMarketOverview, initial.indices);
   const [summary, loadSummary] = useCard(fetchers.summary ?? fetchSummary, initial.summary);
   const [performance, loadPerformance] = useCard(fetchers.performance ?? fetchPerformance, initial.performance);
@@ -81,7 +84,7 @@ export function StocksDashboard({ fetchers = {}, initial = {} }: StocksDashboard
       </div>
       <MarketOverviewCard state={indices} onRetry={loadIndices} />
       <PortfolioSummary state={summary} onRetry={loadSummary} />
-      <PerformanceCard state={performance} onRetry={loadPerformance} />
+      <PerformanceCard state={performance} onRetry={loadPerformance} initialPeriod={initialPeriod} />
       <div className="two two-wide">
         <HoldingsCard state={holdings} />
         <WatchlistCard state={watchlist} onRetry={loadWatchlist} />

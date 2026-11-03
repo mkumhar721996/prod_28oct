@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { SAMPLE_PORTFOLIO as P } from "@/lib/stocks";
+import { SAMPLE_PORTFOLIO as P, type Period } from "@/lib/stocks";
 import { StocksDashboard, type DashboardInitial } from "./StocksDashboard";
 
 const READY: DashboardInitial = {
@@ -107,8 +107,15 @@ describe("StocksDashboard ready", () => {
 
   it("leaves other cards unchanged whatever the chart period (AC7)", () => {
     const strip = (h: string) => h.replace(/<section[^>]*aria-labelledby="h-perf"[\s\S]*?<\/section>/, "");
-    expect(strip(html)).toBe(strip(renderToStaticMarkup(<StocksDashboard initial={READY} />)));
-    expect(strip(html)).not.toContain("Showing the last");
+    const render = (initialPeriod: Period) =>
+      renderToStaticMarkup(<StocksDashboard initial={READY} initialPeriod={initialPeriod} />);
+    const [m1, m6, y1] = [render("1M"), render("6M"), render("1Y")];
+    // the chart card itself must differ, otherwise the comparison below proves nothing
+    expect(m1).not.toBe(m6);
+    expect(m6).not.toBe(y1);
+    expect(strip(m1)).toBe(strip(m6));
+    expect(strip(m1)).toBe(strip(y1));
+    expect(strip(m1)).not.toContain("Showing the last");
   });
 });
 
