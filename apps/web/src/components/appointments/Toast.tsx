@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Icon } from "../orders/Icon";
+import { Icon, type IconName } from "../orders/Icon";
 
 export const TOAST_MS = 4000;
 
@@ -12,10 +12,14 @@ export function Toast({
   message,
   onHide,
   action,
+  icon = "check",
+  role = "status",
 }: {
   message: string;
   onHide?: () => void;
   action?: ToastAction;
+  icon?: IconName;
+  role?: "status" | "alert";
 }) {
   useEffect(() => {
     if (!onHide) return;
@@ -24,8 +28,8 @@ export function Toast({
   }, [onHide]);
 
   return (
-    <div className="toast is-open" role="status">
-      <Icon name="check" />
+    <div className="toast is-open" role={role}>
+      <Icon name={icon} />
       <span>{message}</span>
       {action && (
         <button type="button" className="btn btn-ghost btn-sm" onClick={action.onAction}>

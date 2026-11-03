@@ -85,19 +85,19 @@ describe('Wallet ledger (e2e)', () => {
     expect(await entryCount(id, 'bet')).toBe(1);
   });
 
-  it('AC4/AC5/AC7/AC8/AC9: the strict balance > bet rule', async () => {
+  it('AC4/AC5/AC7/AC8/AC9: the balance >= bet rule', async () => {
     await register();
     const id = await playerId(ana.email);
     await seed(id, 10);
     expect(await service.placeBet(id, 9)).toEqual({ ok: true, balanceCredits: 1 });
     await seed(id, 10);
-    expect(await service.placeBet(id, 10)).toEqual({ ok: false, reason: 'insufficient_balance' });
+    expect(await service.placeBet(id, 10)).toEqual({ ok: true, balanceCredits: 0 });
+    await seed(id, 10);
+    expect(await service.placeBet(id, 11)).toEqual({ ok: false, reason: 'insufficient_balance' });
     expect(await service.balanceFor(id)).toBe(10);
-    await seed(id, 2);
-    expect(await service.placeBet(id, 1)).toEqual({ ok: true, balanceCredits: 1 });
     for (const start of [1, 0]) {
       await seed(id, start);
-      expect(await service.placeBet(id, 1)).toEqual({ ok: false, reason: 'insufficient_balance' });
+      expect(await service.placeBet(id, 2)).toEqual({ ok: false, reason: 'insufficient_balance' });
       expect(await service.balanceFor(id)).toBe(start);
     }
   });

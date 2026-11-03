@@ -13,8 +13,9 @@ export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
 export const MENU_HREF = "/menu";
 export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
-/** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
-export const PLACE_BET_HREF = WALLET_HREF;
+export const PLAY_HREF = "/play";
+/** Where "Place a bet" lands: the game screen. */
+export const PLACE_BET_HREF = PLAY_HREF;
 
 /** Where sign-in may send a patient back to; anything else (open redirects) falls back to the wallet. */
 const NEXT_TARGETS: Record<string, string> = {
@@ -25,6 +26,7 @@ const NEXT_TARGETS: Record<string, string> = {
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
   checkout: CHECKOUT_HREF,
   [ONBOARDING_TEMPLATES_HREF]: ONBOARDING_TEMPLATES_HREF,
+  play: PLAY_HREF,
 };
 
 export function signInTarget(next: string | undefined): string {
@@ -43,6 +45,7 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "menu", label: "Menu", href: MENU_HREF, public: true },
   { key: "onboarding-templates", label: "Templates", href: ONBOARDING_TEMPLATES_HREF },
   { key: "lobby", label: "Lobby", href: LOBBY_HREF, public: true },
+  { key: "play", label: "Play", href: PLAY_HREF },
 ];
 
 export function brandHref(signedIn: boolean): string {
