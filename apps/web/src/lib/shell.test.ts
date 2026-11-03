@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   BRAND_NAME,
   MAIN_NAV,
+  NOTIFICATION_COUNT,
   PLACE_BET_HREF,
   WALLET_HREF,
   brandHref,
@@ -20,15 +21,26 @@ describe("shell", () => {
     expect(brandHref(false)).toBe("/sign-in");
   });
 
-  it("shows only public entries to guests, Menu last for everyone", () => {
+  it("shows only public entries to guests, new sections last for everyone", () => {
     expect(visibleNav(false).map((e) => e.key)).toEqual(["menu", "lobby"]);
-    expect(visibleNav(true).at(-1)?.key).toBe("lobby");
-    expect(MAIN_NAV.at(-1)).toEqual({ key: "lobby", label: "Lobby", href: "/lobby", public: true });
-    expect(isCurrent(MAIN_NAV.at(-1)!, "/lobby")).toBe(true);
+    expect(visibleNav(false).some((e) => e.disabled)).toBe(false);
+    expect(MAIN_NAV.find((e) => e.key === "lobby")).toEqual({ key: "lobby", label: "Lobby", href: "/lobby", public: true });
+    expect(isCurrent(MAIN_NAV.find((e) => e.key === "lobby")!, "/lobby")).toBe(true);
     expect(signInTarget("checkout")).toBe("/checkout");
     expect(visibleNav(true)).toEqual(MAIN_NAV);
-    expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Home", href: "/" });
+    expect(MAIN_NAV[0]).toEqual({ key: "home", label: "Dashboard", href: "/" });
     expect(visibleNav(true)[1]).toEqual({ key: "wallet", label: "Wallet", href: "/wallet" });
+  });
+
+  it("ends with the disabled Holdings and SIPs entries", () => {
+    expect(MAIN_NAV.slice(-2)).toEqual([
+      { key: "holdings", label: "Holdings", href: "/holdings", disabled: true },
+      { key: "sips", label: "SIPs", href: "/sips", disabled: true },
+    ]);
+  });
+
+  it("shows three notifications", () => {
+    expect(NOTIFICATION_COUNT).toBe(3);
   });
 
   it("marks the current entry", () => {
@@ -62,6 +74,8 @@ describe("shell", () => {
       "menu",
       "onboarding-templates",
       "lobby",
+      "holdings",
+      "sips",
     ]);
     expect(isCurrent(MAIN_NAV[2], "/orders")).toBe(true);
     expect(isCurrent(MAIN_NAV[0], "/orders")).toBe(false);

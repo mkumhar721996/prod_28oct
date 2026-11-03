@@ -31,11 +31,15 @@ export function signInTarget(next: string | undefined): string {
   return (next !== undefined && Object.hasOwn(NEXT_TARGETS, next) && NEXT_TARGETS[next]) || WALLET_HREF;
 }
 
-export type NavEntry = { key: string; label: string; href: string; public?: true };
+/** Placeholder: no notifications service exists yet, so the bell shows the demo count. */
+export const NOTIFICATION_COUNT = 3;
+
+/** `disabled` entries are announced but not built yet: shown as "Coming soon", never linked or current. */
+export type NavEntry = { key: string; label: string; href: string; public?: true; disabled?: true };
 
 /** Append new sections to the end so existing positions stay stable. */
 export const MAIN_NAV: readonly NavEntry[] = [
-  { key: "home", label: "Home", href: HOME_HREF },
+  { key: "home", label: "Dashboard", href: HOME_HREF },
   { key: "wallet", label: "Wallet", href: WALLET_HREF },
   { key: "orders", label: "Orders", href: ORDERS_HREF },
   { key: "history", label: "History", href: HISTORY_HREF },
@@ -43,6 +47,8 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "menu", label: "Menu", href: MENU_HREF, public: true },
   { key: "onboarding-templates", label: "Templates", href: ONBOARDING_TEMPLATES_HREF },
   { key: "lobby", label: "Lobby", href: LOBBY_HREF, public: true },
+  { key: "holdings", label: "Holdings", href: "/holdings", disabled: true },
+  { key: "sips", label: "SIPs", href: "/sips", disabled: true },
 ];
 
 export function brandHref(signedIn: boolean): string {

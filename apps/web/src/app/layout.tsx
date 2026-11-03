@@ -19,6 +19,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="shell">
             <TopBarControls signedIn={session !== null} />
             <main className="shell-main">{children}</main>
+            <footer className="shell-footer">
+              <div>{BRAND_NAME}</div>
+            </footer>
           </div>
         </CartProvider>
       </body>
