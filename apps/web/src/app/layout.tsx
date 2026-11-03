@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { CartProvider } from "@/components/cart/CartProvider";
+import { BalanceProvider } from "@/components/BalanceProvider";
 import { TopBarControls } from "@/components/TopBarControls";
-import { getSession } from "@/lib/session";
+import { getSession, getWalletBalance } from "@/lib/session";
 import { BRAND_NAME } from "@/lib/shell";
 import "./globals.css";
 
@@ -12,14 +13,17 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
+  const balance = session ? await getWalletBalance().catch(() => null) : null;
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
         <CartProvider>
-          <div className="shell">
-            <TopBarControls signedIn={session !== null} />
-            <main className="shell-main">{children}</main>
-          </div>
+          <BalanceProvider initial={balance}>
+            <div className="shell">
+              <TopBarControls signedIn={session !== null} />
+              <main className="shell-main">{children}</main>
+            </div>
+          </BalanceProvider>
         </CartProvider>
       </body>
     </html>

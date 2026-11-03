@@ -32,6 +32,11 @@ createServer(async (req, res) => {
   }
   if (req.method === "GET" && url.pathname === "/wallet") {
     const signedIn = cookie.includes("e2e-session=1");
+    // Cookie `e2e-wallet=fail` makes the wallet read fail (500).
+    if (cookie.includes("e2e-wallet=fail")) {
+      res.writeHead(500).end();
+      return;
+    }
     res.writeHead(signedIn ? 200 : 401, { "content-type": "application/json" });
     // Cookie `e2e-balance=1` is a player with 1 credit, who may claim free credits.
     const low = cookie.includes("e2e-balance=1");

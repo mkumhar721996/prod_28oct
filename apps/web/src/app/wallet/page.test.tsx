@@ -12,9 +12,14 @@ const { redirect, getSession, getWallet } = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({ redirect, useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock("@/lib/session", () => ({ getSession, getWallet, claimFreeCredits: vi.fn() }));
 
+import { BalanceProvider } from "@/components/BalanceProvider";
 import WalletPage from "./page";
 
 beforeEach(() => vi.clearAllMocks());
+
+/** The root layout supplies BalanceProvider in the app; mirror that here. */
+const render = (page: React.ReactNode, balance: number) =>
+  renderToStaticMarkup(<BalanceProvider initial={balance}>{page}</BalanceProvider>);
 
 const signedIn = { role: "player", email: "ana@example.com" };
 
@@ -33,7 +38,7 @@ describe("WalletPage", () => {
       balanceCredits: 1000,
       topUp: { eligible: false, credits: 500 },
     });
-    const html = renderToStaticMarkup(await WalletPage({ searchParams: Promise.resolve({}) }));
+    const html = render(await WalletPage({ searchParams: Promise.resolve({}) }), 1000);
     expect(html).toContain("1,000 credits");
     expect(html).toContain("Signed in as ana@example.com");
     expect(html).toContain("Free credits");
@@ -44,7 +49,7 @@ describe("WalletPage", () => {
   it("shows 1 credit and an available claim panel at a balance of 1", async () => {
     getSession.mockResolvedValue(signedIn);
     getWallet.mockResolvedValue({ balanceCredits: 1, topUp: { eligible: true, credits: 500 } });
-    const html = renderToStaticMarkup(await WalletPage({ searchParams: Promise.resolve({}) }));
+    const html = render(await WalletPage({ searchParams: Promise.resolve({}) }), 1);
     expect(html).toContain("1 credit<");
     expect(html).toContain("Available");
   });
@@ -55,8 +60,9 @@ describe("WalletPage", () => {
       balanceCredits: 1000,
       topUp: { eligible: false, credits: 500 },
     });
-    const html = renderToStaticMarkup(
+    const html = render(
       await WalletPage({ searchParams: Promise.resolve({ welcome: "1" }) }),
+      1000,
     );
     expect(html).toContain("Welcome! We added 1,000 credits to your new wallet.");
   });

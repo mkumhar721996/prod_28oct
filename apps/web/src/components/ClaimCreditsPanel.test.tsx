@@ -4,11 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/session", () => ({ claimFreeCredits: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
+import { BalanceProvider } from "./BalanceProvider";
 import { ClaimCreditsPanel, runClaim } from "./ClaimCreditsPanel";
 
 const render = (balanceCredits: number, eligible: boolean) =>
   renderToStaticMarkup(
-    <ClaimCreditsPanel balanceCredits={balanceCredits} topUp={{ eligible, credits: 500 }} />,
+    <BalanceProvider initial={balanceCredits}>
+      <ClaimCreditsPanel balanceCredits={balanceCredits} topUp={{ eligible, credits: 500 }} />
+    </BalanceProvider>,
   );
 
 describe("ClaimCreditsPanel", () => {
@@ -60,5 +63,27 @@ describe("runClaim", () => {
       ok: false,
       message: "Couldn't claim free credits. Try again.",
     });
+  });
+});
+
+describe("runClaim publish", () => {
+  it("publishes the new balance on success", async () => {
+    const publish = vi.fn();
+    await runClaim({
+      claimFreeCredits: async () => ({ ok: true, balanceCredits: 501, grantedCredits: 500 }),
+      refresh: vi.fn(),
+      publish,
+    });
+    expect(publish).toHaveBeenCalledWith(501);
+  });
+
+  it("does not publish on failure", async () => {
+    const publish = vi.fn();
+    await runClaim({
+      claimFreeCredits: async () => ({ ok: false, message: "no" }),
+      refresh: vi.fn(),
+      publish,
+    });
+    expect(publish).not.toHaveBeenCalled();
   });
 });

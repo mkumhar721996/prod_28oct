@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "@/lib/session";
 import { SIGN_IN_HREF } from "@/lib/shell";
+import { useBalance } from "./BalanceProvider";
 import { TopBar } from "./TopBar";
 
 export const SIGN_OUT_ERROR = "Sign out failed. You are still signed in. Try again.";
@@ -34,6 +35,7 @@ export async function handleSignOut(
 export function TopBarControls({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { balance } = useBalance();
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
@@ -53,6 +55,7 @@ export function TopBarControls({ signedIn }: { signedIn: boolean }) {
       onToggleMenu={() => setMenuOpen((open) => !open)}
       onSignOut={onSignOut}
       signingOut={signingOut}
+      balance={balance}
     />
   );
 }

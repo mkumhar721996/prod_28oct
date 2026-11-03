@@ -19,7 +19,7 @@ test("AC4: a signed-in player sees their balance", async ({ page }) => {
   await signIn(page);
   await page.goto("/wallet");
   await expect(page.getByRole("heading", { name: "Wallet" })).toBeVisible();
-  await expect(page.getByText("1,000 credits")).toBeVisible();
+  await expect(page.locator("main").getByText("1,000 credits")).toBeVisible();
   await expect(page.getByText("Signed in as ana@example.com")).toBeVisible();
 });
 
@@ -78,6 +78,51 @@ test("Free credits: a player with 1 credit claims and sees the success message",
   await expect(page.getByRole("status").filter({ hasText: "Free credits claimed" })).toContainText(
     "Free credits claimed: 500 credits. Balance 501 credits.",
   );
+});
+
+test("Top bar balance: signed-in player sees it and a top-up updates it without reload", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/wallet");
+  const badge = page.locator('[data-wf-id="balance"]');
+  await expect(badge).toHaveText("1,000 credits");
+
+  await page
+    .context()
+    .addCookies([{ name: "e2e-balance", value: "1", url: "http://localhost:3100" }]);
+  await page.route("**/api/wallet/top-up", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ balanceCredits: 501, grantedCredits: 500 }),
+    }),
+  );
+  await page.goto("/wallet");
+  await expect(badge).toHaveText("1 credit");
+  const url = page.url();
+  let loaded = false;
+  page.on("load", () => (loaded = true));
+  await page.getByRole("button", { name: "Claim free credits" }).click();
+  await expect(badge).toHaveText("501 credits");
+  expect(page.url()).toBe(url);
+  expect(loaded).toBe(false);
+});
+
+test("Top bar balance: signed-out visitors see no balance", async ({ page }) => {
+  await page.goto("/sign-in");
+  await expect(page.locator(".balance-badge")).toHaveCount(0);
+});
+
+test("Top bar balance: shows -- when the balance cannot be loaded", async ({ page }) => {
+  await signIn(page);
+  await page
+    .context()
+    .addCookies([{ name: "e2e-wallet", value: "fail", url: "http://localhost:3100" }]);
+  await page.goto("/history");
+  const bar = page.locator(".shell-bar");
+  await expect(bar.locator(".badge-danger")).toContainText("--");
+  await expect(bar.getByText("Balance unavailable")).toBeAttached();
 });
 
 test("AC7: a duplicate email shows the alert", async ({ page }) => {
