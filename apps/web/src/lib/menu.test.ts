@@ -19,8 +19,8 @@ const TWO_PER_CATEGORY: readonly MenuItem[] = [
 
 describe("menuCategories", () => {
   it("lists each seeded category once, in first-seen order", () => {
-    expect(menuCategories(MENU_ITEMS)).toEqual([...new Set(MENU_ITEMS.map((d) => d.category))]);
-    expect(menuCategories(MENU_ITEMS).length).toBeGreaterThan(0);
+    expect(menuCategories(MENU_ITEMS)).toEqual(["Mains", "Drinks", "Sides"]);
+    expect(menuCategories(TWO_PER_CATEGORY)).toEqual(["Mains", "Sides", "Drinks"]);
   });
 });
 

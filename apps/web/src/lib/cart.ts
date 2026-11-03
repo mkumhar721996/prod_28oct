@@ -18,10 +18,12 @@ export function formatMoney(amount: number): string {
   return money.format(amount);
 }
 
+/** Copies only the cart-line fields, so extra fields on a menu item (e.g. category) never reach the cart. */
 export function addItem(cart: Cart, item: Omit<CartLine, "quantity">): Cart {
-  return cart.some((line) => line.id === item.id)
-    ? increase(cart, item.id)
-    : [...cart, { ...item, quantity: 1 }];
+  const { id, name, unitPrice, image } = item;
+  return cart.some((line) => line.id === id)
+    ? increase(cart, id)
+    : [...cart, { id, name, unitPrice, image, quantity: 1 }];
 }
 
 /** A quantity below 1 removes the line. */

@@ -61,7 +61,7 @@ export function MenuGrid({ items = MENU_ITEMS, initial }: MenuGridProps = {}) {
         </div>
       ) : (
         <div className="grid">
-          {shown.map(({ category: _category, ...item }) => (
+          {shown.map((item) => (
             <div className="card stack stack-2" key={item.id} data-testid="menu-item">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="menu-photo" data-testid="item-image" src={item.image} alt="" />

@@ -20,6 +20,11 @@ describe("cart model", () => {
     expect(addItem([m], m)[0].quantity).toBe(3);
   });
 
+  it("keeps extra item fields such as category out of the cart line", () => {
+    const line = addItem([], { id: "m", name: "Margherita", unitPrice: 10, image, category: "Mains" } as never)[0];
+    expect(line).toEqual({ id: "m", name: "Margherita", unitPrice: 10, image, quantity: 1 });
+  });
+
   it("increases a quantity from 2 to 3 (AC3)", () => {
     expect(increase([m], "m")[0].quantity).toBe(3);
   });
