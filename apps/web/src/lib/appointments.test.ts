@@ -4,8 +4,12 @@ import {
   bookAppointment,
   canConfirm,
   describeAppointment,
+  describeDateTime,
   describeNext,
   dayLabel,
+  NO_REASON_TEXT,
+  reasonText,
+  zoneNote,
   fetchSlots,
   reasonError,
   splitUpcoming,
@@ -37,13 +41,13 @@ describe("reasonError", () => {
 describe("formatting", () => {
   it("labels days and describes bookings", () => {
     expect(dayLabel("2026-11-02")).toBe("Mon 2 Nov");
-    const base = { id: "a", clinicId: "north", clinicName: "North Clinic", date: "2026-11-02", time: "09:00", startsAt: "2026-11-02T09:00:00.000Z" };
+    const base = { id: "a", clinicId: "north", clinicName: "North Clinic", timeZone: "Europe/London", date: "2026-11-02", time: "09:00", startsAt: "2026-11-02T09:00:00.000Z" };
     expect(describeAppointment({ ...base, reason: "" })).toBe("North Clinic, Mon 2 Nov, 09:00");
     expect(describeAppointment({ ...base, reason: "x".repeat(80) })).toBe("North Clinic, Mon 2 Nov, 09:00");
   });
 
   it("orders upcoming soonest first and past most recent first, around now", () => {
-    const mk = (startsAt: string) => ({ id: startsAt, clinicId: "", clinicName: "", date: "", time: "", reason: "", startsAt });
+    const mk = (startsAt: string) => ({ id: startsAt, clinicId: "", clinicName: "", timeZone: "", date: "", time: "", reason: "", startsAt });
     const input = [
       mk("2026-11-20T08:00:00Z"),
       mk("2026-10-29T15:00:00Z"),
@@ -57,7 +61,7 @@ describe("formatting", () => {
   });
 
   it("splits upcoming from past by start instant", () => {
-    const mk = (startsAt: string) => ({ id: startsAt, clinicId: "", clinicName: "", date: "", time: "", reason: "", startsAt });
+    const mk = (startsAt: string) => ({ id: startsAt, clinicId: "", clinicName: "", timeZone: "", date: "", time: "", reason: "", startsAt });
     const { upcoming, past } = splitUpcoming(
       [mk("2026-11-01T09:00:00Z"), mk("2026-10-01T09:00:00Z")],
       new Date("2026-10-29T00:00:00Z"),
@@ -72,6 +76,7 @@ describe("describeNext", () => {
     id: startsAt,
     clinicId: "central",
     clinicName: "Central Clinic",
+    timeZone: "Europe/London",
     date,
     time,
     reason: "",
@@ -130,5 +135,43 @@ describe("client calls", () => {
     expect(await fetchSlots("north")).toEqual([{ date: "2026-11-02", times: ["09:00"] }]);
     vi.stubGlobal("fetch", reply(500, {}));
     await expect(fetchSlots("north")).rejects.toThrow();
+  });
+});
+
+describe("appointment detail helpers", () => {
+  const appt = {
+    id: "a1",
+    clinicId: "north",
+    clinicName: "North Clinic",
+    timeZone: "Europe/London",
+    date: "2026-11-03",
+    time: "09:30",
+    startsAt: "2026-11-03T09:30:00.000Z",
+    reason: "Blood pressure check",
+  };
+  const ny = { ...appt, timeZone: "America/New_York", date: "2026-11-24", time: "10:00", startsAt: "2026-11-24T15:00:00.000Z" };
+
+  it("describes the clinic-local date and time with the zone name", () => {
+    expect(describeDateTime(appt)).toBe("Tue 3 Nov 2026, 09:30 GMT");
+    expect(describeDateTime(ny)).toBe("Tue 24 Nov 2026, 10:00 GMT-5");
+  });
+
+  it("omits the zone name when the zone is missing or invalid", () => {
+    expect(describeDateTime({ ...appt, timeZone: "Not/AZone" })).toBe("Tue 3 Nov 2026, 09:30");
+    expect(describeDateTime({ ...appt, timeZone: undefined } as never)).toBe("Tue 3 Nov 2026, 09:30");
+  });
+
+  it("shows the reason, or 'No reason given' when empty or blank", () => {
+    expect(reasonText(appt)).toBe("Blood pressure check");
+    expect(NO_REASON_TEXT).toBe("No reason given");
+    expect(reasonText({ ...appt, reason: "" })).toBe("No reason given");
+    expect(reasonText({ ...appt, reason: "   " })).toBe("No reason given");
+  });
+
+  it("notes the clinic zone only when the device zone differs", () => {
+    expect(zoneNote(ny, "Europe/London")).toContain("clinic's local time");
+    expect(zoneNote(ny, "Europe/London")).toContain("Your device is on Europe/London");
+    expect(zoneNote(appt, "Europe/London")).toBeNull();
+    expect(zoneNote({ ...appt, timeZone: undefined } as never, "Europe/London")).toBeNull();
   });
 });

@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { describeAppointment, splitUpcoming, type Appointment } from "@/lib/appointments";
+import { dayLabel, describeAppointment, splitUpcoming, type Appointment } from "@/lib/appointments";
 import { APPOINTMENTS_HREF, BOOK_APPOINTMENT_HREF } from "@/lib/shell";
+import { AppointmentDetail } from "./AppointmentDetail";
 import { NoAppointments } from "./NoAppointments";
 import { Toast } from "./Toast";
 
@@ -23,12 +24,30 @@ type Props = {
   initialTab?: TabId;
 };
 
-function AppointmentList({ items, label }: { items: Appointment[]; label: string }) {
+function AppointmentList({
+  items,
+  label,
+  onOpen,
+}: {
+  items: Appointment[];
+  label: string;
+  onOpen: (id: string) => void;
+}) {
   return (
     <ul className="stack stack-2 plain-list" aria-label={label}>
       {items.map((a) => (
-        <li className="card" key={a.id}>
-          {describeAppointment(a)}
+        <li key={a.id}>
+          <button
+            type="button"
+            className="card appt"
+            aria-label={`Open appointment at ${describeAppointment(a)}`}
+            onClick={() => onOpen(a.id)}
+          >
+            <span className="appt-patient">{a.clinicName}</span>
+            <span className="text-muted">
+              {dayLabel(a.date)}, {a.time}
+            </span>
+          </button>
         </li>
       ))}
     </ul>
@@ -38,6 +57,7 @@ function AppointmentList({ items, label }: { items: Appointment[]; label: string
 export function AppointmentsScreen({ appointments, now, justBooked = false, initialTab }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>(initialTab ?? "upcoming");
+  const [openId, setOpenId] = useState<string | null>(null);
   const [toast, setToast] = useState(justBooked);
   const hideToast = useCallback(() => setToast(false), []);
   const { upcoming, past } = splitUpcoming(appointments, new Date(now));
@@ -54,6 +74,17 @@ export function AppointmentsScreen({ appointments, now, justBooked = false, init
         <NoAppointments />
         {toast && <Toast message="Appointment booked" onHide={hideToast} />}
       </div>
+    );
+  }
+
+  const open = appointments.find((a) => a.id === openId);
+  if (open) {
+    return (
+      <AppointmentDetail
+        appointment={open}
+        upcoming={upcoming.includes(open)}
+        onBack={() => setOpenId(null)}
+      />
     );
   }
 
@@ -88,13 +119,13 @@ export function AppointmentsScreen({ appointments, now, justBooked = false, init
           (upcoming.length === 0 ? (
             <p className="text-muted">No upcoming appointments.</p>
           ) : (
-            <AppointmentList items={upcoming} label="Upcoming appointments" />
+            <AppointmentList items={upcoming} label="Upcoming appointments" onOpen={setOpenId} />
           ))}
         {tab === "past" &&
           (past.length === 0 ? (
             <p className="text-muted">No past appointments.</p>
           ) : (
-            <AppointmentList items={past} label="Past appointments" />
+            <AppointmentList items={past} label="Past appointments" onOpen={setOpenId} />
           ))}
       </div>
 

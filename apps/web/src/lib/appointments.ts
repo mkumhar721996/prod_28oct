@@ -8,6 +8,8 @@ export type Appointment = {
   id: string;
   clinicId: string;
   clinicName: string;
+  /** The clinic's IANA time zone; date and time below are in it. */
+  timeZone: string;
   /** Clinic-local date (YYYY-MM-DD) and time (HH:mm), as the server formats them. */
   date: string;
   time: string;
@@ -53,6 +55,38 @@ export function dayLabel(date: string): string {
 
 export function describeAppointment(a: Appointment): string {
   return `${a.clinicName}, ${dayLabel(a.date)}, ${a.time}`;
+}
+
+export const NO_REASON_TEXT = "No reason given";
+
+function zoneName(timeZone: unknown, at: string): string | null {
+  if (typeof timeZone !== "string") return null;
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "short" }).formatToParts(
+      new Date(at),
+    );
+    return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** "Tue 3 Nov 2026, 09:30 GMT": clinic-local date and time, then the clinic zone's short name at that instant. */
+export function describeDateTime(a: Appointment): string {
+  const year = a.date.split("-")[0];
+  const zone = zoneName(a.timeZone, a.startsAt);
+  return `${dayLabel(a.date)} ${year}, ${a.time}${zone ? ` ${zone}` : ""}`;
+}
+
+/** The detail's reason text: the reason, or NO_REASON_TEXT when empty or only whitespace. */
+export function reasonText(a: Appointment): string {
+  return a.reason.trim() === "" ? NO_REASON_TEXT : a.reason;
+}
+
+/** Note for the detail when the device zone differs from the clinic zone; null when equal. */
+export function zoneNote(a: Appointment, deviceZone: string): string | null {
+  if (typeof a.timeZone !== "string" || a.timeZone === deviceZone) return null;
+  return `Shown in ${a.timeZone}, the clinic's local time. Your device is on ${deviceZone}.`;
 }
 
 /** Splits bookings by start instant: upcoming soonest first, past most recent first. */

@@ -161,6 +161,15 @@ a.link { color: var(--color-primary); }
 /* Appointments: booking page, list and toast (from the approved prototype) */
 .page { max-width: var(--size-modal); margin: 0 auto; width: 100%; }
 .title-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.d-group { display: flex; flex-direction: column; gap: var(--space-1); }
+.d-label { font-size: var(--font-size-sm); color: var(--color-fg-muted); }
+.d-value { overflow-wrap: anywhere; }
+.d-reason.is-empty { color: var(--color-fg-muted); font-style: italic; }
+.back { align-self: flex-start; }
+.appt { display: flex; flex-direction: column; gap: var(--space-1); width: 100%; text-align: left; font: inherit; color: inherit; }
+.appt-patient { font-weight: var(--font-weight-semibold); }
+button.appt { cursor: pointer; }
+button.appt:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
 .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
 .plain-list { list-style: none; margin: 0; padding: 0; }
 .field-label { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
