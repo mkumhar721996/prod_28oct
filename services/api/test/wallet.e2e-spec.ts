@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import { Pool } from 'pg';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { BET_ABOVE_BALANCE_MESSAGE } from '../src/wallet/wallet.constants';
 import { WalletService } from '../src/wallet/wallet.service';
 
 const ana = { email: 'ana@example.com', password: 'play-2026' };
@@ -75,31 +76,58 @@ describe('Wallet ledger (e2e)', () => {
     expect(Number(rows[0].balance_after_credits)).toBe(650);
   });
 
-  it('AC3: two simultaneous bets of 6 on 10 accept only one', async () => {
+  it('AC6/AC7: two simultaneous bets of 60 on 100 accept only one and leave 40', async () => {
     await register();
     const id = await playerId(ana.email);
-    await seed(id, 10);
-    const results = await Promise.all([service.placeBet(id, 6), service.placeBet(id, 6)]);
+    await seed(id, 100);
+    const results = await Promise.all([service.placeBet(id, 60), service.placeBet(id, 60)]);
     expect(results.filter((r) => r.ok)).toHaveLength(1);
-    expect(await service.balanceFor(id)).toBe(4);
+    expect(await service.balanceFor(id)).toBe(40);
     expect(await entryCount(id, 'bet')).toBe(1);
   });
 
-  it('AC4/AC5/AC7/AC8/AC9: the strict balance > bet rule', async () => {
+  it('AC6/AC7 over HTTP: two parallel POST /wallet/bet of 60 on 100', async () => {
+    const { agent } = await register();
+    const id = await playerId(ana.email);
+    await seed(id, 100);
+    const res = await Promise.all([
+      agent.post('/wallet/bet').send({ amount: 60 }),
+      agent.post('/wallet/bet').send({ amount: 60 }),
+    ]);
+    expect(res.map((r) => r.status).sort()).toEqual([200, 409]);
+    expect(await service.balanceFor(id)).toBe(40);
+    expect(await entryCount(id, 'bet')).toBe(1);
+  });
+
+  it('AC1/AC4/AC5: a bet of 101 on 100 is refused and changes nothing', async () => {
     await register();
     const id = await playerId(ana.email);
-    await seed(id, 10);
-    expect(await service.placeBet(id, 9)).toEqual({ ok: true, balanceCredits: 1 });
-    await seed(id, 10);
-    expect(await service.placeBet(id, 10)).toEqual({ ok: false, reason: 'insufficient_balance' });
-    expect(await service.balanceFor(id)).toBe(10);
-    await seed(id, 2);
-    expect(await service.placeBet(id, 1)).toEqual({ ok: true, balanceCredits: 1 });
-    for (const start of [1, 0]) {
-      await seed(id, start);
-      expect(await service.placeBet(id, 1)).toEqual({ ok: false, reason: 'insufficient_balance' });
-      expect(await service.balanceFor(id)).toBe(start);
-    }
+    await seed(id, 100);
+    expect(await service.placeBet(id, 101)).toEqual({ ok: false, reason: 'insufficient_balance' });
+    expect(await service.balanceFor(id)).toBe(100);
+    expect(await entryCount(id, 'bet')).toBe(0);
+  });
+
+  it('AC3: a bet equal to the balance is accepted and leaves 0', async () => {
+    await register();
+    const id = await playerId(ana.email);
+    await seed(id, 100);
+    expect(await service.placeBet(id, 100)).toEqual({ ok: true, balanceCredits: 0 });
+    expect(await service.placeBet(id, 1)).toEqual({ ok: false, reason: 'insufficient_balance' });
+    expect(await service.balanceFor(id)).toBe(0);
+  });
+
+  it('AC2/AC4 over HTTP: 101 on 100 is a 409 with the message, balance still 100', async () => {
+    const { agent } = await register();
+    const id = await playerId(ana.email);
+    await seed(id, 100);
+    const res = await agent.post('/wallet/bet').send({ amount: 101 }).expect(409);
+    expect(res.body.message).toBe(BET_ABOVE_BALANCE_MESSAGE);
+    expect((await agent.get('/wallet')).body.balanceCredits).toBe(100);
+    await agent.post('/wallet/bet').send({ amount: 1.5 }).expect(400);
+    await agent.post('/wallet/bet').send({ amount: '5' }).expect(400);
+    expect(await service.balanceFor(id)).toBe(100);
+    await request(server()).post('/wallet/bet').send({ amount: 1 }).expect(401);
   });
 
   it('AC6/16/17: invalid amounts leave the balance unchanged', async () => {
