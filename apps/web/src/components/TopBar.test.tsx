@@ -60,6 +60,36 @@ describe("TopBar signed in", () => {
   });
 });
 
+describe("TopBar alerts link", () => {
+  it("shows the unread count", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn pathname="/" unreadCount={2} />);
+    expect(html).toContain("2 unread");
+    expect(html).toMatch(/<a[^>]*data-nav-key="alerts"[^>]*aria-label="Alerts, 2 unread"/);
+    expect(html).toMatch(/<a[^>]*href="\/alerts"/);
+    expect(html).toContain("badge badge-danger");
+    expect(html.indexOf('data-nav-key="alerts"')).toBeGreaterThan(html.indexOf("</nav>"));
+    expect(html.indexOf('data-nav-key="alerts"')).toBeLessThan(html.indexOf(">Sign out<"));
+  });
+
+  it.each([0, null, undefined])("shows no badge for a count of %s", (unreadCount) => {
+    const html = renderToStaticMarkup(<TopBar signedIn pathname="/" unreadCount={unreadCount} />);
+    expect(html).toContain('data-nav-key="alerts"');
+    expect(html).not.toContain("unread");
+    expect(html).not.toContain("badge-danger");
+  });
+
+  it("marks the alerts page current", () => {
+    expect(renderToStaticMarkup(<TopBar signedIn pathname="/alerts" />)).toMatch(
+      /data-nav-key="alerts"[^>]*aria-current="page"/,
+    );
+  });
+
+  it("is absent when signed out", () => {
+    const html = renderToStaticMarkup(<TopBar signedIn={false} pathname="/" unreadCount={2} />);
+    expect(html).not.toContain('data-nav-key="alerts"');
+  });
+});
+
 describe("TopBar signed out", () => {
   const html = renderToStaticMarkup(<TopBar signedIn={false} pathname="/sign-in" />);
 

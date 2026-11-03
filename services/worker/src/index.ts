@@ -2,11 +2,11 @@ import { loadConfig } from './config';
 import { startWorker } from './worker';
 
 async function main(): Promise<void> {
-  const boss = await startWorker(loadConfig());
+  const worker = await startWorker(loadConfig());
   console.log('background worker started');
 
   const shutdown = async () => {
-    await boss.stop();
+    await worker.stop();
     process.exit(0);
   };
   process.on('SIGINT', shutdown);

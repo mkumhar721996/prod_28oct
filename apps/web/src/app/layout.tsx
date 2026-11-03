@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { UnreadCountProvider } from "@/components/alerts/UnreadCountProvider";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { TopBarControls } from "@/components/TopBarControls";
 import { getSession } from "@/lib/session";
@@ -16,10 +17,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body className="min-h-screen antialiased">
         <CartProvider>
-          <div className="shell">
-            <TopBarControls signedIn={session !== null} />
-            <main className="shell-main">{children}</main>
-          </div>
+          <UnreadCountProvider signedIn={session !== null}>
+            <div className="shell">
+              <TopBarControls signedIn={session !== null} />
+              <main className="shell-main">{children}</main>
+            </div>
+          </UnreadCountProvider>
         </CartProvider>
       </body>
     </html>

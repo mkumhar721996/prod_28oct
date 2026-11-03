@@ -267,3 +267,14 @@ fieldset.field legend { padding: 0; font-size: var(--font-size-sm); font-weight:
 .game-card.is-unavailable .game-thumb { background: var(--color-border); }
 .skeleton-thumb { aspect-ratio: 4 / 3; height: auto; }
 .loading-note { display: flex; align-items: center; gap: var(--space-2); }
+
+/* Alerts: top bar link and list cards (from the approved prototype) */
+.shell-alerts { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--size-control); padding: 0 var(--space-2); border-radius: var(--radius-md); color: var(--color-fg); text-decoration: none; font-weight: var(--font-weight-medium); }
+.shell-alerts:hover { background: var(--color-bg-subtle); }
+.shell-alerts[aria-current="page"] { color: var(--color-primary); }
+.shell-alerts:focus-visible { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.alert-card { border-left-width: var(--border-width-strong); }
+.alert-card.is-unread { border-left-color: var(--color-primary); }
+.alert-card h3, .alert-card p { overflow-wrap: anywhere; }
+.alert-amount { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); }
+.alert-skeleton { height: var(--space-6); }

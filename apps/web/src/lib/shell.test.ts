@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ALERTS_HREF,
   BRAND_NAME,
   MAIN_NAV,
   PLACE_BET_HREF,
@@ -9,6 +10,13 @@ import {
   signInTarget,
   visibleNav,
 } from "./shell";
+
+describe("shell alerts", () => {
+  it("has an alerts page that sign-in can return to", () => {
+    expect(ALERTS_HREF).toBe("/alerts");
+    expect(signInTarget("alerts")).toBe("/alerts");
+  });
+});
 
 describe("shell", () => {
   it("has one brand value", () => {
