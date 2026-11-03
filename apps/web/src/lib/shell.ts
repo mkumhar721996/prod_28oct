@@ -10,6 +10,8 @@ export const APPOINTMENTS_HREF = "/appointments";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
 export const MENU_HREF = "/menu";
 export const CHECKOUT_HREF = "/checkout";
+/** Owned by the Order confirmed story; Checkout only navigates here with `?number=<order number>`. */
+export const ORDER_CONFIRMED_HREF = "/order-confirmed";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 

@@ -228,3 +228,15 @@ a.link { color: var(--color-primary); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(var(--size-drawer), 100%), 1fr)); gap: var(--space-3); }
 .menu-photo { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--color-bg-subtle); border-radius: var(--radius-md); }
 .menu-name { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); }
+
+/* Checkout: fulfilment choice and order summary lines */
+.radio-group { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.radio-group > legend { padding: 0; margin-bottom: var(--space-2); }
+.radio-option { display: flex; align-items: center; gap: var(--space-2); min-height: var(--size-control); }
+.radio-option input { width: var(--size-check); height: var(--size-check); margin: 0; }
+.radio-option:focus-within { outline: var(--border-width-strong) solid var(--color-focus); outline-offset: var(--size-focus-offset); }
+.order-line { grid-template-columns: 1fr auto; }
+@media (min-width: 768px) {
+  .radio-group { flex-direction: row; flex-wrap: wrap; }
+  .radio-group > legend { flex-basis: 100%; }
+}

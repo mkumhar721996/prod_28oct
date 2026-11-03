@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   BRAND_NAME,
   MAIN_NAV,
+  ORDER_CONFIRMED_HREF,
   PLACE_BET_HREF,
   WALLET_HREF,
   brandHref,
@@ -11,6 +12,10 @@ import {
 } from "./shell";
 
 describe("shell", () => {
+  it("names the Order confirmed route Checkout navigates into", () => {
+    expect(ORDER_CONFIRMED_HREF).toBe("/order-confirmed");
+  });
+
   it("has one brand value", () => {
     expect(BRAND_NAME).toBe("Web App");
   });
