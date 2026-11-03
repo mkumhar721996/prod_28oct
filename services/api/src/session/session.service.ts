@@ -17,17 +17,21 @@ export function readCookie(header: string | undefined, name: string): string | u
   return undefined;
 }
 
-const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
+export const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
+
+export function sessionCookieOptions(): CookieOptions {
+  const secure = process.env.SESSION_COOKIE_SECURE
+    ? process.env.SESSION_COOKIE_SECURE === 'true'
+    : process.env.NODE_ENV === 'production';
+  return { httpOnly: true, sameSite: 'lax', secure, path: '/' };
+}
 
 @Injectable()
 export class SessionService {
   constructor(private readonly db: DatabaseService) {}
 
   private cookieOptions(): CookieOptions {
-    const secure = process.env.SESSION_COOKIE_SECURE
-      ? process.env.SESSION_COOKIE_SECURE === 'true'
-      : process.env.NODE_ENV === 'production';
-    return { httpOnly: true, sameSite: 'lax', secure, path: '/' };
+    return sessionCookieOptions();
   }
 
   /** Issues a random token, stores only its hash, and sets the cookie. */

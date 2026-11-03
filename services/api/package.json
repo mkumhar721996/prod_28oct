@@ -12,6 +12,7 @@
     "build": "nest build",
     "start": "node dist/main",
     "migrate": "node --experimental-strip-types scripts/migrate.ts",
+    "create-staff": "nest build && node dist/staff/create-staff",
     "start:dev": "nest start --watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --config jest.config.js",
