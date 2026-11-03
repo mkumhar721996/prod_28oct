@@ -60,6 +60,13 @@ describe('OrdersService.place', () => {
     ['unknown fulfilment', { fulfilment: 'drone' as never }],
     ['blank key', { idempotencyKey: ' ' }],
     ['bad line', { lines: [{ id: 'p1', name: 'Pizza', unitPrice: 900, quantity: 0 }] }],
+    ['too many lines', { lines: Array.from({ length: 51 }, (_, i) => ({ ...lines[0], id: `p${i}` })) }],
+    ['oversized quantity', { lines: [{ ...lines[0], quantity: 100 }] }],
+    ['oversized line name', { lines: [{ ...lines[0], name: 'x'.repeat(201) }] }],
+    ['oversized name', { name: 'x'.repeat(101) }],
+    ['oversized phone', { phone: '1'.repeat(10) + ' '.repeat(40) }],
+    ['oversized address', { fulfilment: 'delivery' as const, address: `12 MG Road, ${'x'.repeat(300)}, 560103` }],
+    ['oversized key', { idempotencyKey: 'k'.repeat(101) }],
   ])('refuses %s and runs no query', async (_label, patch) => {
     const { service, query } = setup();
     expect(await service.place('player-1', { ...collection, ...patch })).toEqual({ ok: false, code: 'invalid' });

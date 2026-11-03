@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { addressError, isValidLine, phoneError } from './orders.validation';
+import { addressError, isText, isValidLine, LIMITS, phoneError } from './orders.validation';
 
 export type OrderLineInput = { id: string; name: string; unitPrice: number; quantity: number };
 export type PlaceOrderInput = {
@@ -31,11 +31,14 @@ export class OrdersService {
     const delivery = input.fulfilment === 'delivery';
     const valid =
       (delivery || input.fulfilment === 'collection') &&
-      input.name.trim() !== '' &&
+      input.lines.length <= LIMITS.lines &&
+      isText(input.name, LIMITS.name) &&
+      isText(input.phone, LIMITS.phone) &&
       !phoneError(input.phone) &&
-      (!delivery || (typeof input.address === 'string' && !addressError(input.address))) &&
+      (!delivery ||
+        (isText(input.address, LIMITS.address) && !addressError(input.address))) &&
       input.lines.every(isValidLine) &&
-      input.idempotencyKey.trim() !== '';
+      isText(input.idempotencyKey, LIMITS.idempotencyKey);
     if (!valid) return { ok: false, code: 'invalid' };
 
     const { rows } = await this.db.pool.query(

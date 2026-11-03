@@ -14,18 +14,31 @@ export function addressError(address: string): boolean {
   return parts.length < 3 || parts.some((p) => p === '') || !PIN_CODE.test(parts[parts.length - 1]);
 }
 
-const isText = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
+export const LIMITS = {
+  lines: 50,
+  quantity: 99,
+  name: 100,
+  phone: 30,
+  address: 300,
+  lineId: 100,
+  lineName: 200,
+  idempotencyKey: 100,
+} as const;
+
+export const isText = (v: unknown, max: number): v is string =>
+  typeof v === 'string' && v.trim() !== '' && v.length <= max;
 
 export function isValidLine(line: unknown): boolean {
   if (typeof line !== 'object' || line === null) return false;
   const l = line as Record<string, unknown>;
   return (
-    isText(l.id) &&
-    isText(l.name) &&
+    isText(l.id, LIMITS.lineId) &&
+    isText(l.name, LIMITS.lineName) &&
     typeof l.unitPrice === 'number' &&
     Number.isFinite(l.unitPrice) &&
     l.unitPrice >= 0 &&
     Number.isInteger(l.quantity) &&
-    (l.quantity as number) >= 1
+    (l.quantity as number) >= 1 &&
+    (l.quantity as number) <= LIMITS.quantity
   );
 }

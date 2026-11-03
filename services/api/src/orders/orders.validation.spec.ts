@@ -39,6 +39,9 @@ describe('isValidLine', () => {
     { ...line, unitPrice: Number.NaN },
     { ...line, quantity: 0 },
     { ...line, quantity: 1.5 },
+    { ...line, quantity: 100 },
+    { ...line, name: 'x'.repeat(201) },
+    { ...line, id: 'x'.repeat(101) },
     null,
   ])('rejects %j', (bad) => expect(isValidLine(bad)).toBe(false));
 });

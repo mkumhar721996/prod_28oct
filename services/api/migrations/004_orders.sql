@@ -15,6 +15,9 @@ create table if not exists orders (
   lines jsonb not null,
   idempotency_key text not null,
   created_at timestamptz not null default now(),
+  check (char_length(name) <= 100 and char_length(phone) <= 30 and char_length(address) <= 300),
+  check (char_length(idempotency_key) <= 100),
+  check (jsonb_typeof(lines) = 'array' and jsonb_array_length(lines) between 1 and 50),
   check ((fulfilment = 'delivery' and address is not null) or (fulfilment = 'collection' and address is null))
 );
 
