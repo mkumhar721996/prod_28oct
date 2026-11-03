@@ -156,7 +156,9 @@ describe('HiresService.createPlan', () => {
 describe('HiresService.getPlan', () => {
   const view = { id: 'plan-1', hire_name: 'Alex Morgan', job_role: 'software-engineer', start_date: '2026-12-01' };
 
-  it('computes the due date from the hire start date (AC2)', async () => {
+  // The date arithmetic itself runs in Postgres and is not exercised by this mocked pool: this only checks
+  // the row-to-view mapping and that the query adds the offset to the hire's start date.
+  it('maps the plan rows and asks SQL for start date + offset (AC2)', async () => {
     const { service, pool } = setup({
       planRows: [{ ...view, title: 'Welcome', owner: 'hr', assignee: 'HR', due_offset_days: -30, due_date: '2026-11-01' }],
     });

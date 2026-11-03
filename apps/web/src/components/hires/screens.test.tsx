@@ -52,6 +52,8 @@ describe("HireRecordScreen", () => {
       <HireRecordScreen hire={{ ...hire, planId: "plan-1" }} managers={["Dana Lee"]} />,
     );
     expect(withPlan).toContain("View plan");
+    expect(withPlan.match(/disabled=""/g)).toHaveLength(2); // start date and manager can no longer be edited here
+    expect(withPlan).toContain("Change the start date on the plan page.");
     expect(withPlan).toContain('<span class="badge badge-success">Plan created</span>');
   });
 });

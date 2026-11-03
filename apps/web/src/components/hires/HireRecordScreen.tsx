@@ -21,6 +21,7 @@ export function HireRecordScreen({ hire, managers }: { hire: Hire; managers: str
   const router = useRouter();
   const [startText, setStartText] = useState(toInputDate(hire.startDate));
   const [manager, setManager] = useState(hire.managerName ?? "");
+  const [saved, setSaved] = useState({ startDate: hire.startDate, manager: hire.managerName ?? "" });
   const [pending, setPending] = useState(false);
   const [hasPlan, setHasPlan] = useState(hire.planId !== null);
   const [error, setError] = useState<string | null>(null);
@@ -49,13 +50,16 @@ export function HireRecordScreen({ hire, managers }: { hire: Hire; managers: str
     }
     setPending(true);
     // The record's fields are what the plan is built from, so save any change first.
-    if (iso !== hire.startDate) {
-      const saved = await saveStartDate(hire.id, iso);
-      if (!saved.ok) return fail(saved.message);
+    // Compared with what is actually saved, so a retry after a refusal does not send the same change again.
+    if (iso !== saved.startDate) {
+      const result = await saveStartDate(hire.id, iso);
+      if (!result.ok) return fail(result.message);
+      setSaved((s) => ({ ...s, startDate: iso }));
     }
-    if (manager !== (hire.managerName ?? "")) {
-      const saved = await saveManager(hire.id, manager === "" ? null : manager);
-      if (!saved.ok) return fail(saved.message);
+    if (manager !== saved.manager) {
+      const result = await saveManager(hire.id, manager === "" ? null : manager);
+      if (!result.ok) return fail(result.message);
+      setSaved((s) => ({ ...s, manager }));
     }
     const result = await createPlan(hire.id);
     setPending(false);
@@ -92,11 +96,14 @@ export function HireRecordScreen({ hire, managers }: { hire: Hire; managers: str
               inputMode="numeric"
               aria-describedby="start-hint"
               aria-invalid={startInvalid ? true : undefined}
+              disabled={hasPlan}
               value={startText}
               onChange={(e) => setStartText(e.target.value)}
             />
             <p className="field-hint" id="start-hint">
-              Task due dates are counted from this date.
+              {hasPlan
+                ? "Change the start date on the plan page."
+                : "Task due dates are counted from this date."}
             </p>
           </div>
           <div className="field">
@@ -105,6 +112,7 @@ export function HireRecordScreen({ hire, managers }: { hire: Hire; managers: str
               className={`select${managerInvalid ? " is-invalid" : ""}`}
               id="manager"
               aria-invalid={managerInvalid ? true : undefined}
+              disabled={hasPlan}
               value={manager}
               onChange={(e) => setManager(e.target.value)}
             >

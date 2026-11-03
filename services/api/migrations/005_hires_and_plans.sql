@@ -1,6 +1,8 @@
 -- The managers must match MANAGERS in hires.constants.ts (the manager is stored by name).
 
 -- The minimum hire record plan creation needs: who, which role, when they start, and their manager.
+-- Nothing creates hire rows yet (no endpoint, seed or nav link): a hire-creation story must add that.
+-- Until then, rows are inserted by SQL and the pages are reached at /hires/{id}.
 create table if not exists hires (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(name) between 1 and 200),
