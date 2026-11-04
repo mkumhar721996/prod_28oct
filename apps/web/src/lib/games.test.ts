@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   SAMPLE_GAMES,
   fetchGames,
   loadGames,
+  playGame,
   lobbyReducer,
   sortGamesByName,
   type LobbyAction,
@@ -76,5 +77,43 @@ describe("games", () => {
     const loaded = lobbyReducer(retrying, { type: "loaded", games: SAMPLE_GAMES.slice() });
     expect(loaded.status).toBe("loaded");
     expect(loaded.games).toHaveLength(SAMPLE_GAMES.length);
+  });
+});
+
+describe("playGame", () => {
+  const setup = () => ({ open: vi.fn(), goToSignIn: vi.fn() });
+
+  it("opens an available game for a signed-in player", async () => {
+    const { open, goToSignIn } = setup();
+    const out = await playGame(SAMPLE_GAMES[0], { signedIn: true, open, goToSignIn });
+    expect(out).toBe("opened");
+    expect(open).toHaveBeenCalledWith(SAMPLE_GAMES[0]);
+    expect(goToSignIn).not.toHaveBeenCalled();
+  });
+
+  it("sends a guest to sign-in without opening the game", async () => {
+    const { open, goToSignIn } = setup();
+    const out = await playGame(SAMPLE_GAMES[0], { signedIn: false, open, goToSignIn });
+    expect(out).toBe("sign-in");
+    expect(goToSignIn).toHaveBeenCalledOnce();
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it("opens nothing for a Coming soon game", async () => {
+    const { open, goToSignIn } = setup();
+    const out = await playGame(SAMPLE_GAMES[3], { signedIn: true, open, goToSignIn });
+    expect(out).toBe("unavailable");
+    expect(open).not.toHaveBeenCalled();
+    expect(goToSignIn).not.toHaveBeenCalled();
+  });
+
+  it("reports failed when opening throws, without going to sign-in", async () => {
+    const { goToSignIn } = setup();
+    const boom = vi.fn().mockRejectedValue(new Error("x"));
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const out = await playGame(SAMPLE_GAMES[0], { signedIn: true, open: boom, goToSignIn });
+    expect(out).toBe("failed");
+    expect(goToSignIn).not.toHaveBeenCalled();
+    spy.mockRestore();
   });
 });
