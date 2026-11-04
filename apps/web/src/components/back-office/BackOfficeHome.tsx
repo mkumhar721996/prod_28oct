@@ -6,6 +6,7 @@ import { STAFF_SIGN_IN_HREF } from "@/lib/shell";
 import { signOutStaff } from "@/lib/staffSession";
 import { Toast } from "../appointments/Toast";
 import { Icon } from "../orders/Icon";
+import { AccountsScreen } from "./AccountsScreen";
 
 type SignOutDeps = { signOutStaff: () => Promise<void>; replace: (href: string) => void };
 
@@ -37,10 +38,11 @@ export function BackOfficeHome() {
           <Icon name="user" /> Sign out
         </button>
       </div>
-      <h1>Back-office tools</h1>
+      <AccountsScreen />
       <div className="card">
         <div className="empty-state">
-          <p>Review identity verifications and freeze accounts will appear here.</p>
+          <h2>Back-office tools</h2>
+          <p>Review identity verifications will appear here.</p>
           <span className="badge badge-info">Signed in as staff</span>
         </div>
       </div>
