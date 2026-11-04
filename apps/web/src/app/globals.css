@@ -281,3 +281,17 @@ fieldset.field legend { padding: 0; font-size: var(--font-size-sm); font-weight:
 .alert-card.is-unread { border-left-color: var(--color-primary); }
 .alert-card h3, .alert-card p { overflow-wrap: anywhere; }
 .amount { font-weight: var(--font-weight-semibold); }
+
+/* Organizations and accounts (from the approved prototype) */
+.wide { max-width: var(--size-shell-max); margin: 0 auto; width: 100%; }
+.strip {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3); border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md); background: var(--color-bg-subtle);
+}
+.dl { display: grid; grid-template-columns: 1fr; gap: var(--space-1) var(--space-3); margin: 0; }
+.dl dt { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-fg-muted); }
+.dl dd { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
+@media (min-width: 768px) { .dl { grid-template-columns: 11rem 1fr; } .dl dd { margin: 0; } }
+.acct { padding: var(--space-2) 0; border-top: var(--border-width) solid var(--color-border); overflow-wrap: anywhere; }
+.acct:first-child { border-top: 0; }

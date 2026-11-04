@@ -22,6 +22,22 @@ cd services/api && DATABASE_URL=... pnpm run migrate
 
 The SQL files in `migrations/` are idempotent (`create ... if not exists`), so re-running is safe.
 
+## Deployment setup: the first super-admin
+
+Back-office accounts (super-admin, staff, Fundraising Consultant) live in `app_users`. Only a
+signed-in super-admin can create more, so the first one is seeded. Deploy order: **migrate, new API,
+seed, web app**.
+
+```
+cd services/api && DATABASE_URL=... pnpm run migrate
+cd services/api && DATABASE_URL=... SUPER_ADMIN_EMAIL=... SUPER_ADMIN_PASSWORD=... pnpm run seed-super-admin
+```
+
+The seed is idempotent: if the email already exists it changes nothing and says so, so it is safe on
+every deploy. It exits non-zero with a message when either variable is unset or invalid (password 8
+to 128 characters). Credentials come from the environment, never argv. A session ends after 30
+minutes without a request (`ORG_IDLE_MS` in `src/auth/auth.constants.ts`).
+
 ## Sign-in and registration limits
 
 Sign-in is refused with 429 after 10 failed attempts in 15 minutes for one email or one IP;
