@@ -4,8 +4,9 @@ import { TransfersService } from './transfers.service';
 type Row = Record<string, unknown>;
 type Call = [string, unknown[] | undefined];
 
-const CHECKING = 'a-checking';
-const SAVINGS = 'a-savings';
+const CHECKING = '11111111-1111-4111-8111-111111111111';
+const SAVINGS = '22222222-2222-4222-8222-222222222222';
+const OTHERS = '33333333-3333-4333-8333-333333333333';
 
 /** A tiny in-memory stand-in for the three tables, answering the SQL the service sends. */
 function setup({
@@ -32,7 +33,8 @@ function setup({
         return { rows: [{ id: 't1' }] };
       }
       if (s.startsWith('select a.id, a.balance') && s.includes('transfers')) {
-        const t = transfers.get(String(params[1]))!;
+        const t = transfers.get(String(params[1]));
+        if (!t) return { rows: [] };
         const row = (id: unknown) => ({
           id,
           balance: String(balances[id as string]),
@@ -103,7 +105,7 @@ describe('TransfersService.execute', () => {
     expect(await service.execute('p1', input(over))).toEqual({ ok: false, reason });
     expect(balances).toEqual({ [CHECKING]: 200, [SAVINGS]: 100 });
     expect(audits).toHaveLength(0);
-    expect(transfers.size).toBe(1); // inserted, then rolled back by the real database
+    expect(transfers.size).toBe(0); // refused before the transfers row is inserted
   });
 
   it('refuses before moving any money: rolls back and never updates', async () => {
@@ -117,10 +119,23 @@ describe('TransfersService.execute', () => {
 
   it('is not_found for an account that is not the player’s', async () => {
     const { service } = setup();
-    expect(await service.execute('p1', input({ toAccountId: 'someone-elses' }))).toEqual({
+    expect(await service.execute('p1', input({ toAccountId: OTHERS }))).toEqual({
       ok: false,
       reason: 'not_found',
     });
+  });
+
+  it('is not_found for a malformed account id, without touching the database', async () => {
+    const { service, calls } = setup();
+    expect(await service.execute('p1', input({ toAccountId: 'not-a-uuid' }))).toEqual({
+      ok: false,
+      reason: 'not_found',
+    });
+    expect(await service.execute('p1', input({ fromAccountId: 7 }))).toEqual({
+      ok: false,
+      reason: 'not_found',
+    });
+    expect(calls).toHaveLength(0);
   });
 
   it('refuses the same account and a bad amount or key without touching the database', async () => {
@@ -157,14 +172,14 @@ describe('TransfersService.execute', () => {
     expect(balances).toEqual({ [CHECKING]: 150, [SAVINGS]: 150 });
   });
 
-  it('locks both accounts in id order, after the idempotency insert', async () => {
+  it('locks both accounts in id order, before the transfers insert', async () => {
     const { service, calls } = setup();
     await service.execute('p1', input());
     const sql = calls.map(([s]) => s.trim());
     const insert = sql.findIndex((s) => s.startsWith('insert into transfers'));
     const lock = sql.findIndex((s) => s.startsWith('select id, balance'));
-    expect(insert).toBeGreaterThan(0);
-    expect(lock).toBeGreaterThan(insert);
+    expect(lock).toBeGreaterThan(0);
+    expect(insert).toBeGreaterThan(lock);
     expect(sql[lock]).toMatch(/order by id for update/);
   });
 

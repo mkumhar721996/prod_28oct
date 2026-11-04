@@ -3,6 +3,8 @@ import { PoolClient } from 'pg';
 import { DatabaseService } from '../database/database.service';
 import { MAX_IDEMPOTENCY_KEY_LENGTH, TransferRefusal } from './accounts.constants';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export type AccountBalance = { id: string; balance: number };
 export type TransferResult =
   | { ok: true; transferId: string; from: AccountBalance; to: AccountBalance; replayed: boolean }
@@ -36,12 +38,35 @@ export class TransfersService {
       return { ok: false, reason: 'invalid_amount' };
     }
     if (fromAccountId === toAccountId) return { ok: false, reason: 'same_account' };
+    // Account ids are uuids; anything else cannot exist, and must not reach the database as a cast error.
+    if (!UUID.test(String(fromAccountId)) || !UUID.test(String(toAccountId))) {
+      return { ok: false, reason: 'not_found' };
+    }
 
     const client: PoolClient = await this.db.pool.connect();
     try {
       await client.query('begin');
-      // The key is claimed first: a concurrent or repeated confirmation waits on the unique index,
-      // then finds the row already there and changes nothing.
+      // Accounts are locked first, in id order, so concurrent transfers serialise and cannot deadlock.
+      // (Inserting into transfers first would take FK key-share locks that conflict with this lock.)
+      const { rows } = await client.query(
+        'select id, balance, frozen from accounts where id = any($1) and player_id = $2 order by id for update',
+        [[fromAccountId, toAccountId], playerId],
+      );
+      // A repeated confirmation finds the earlier outcome (once the lock is ours it has committed).
+      const earlier = await this.replay(client, playerId, idempotencyKey);
+      if (earlier) {
+        await client.query('commit');
+        return earlier;
+      }
+      const from = rows.find((r) => r.id === fromAccountId);
+      const to = rows.find((r) => r.id === toAccountId);
+      const refusal = this.refusal(from, to, amount);
+      if (refusal || !from || !to) {
+        await client.query('rollback');
+        return { ok: false, reason: refusal ?? 'not_found' };
+      }
+
+      // The unique index still guards the same key arriving for different accounts at the same time.
       const claimed = await client.query(
         `insert into transfers (player_id, from_account_id, to_account_id, amount, idempotency_key)
          values ($1, $2, $3, $4, $5)
@@ -52,23 +77,9 @@ export class TransfersService {
       if (!claimed.rows[0]) {
         const result = await this.replay(client, playerId, idempotencyKey);
         await client.query('commit');
-        return result;
+        return result as TransferResult;
       }
       const transferId = String(claimed.rows[0].id);
-
-      // Locked in id order, so concurrent transfers serialise and cannot deadlock.
-      const { rows } = await client.query(
-        'select id, balance, frozen from accounts where id = any($1) and player_id = $2 order by id for update',
-        [[fromAccountId, toAccountId], playerId],
-      );
-      const from = rows.find((r) => r.id === fromAccountId);
-      const to = rows.find((r) => r.id === toAccountId);
-      const refusal = this.refusal(from, to, amount);
-      if (refusal || !from || !to) {
-        // Rolling back also removes the claimed key, so the same key can be retried after a fix.
-        await client.query('rollback');
-        return { ok: false, reason: refusal ?? 'not_found' };
-      }
 
       await client.query('update accounts set balance = balance + $1 where id = $2', [-amount, fromAccountId]);
       await client.query('update accounts set balance = balance + $1 where id = $2', [amount, toAccountId]);
@@ -105,13 +116,14 @@ export class TransfersService {
   }
 
   /** The stored outcome of an earlier confirmation, with current balances; nothing changes. */
-  private async replay(client: PoolClient, playerId: string, key: string): Promise<TransferResult> {
+  private async replay(client: PoolClient, playerId: string, key: string): Promise<TransferResult | null> {
     const { rows } = await client.query(
       `select a.id, a.balance, t.id as transfer_id, t.from_account_id
          from transfers t join accounts a on a.id in (t.from_account_id, t.to_account_id)
         where t.player_id = $1 and t.idempotency_key = $2`,
       [playerId, key],
     );
+    if (!rows[0]) return null;
     const from = rows.find((r) => r.id === r.from_account_id);
     const to = rows.find((r) => r.id !== r.from_account_id);
     return {
