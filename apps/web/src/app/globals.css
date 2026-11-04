@@ -272,3 +272,12 @@ fieldset.field legend { padding: 0; font-size: var(--font-size-sm); font-weight:
 .game-card.is-unavailable .game-thumb { background: var(--color-border); }
 .skeleton-thumb { aspect-ratio: 4 / 3; height: auto; }
 .loading-note { display: flex; align-items: center; gap: var(--space-2); }
+
+/* Transfer (from the approved prototype) */
+.pair { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(var(--size-grid-min), 100%), 1fr)); }
+.bal-label { color: var(--color-fg-muted); font-size: var(--font-size-sm); }
+.bal-value { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); }
+.summary-row { display: flex; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: var(--border-width) solid var(--color-border); }
+.summary-row:last-child { border-bottom: 0; }
+.actions-between { justify-content: space-between; }
+.transfer-form .select, .transfer-form .input { min-height: var(--size-control-lg); }

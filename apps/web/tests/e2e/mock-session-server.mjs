@@ -91,6 +91,51 @@ async function handleTemplates(req, res, url, cookie) {
   return json(res, req.method === "POST" ? 201 : 200, { ok: true });
 }
 
+// Bank accounts and transfers, kept in memory with the same rules as the API: checking 200 and
+// savings 100; cookie `e2e-frozen=checking` or `e2e-frozen=savings` freezes that account.
+// A repeated idempotency key is applied once. `POST /__reset` restores the balances.
+const seedAccounts = () => [
+  { id: "acc-checking", kind: "checking", balance: 200 },
+  { id: "acc-savings", kind: "savings", balance: 100 },
+];
+let accounts = seedAccounts();
+const doneTransfers = new Map();
+const frozenKind = (cookie) => /e2e-frozen=(checking|savings)/.exec(cookie)?.[1];
+const withFrozen = (cookie) => accounts.map((a) => ({ ...a, frozen: a.kind === frozenKind(cookie) }));
+const label = (a) => (a.kind === "checking" ? "Checking" : "Savings");
+
+async function handleAccounts(req, res, url, cookie) {
+  if (!cookie.includes("e2e-session=1")) return json(res, 401, {});
+  if (req.method === "GET" && url.pathname === "/accounts") return json(res, 200, withFrozen(cookie));
+  const { fromAccountId, toAccountId, amount, idempotencyKey } = await readJson(req);
+  const done = doneTransfers.get(idempotencyKey);
+  if (done) return json(res, 200, { ...done, replayed: true });
+  const all = withFrozen(cookie);
+  const from = all.find((a) => a.id === fromAccountId);
+  const to = all.find((a) => a.id === toAccountId);
+  const refuse = (reason, text) => json(res, 409, { reason, message: `Transfer not made. ${text}` });
+  if (!from || !to || from === to) return refuse("not_found", "Choose two different accounts.");
+  if (!Number.isSafeInteger(amount) || amount < 1) return refuse("invalid_amount", "Enter a whole number of 1 or more.");
+  if (from.frozen) return refuse("source_frozen", `${label(from)} is frozen, so money cannot move in or out.`);
+  if (to.frozen) return refuse("destination_frozen", `${label(to)} is frozen, so money cannot move in or out.`);
+  if (from.balance < amount) {
+    return refuse("insufficient_balance", `${label(from)} does not have ${amount} available. Enter ${from.balance} or less.`);
+  }
+  const src = accounts.find((a) => a.id === from.id);
+  const dst = accounts.find((a) => a.id === to.id);
+  src.balance -= amount;
+  dst.balance += amount;
+  const outcome = {
+    transferId: `t${doneTransfers.size + 1}`,
+    reference: `TRF-000${doneTransfers.size + 1}`,
+    from: { id: src.id, balance: src.balance },
+    to: { id: dst.id, balance: dst.balance },
+    replayed: false,
+  };
+  doneTransfers.set(idempotencyKey, outcome);
+  return json(res, 200, outcome);
+}
+
 createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
   const cookie = req.headers.cookie ?? "";
@@ -104,7 +149,13 @@ createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/__reset") {
     templates.clear();
     for (const [role, template] of seedTemplates()) templates.set(role, template);
+    accounts = seedAccounts();
+    doneTransfers.clear();
     return json(res, 200, { ok: true });
+  }
+  if (url.pathname === "/accounts" || url.pathname === "/transfers") {
+    await handleAccounts(req, res, url, cookie);
+    return;
   }
   if (url.pathname === "/onboarding-templates" || url.pathname.startsWith("/onboarding-templates/")) {
     await handleTemplates(req, res, url, cookie);
