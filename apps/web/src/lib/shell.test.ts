@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  BACK_OFFICE_HREF,
+  STAFF_REGISTER_HREF,
+  STAFF_SIGN_IN_HREF,
   BRAND_NAME,
   MAIN_NAV,
   PLACE_BET_HREF,
@@ -11,6 +14,14 @@ import {
 } from "./shell";
 
 describe("shell", () => {
+  it("keeps back-office pages out of the nav and sign-in targets", () => {
+    expect(BACK_OFFICE_HREF).toBe("/back-office");
+    expect(STAFF_SIGN_IN_HREF).toBe("/back-office/sign-in");
+    expect(STAFF_REGISTER_HREF).toBe("/back-office/register");
+    expect(MAIN_NAV.some((e) => e.href.startsWith(BACK_OFFICE_HREF))).toBe(false);
+    expect(signInTarget("back-office")).toBe("/wallet");
+  });
+
   it("has one brand value", () => {
     expect(BRAND_NAME).toBe("Web App");
   });

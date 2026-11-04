@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { validateSignInEmailRequired, validateSignInPasswordRequired } from "@/lib/credentials";
 import { signInPlayer, type AuthResult } from "@/lib/session";
 import { REGISTER_HREF, WALLET_HREF } from "@/lib/shell";
+import { Icon } from "./orders/Icon";
 
 type SignInDeps = {
   signInPlayer: (email: string, password: string) => Promise<AuthResult>;
@@ -25,6 +26,7 @@ export async function handleSignIn(
   email: string,
   password: string,
   redirectTo: string = WALLET_HREF,
+  refusalMessage?: string,
 ): Promise<SignInErrors> {
   const emailError = validateSignInEmailRequired(email);
   if (emailError) return { email: emailError };
@@ -32,6 +34,8 @@ export async function handleSignIn(
   if (passwordError) return { password: passwordError };
   const result = await deps.signInPlayer(email, password);
   if (!result.ok) {
+    // A fixed refusal message hides the cause (wrong password, customer credentials, unknown email).
+    if (refusalMessage) return { alert: refusalMessage };
     // One message for an unknown email and a wrong password, so neither is revealed.
     return { alert: result.status === UNAUTHORIZED ? SIGN_IN_FAILED_ERROR : result.message };
   }
@@ -40,12 +44,27 @@ export async function handleSignIn(
   return {};
 }
 
+/** Defaults give the customer sign-in; the staff sign-in overrides them (and gets the field-error style). */
 export function SignInForm({
   redirected = false,
   redirectTo = WALLET_HREF,
+  title = "Sign in",
+  signIn = signInPlayer,
+  registerHref = REGISTER_HREF,
+  registerPrompt,
+  registerLabel = "Create an account",
+  refusalMessage,
 }: {
   redirected?: boolean;
   redirectTo?: string;
+  title?: string;
+  signIn?: (email: string, password: string) => Promise<AuthResult>;
+  registerHref?: string;
+  /** Plain text before the register link, e.g. "No staff account?". */
+  registerPrompt?: string;
+  registerLabel?: string;
+  /** When set, every refusal shows this one message under the fields instead of the server's. */
+  refusalMessage?: string;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -55,22 +74,28 @@ export function SignInForm({
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const alertRef = useRef<HTMLDivElement>(null);
+  const fieldError = refusalMessage !== undefined;
 
   useEffect(() => {
-    if (errors.alert) alertRef.current?.focus();
-    else if (errors.email) emailRef.current?.focus();
+    if (errors.alert) {
+      if (fieldError) passwordRef.current?.focus();
+      else alertRef.current?.focus();
+    } else if (errors.email) emailRef.current?.focus();
     else if (errors.password) passwordRef.current?.focus();
-  }, [errors]);
+  }, [errors, fieldError]);
+
+  const invalid = fieldError && !!errors.alert;
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setErrors({});
     setPending(true);
     const result = await handleSignIn(
-      { signInPlayer, replace: router.replace, refresh: router.refresh },
+      { signInPlayer: signIn, replace: router.replace, refresh: router.refresh },
       email,
       password,
       redirectTo,
+      refusalMessage,
     );
     setPending(false);
     setErrors(result);
@@ -81,7 +106,7 @@ export function SignInForm({
   return (
     <div className="narrow">
       <form className="card stack" onSubmit={onSubmit} noValidate>
-        <h1>Sign in</h1>
+        <h1>{title}</h1>
         {redirected && (
           <div className="alert alert-info" role="status">
             <span>Sign in to see your wallet.</span>
@@ -90,16 +115,16 @@ export function SignInForm({
         <div className="field">
           <label htmlFor="si-email">Email</label>
           <input
-            className={errors.email ? "input is-invalid" : "input"}
+            className={errors.email || invalid ? "input is-invalid" : "input"}
             id="si-email"
             type="email"
-            autoComplete="email"
-            placeholder="Email address"
+            autoComplete={fieldError ? "username" : "email"}
+            placeholder={fieldError ? "Staff email" : "Email address"}
             ref={emailRef}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            aria-invalid={errors.email ? true : undefined}
-            aria-describedby={errors.email ? "si-email-err" : undefined}
+            aria-invalid={errors.email || invalid ? true : undefined}
+            aria-describedby={errors.email ? "si-email-err" : invalid ? "si-err" : undefined}
           />
           {errors.email && (
             <span className="field-error" id="si-email-err">
@@ -110,7 +135,7 @@ export function SignInForm({
         <div className="field">
           <label htmlFor="si-pass">Password</label>
           <input
-            className={errors.password ? "input is-invalid" : "input"}
+            className={errors.password || invalid ? "input is-invalid" : "input"}
             id="si-pass"
             type="password"
             autoComplete="current-password"
@@ -118,8 +143,8 @@ export function SignInForm({
             ref={passwordRef}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            aria-invalid={errors.password ? true : undefined}
-            aria-describedby={errors.password ? "si-pass-err" : undefined}
+            aria-invalid={errors.password || invalid ? true : undefined}
+            aria-describedby={errors.password ? "si-pass-err" : invalid ? "si-err" : undefined}
           />
           {errors.password && (
             <span className="field-error" id="si-pass-err">
@@ -127,7 +152,13 @@ export function SignInForm({
             </span>
           )}
         </div>
-        {errors.alert && (
+        {errors.alert && fieldError && (
+          <p className="field-error row-inline" id="si-err" role="alert">
+            <Icon name="alert" />
+            <span>{errors.alert}</span>
+          </p>
+        )}
+        {errors.alert && !fieldError && (
           <div className="alert alert-danger" role="alert" tabIndex={-1} ref={alertRef}>
             <span>{errors.alert}</span>
           </div>
@@ -137,9 +168,10 @@ export function SignInForm({
             {pending ? "Signing in…" : "Sign in"}
           </button>
         </div>
-        <p className="text-sm">
-          <Link className="link" href={REGISTER_HREF}>
-            Create an account
+        <p className="text-sm row-inline">
+          {registerPrompt && <span>{registerPrompt}</span>}
+          <Link className="link" href={registerHref}>
+            {registerLabel}
           </Link>
         </p>
       </form>

@@ -66,6 +66,46 @@ describe("handleSignIn", () => {
   });
 });
 
+describe("handleSignIn with a fixed refusal message (staff)", () => {
+  const refusal = "Sign-in refused. Check your details or contact an administrator.";
+
+  it("AC5: shows the same message for every cause and does not navigate", async () => {
+    for (const message of ["Sign-in refused", "Something went wrong. Try again."]) {
+      const deps = {
+        ...nav(),
+        signInPlayer: vi.fn(async () => ({ ok: false as const, status: 401, message })),
+      };
+      expect(await handleSignIn(deps, "a@bank.example", "nope", "/back-office", refusal)).toEqual({ alert: refusal });
+      expect(deps.replace).not.toHaveBeenCalled();
+    }
+  });
+
+  it("AC1: goes to the back office on success", async () => {
+    const deps = { ...nav(), signInPlayer: vi.fn(async () => ({ ok: true as const })) };
+    expect(await handleSignIn(deps, "a@bank.example", "Staff-pass1", "/back-office", refusal)).toEqual({});
+    expect(deps.replace).toHaveBeenCalledWith("/back-office");
+  });
+
+  it("renders the staff copy and links; the customer defaults are unchanged", () => {
+    const staff = renderToStaticMarkup(
+      <SignInForm
+        title="Staff sign in"
+        redirectTo="/back-office"
+        registerHref="/back-office/register"
+        registerPrompt="No staff account?"
+        registerLabel="Register"
+        refusalMessage={refusal}
+      />,
+    );
+    expect(staff).toContain("Staff sign in");
+    expect(staff).toContain("No staff account?");
+    expect(staff).toContain('href="/back-office/register"');
+    const customer = renderToStaticMarkup(<SignInForm />);
+    expect(customer).toContain("<h1>Sign in</h1>");
+    expect(customer).toContain("Create an account");
+  });
+});
+
 describe("handleRegister", () => {
   it("validates before calling the API", async () => {
     const deps = { ...nav(), registerPlayer: vi.fn() };
