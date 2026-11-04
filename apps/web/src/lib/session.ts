@@ -108,30 +108,39 @@ export async function claimFreeCredits(): Promise<ClaimResult> {
   }
 }
 
-export type AuthResult = { ok: true } | { ok: false; status: number; message: string };
+/** `field` is the form field a 4xx refusal is about, when the server names one. */
+export type AuthResult =
+  | { ok: true }
+  | { ok: false; status: number; message: string; field?: string };
 
 const GENERIC_ERROR = "Something went wrong. Try again.";
 
-export async function postCredentials(path: string, email: string, password: string): Promise<AuthResult> {
+export async function postCredentials(
+  path: string,
+  email: string,
+  password: string,
+  name?: string,
+): Promise<AuthResult> {
   try {
     const res = await fetch(path, {
       method: "POST",
       credentials: "include",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(name === undefined ? { email, password } : { name, email, password }),
     });
     if (res.ok) return { ok: true };
-    const body = (await res.json().catch(() => ({}))) as { message?: unknown };
+    const body = (await res.json().catch(() => ({}))) as { message?: unknown; field?: unknown };
     const message = typeof body.message === "string" ? body.message : GENERIC_ERROR;
-    return { ok: false, status: res.status, message };
+    const field = typeof body.field === "string" ? body.field : undefined;
+    return { ok: false, status: res.status, message, field };
   } catch {
     return { ok: false, status: 0, message: GENERIC_ERROR };
   }
 }
 
 /** Client side: creates the account and signs the visitor in. */
-export function registerPlayer(email: string, password: string): Promise<AuthResult> {
-  return postCredentials(REGISTER_PATH, email, password);
+export function registerPlayer(name: string, email: string, password: string): Promise<AuthResult> {
+  return postCredentials(REGISTER_PATH, email, password, name);
 }
 
 /** Client side: signs a player in. */

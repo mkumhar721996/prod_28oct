@@ -31,7 +31,7 @@ describe('PlayersService.register', () => {
         ? { rows: [{ id: 'p1', email: 'ana@example.com' }] }
         : { rows: [] },
     );
-    const player = await service.register(' ANA@example.com ', 'play-2026');
+    const player = await service.register('Ana', ' ANA@example.com ', 'play-2026');
     expect(player).toEqual({ id: 'p1', email: 'ana@example.com', accountRole: 'player' });
     const sql = sqlOf(calls);
     expect(sql[0]).toBe('begin');
@@ -41,8 +41,56 @@ describe('PlayersService.register', () => {
     expect(sql[3]).toMatch(/^insert into wallet_entries/);
     expect(calls[3][1]).toEqual(['p1', STARTING_GRANT]);
     expect(sql[4]).toBe('commit');
-    expect(calls[1][1]![0]).toBe('ana@example.com');
+    expect(calls[1][1]!.slice(0, 2)).toEqual(['Ana', 'ana@example.com']);
     expect(client.release).toHaveBeenCalled();
+  });
+
+  it('stores the trimmed name with the player', async () => {
+    const { service, calls } = setup((sql) =>
+      sql.includes('insert into players') ? { rows: [{ id: 'p1', email: 'a@b.co' }] } : { rows: [] },
+    );
+    await service.register(' Ana ', 'a@b.co', 'exactly8');
+    expect(calls[1][1]).toEqual(['Ana', 'a@b.co', expect.any(String)]);
+  });
+
+  it('accepts a 50-character name and the same name twice', async () => {
+    const { service } = setup((sql) =>
+      sql.includes('insert into players') ? { rows: [{ id: 'p1', email: 'a@b.co' }] } : { rows: [] },
+    );
+    await expect(service.register('x'.repeat(50), 'a@b.co', 'play-2026')).resolves.toBeDefined();
+    await expect(service.register('😀'.repeat(50), 'a@b.co', 'play-2026')).resolves.toBeDefined();
+    await service.register('Alex', 'a1@b.co', 'play-2026');
+    await expect(service.register('Alex', 'a2@b.co', 'play-2026')).resolves.toBeDefined();
+  });
+
+  it('rejects an empty, blank, missing or 51-character name with a name field error', async () => {
+    const { service, pool } = setup();
+    for (const name of ['', '   ', undefined, 'x'.repeat(51)]) {
+      await expect(service.register(name, 'a@b.co', 'play-2026')).rejects.toMatchObject({
+        response: { field: 'name' },
+      });
+    }
+    expect(pool.connect).not.toHaveBeenCalled();
+  });
+
+  it('flags the email and password fields on bad input', async () => {
+    const { service } = setup();
+    await expect(service.register('Ana', 'player-at-example', 'play-2026')).rejects.toMatchObject({
+      response: { field: 'email' },
+    });
+    await expect(service.register('Ana', 'a@b.co', '1234567')).rejects.toMatchObject({
+      response: { field: 'password' },
+    });
+  });
+
+  it('flags the email field on a duplicate', async () => {
+    const { service } = setup((sql) => {
+      if (sql.includes('insert into players')) throw Object.assign(new Error('dup'), { code: '23505' });
+      return { rows: [] };
+    });
+    await expect(service.register('Ana', 'a@b.co', 'play-2026')).rejects.toMatchObject({
+      response: { field: 'email' },
+    });
   });
 
   it('rolls back when the wallet insert throws', async () => {
@@ -51,7 +99,7 @@ describe('PlayersService.register', () => {
       if (sql.includes('insert into wallets')) throw new Error('boom');
       return { rows: [] };
     });
-    await expect(service.register('a@b.co', 'play-2026')).rejects.toThrow('boom');
+    await expect(service.register('Ana', 'a@b.co', 'play-2026')).rejects.toThrow('boom');
     expect(sqlOf(calls)).toContain('rollback');
     expect(sqlOf(calls)).not.toContain('commit');
   });
@@ -62,7 +110,7 @@ describe('PlayersService.register', () => {
       if (sql.includes('insert into wallet_entries')) throw new Error('boom');
       return { rows: [] };
     });
-    await expect(service.register('a@b.co', 'play-2026')).rejects.toThrow('boom');
+    await expect(service.register('Ana', 'a@b.co', 'play-2026')).rejects.toThrow('boom');
     expect(sqlOf(calls)).toContain('rollback');
     expect(sqlOf(calls)).not.toContain('commit');
   });
@@ -72,19 +120,19 @@ describe('PlayersService.register', () => {
       if (sql.includes('insert into players')) throw Object.assign(new Error('dup'), { code: '23505' });
       return { rows: [] };
     });
-    await expect(service.register('a@b.co', 'play-2026')).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.register('Ana', 'a@b.co', 'play-2026')).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('rejects a bad email or short password without touching the database', async () => {
     const { service, pool } = setup();
-    await expect(service.register('nope', 'play-2026')).rejects.toBeInstanceOf(BadRequestException);
-    await expect(service.register('a@b.co', 'short')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.register('Ana', 'nope', 'play-2026')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.register('Ana', 'a@b.co', 'short')).rejects.toBeInstanceOf(BadRequestException);
     expect(pool.connect).not.toHaveBeenCalled();
   });
 
   it('caps the password length before hashing', async () => {
     const { service, pool } = setup();
-    await expect(service.register('a@b.co', 'x'.repeat(129))).rejects.toBeInstanceOf(
+    await expect(service.register('Ana', 'a@b.co', 'x'.repeat(129))).rejects.toBeInstanceOf(
       BadRequestException,
     );
     expect(pool.connect).not.toHaveBeenCalled();
@@ -96,7 +144,7 @@ describe('PlayersService.register', () => {
       if (sql === 'rollback') throw new Error('rollback failed');
       return { rows: [] };
     });
-    await expect(service.register('a@b.co', 'play-2026')).rejects.toThrow('original');
+    await expect(service.register('Ana', 'a@b.co', 'play-2026')).rejects.toThrow('original');
   });
 });
 

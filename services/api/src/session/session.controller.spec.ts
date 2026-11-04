@@ -62,6 +62,13 @@ describe('SessionController throttling', () => {
     expect(players.authenticate).toHaveBeenCalledTimes(15);
   });
 
+  it('passes the name, email and password to register', async () => {
+    const { controller, players, req, res } = setup();
+    players.register.mockResolvedValue({ id: 'p1', email: creds.email });
+    await controller.register({ name: 'Ana', ...creds }, req, res);
+    expect(players.register).toHaveBeenCalledWith('Ana', creds.email, creds.password);
+  });
+
   it('limits registrations per IP', async () => {
     const { controller, players, req, res } = setup();
     players.register.mockResolvedValue({ id: 'p1', email: creds.email });

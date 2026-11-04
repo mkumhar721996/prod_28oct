@@ -7,8 +7,8 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { WalletService } from '../src/wallet/wallet.service';
 
-const ana = { email: 'ana@example.com', password: 'play-2026' };
-const ben = { email: 'ben@example.com', password: 'ben-pass-1' };
+const ana = { name: 'Ana', email: 'ana@example.com', password: 'play-2026' };
+const ben = { name: 'Ben', email: 'ben@example.com', password: 'ben-pass-1' };
 const NOW = new Date('2026-10-28T12:00:00Z');
 const daysBefore = (d: Date, n: number) => new Date(d.getTime() - n * 86_400_000);
 

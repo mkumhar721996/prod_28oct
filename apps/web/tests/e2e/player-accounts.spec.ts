@@ -85,9 +85,41 @@ test("AC7: a duplicate email shows the alert", async ({ page }) => {
     route.fulfill({ status: 409, contentType: "application/json", body: "{}" }),
   );
   await page.goto("/register");
+  await page.getByLabel("Name").fill("Ana");
   await page.getByLabel("Email").fill("ana@example.com");
   await page.getByLabel("Password").fill("play-2026");
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.locator("#rg-email-err")).toContainText("An account with this email already exists");
   await expect(page.getByRole("alert")).toHaveCount(0);
+});
+
+test("AC9: a new account is created from the form and lands on the lobby", async ({ page }) => {
+  let body: unknown;
+  await page.route("**/session/register", (route) => {
+    body = route.request().postDataJSON();
+    return route.fulfill({
+      status: 201,
+      contentType: "application/json",
+      headers: { "set-cookie": "e2e-session=1; Path=/" },
+      body: JSON.stringify({ role: "player", email: "ana@example.com" }),
+    });
+  });
+  await page.goto("/register");
+  await page.getByLabel("Name").fill("Ana");
+  await page.getByLabel("Email").fill("ana@example.com");
+  await page.getByLabel("Password").fill("exactly8");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/lobby$/);
+  expect(body).toEqual({ name: "Ana", email: "ana@example.com", password: "exactly8" });
+});
+
+test("AC2/AC3/AC5/AC6: every invalid field is flagged beside it and the form stays put", async ({
+  page,
+}) => {
+  await page.goto("/register");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.locator("#rg-name-err")).toContainText("Enter your name");
+  await expect(page.locator("#rg-email-err")).toBeVisible();
+  await expect(page.locator("#rg-pass-err")).toBeVisible();
+  await expect(page).toHaveURL(/\/register$/);
 });

@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable } from '@nestjs/comm
 import { DatabaseService } from '../database/database.service';
 import {
   EMAIL_PATTERN,
+  MAX_NAME_LENGTH,
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
   STARTING_GRANT,
@@ -27,24 +28,44 @@ export class PlayersService {
   ) {}
 
   /** Creates the player and the wallet with its one-time grant in ONE transaction. */
-  async register(email: unknown, password: unknown): Promise<Player> {
+  async register(name: unknown, email: unknown, password: unknown): Promise<Player> {
+    const trimmedName = typeof name === 'string' ? name.trim() : '';
+    if (!trimmedName) {
+      throw new BadRequestException({ field: 'name', message: 'Enter your name' });
+    }
+    // Code points, to match the database's char_length check.
+    if ([...trimmedName].length > MAX_NAME_LENGTH) {
+      throw new BadRequestException({
+        field: 'name',
+        message: `Use ${MAX_NAME_LENGTH} characters or fewer`,
+      });
+    }
     const normalised = normaliseEmail(email);
     if (!EMAIL_PATTERN.test(normalised)) {
-      throw new BadRequestException('Enter an email like name@example.com');
+      throw new BadRequestException({
+        field: 'email',
+        message: 'Enter an email like name@example.com',
+      });
     }
     if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
-      throw new BadRequestException(`Use at least ${MIN_PASSWORD_LENGTH} characters`);
+      throw new BadRequestException({
+        field: 'password',
+        message: `Use at least ${MIN_PASSWORD_LENGTH} characters`,
+      });
     }
     if (password.length > MAX_PASSWORD_LENGTH) {
-      throw new BadRequestException(`Use at most ${MAX_PASSWORD_LENGTH} characters`);
+      throw new BadRequestException({
+        field: 'password',
+        message: `Use at most ${MAX_PASSWORD_LENGTH} characters`,
+      });
     }
     const passwordHash = await this.passwords.hash(password);
     const client = await this.db.pool.connect();
     try {
       await client.query('begin');
       const { rows } = await client.query(
-        'insert into players (email, password_hash) values ($1, $2) returning id, email',
-        [normalised, passwordHash],
+        'insert into players (name, email, password_hash) values ($1, $2, $3) returning id, email',
+        [trimmedName, normalised, passwordHash],
       );
       // A new account is always a player; HR accounts are set in the database.
       const player: Player = { ...rows[0], accountRole: 'player' };
@@ -61,9 +82,11 @@ export class PlayersService {
     } catch (err) {
       await client.query('rollback').catch(() => undefined);
       if ((err as { code?: string }).code === UNIQUE_VIOLATION) {
-        throw new ConflictException(
-          'An account with this email already exists. Sign in instead, or use a different email.',
-        );
+        throw new ConflictException({
+          field: 'email',
+          message:
+            'An account with this email already exists. Sign in instead, or use a different email.',
+        });
       }
       throw err;
     } finally {

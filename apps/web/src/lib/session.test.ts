@@ -12,7 +12,7 @@ import {
 } from "./session";
 
 function stubFetch(status: number, body: unknown) {
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify(body), { status }));
+  const fetchMock = vi.fn(async (_url?: string, _init?: RequestInit) => new Response(JSON.stringify(body), { status }));
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
@@ -20,9 +20,24 @@ function stubFetch(status: number, body: unknown) {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("registerPlayer / signInPlayer", () => {
+  it("sends the name only when registering", async () => {
+    const fetchMock = stubFetch(201, {});
+    await registerPlayer("Ana", "a@b.co", "play-2026");
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+      name: "Ana",
+      email: "a@b.co",
+      password: "play-2026",
+    });
+    await signInPlayer("a@b.co", "play-2026");
+    expect(JSON.parse(String(fetchMock.mock.calls[1][1]?.body))).toEqual({
+      email: "a@b.co",
+      password: "play-2026",
+    });
+  });
+
   it("posts credentials with the cookie and reports ok", async () => {
     const fetchMock = stubFetch(201, { role: "player" });
-    expect(await registerPlayer("a@b.co", "play-2026")).toEqual({ ok: true });
+    expect(await registerPlayer("Ana", "a@b.co", "play-2026")).toEqual({ ok: true });
     expect(fetchMock).toHaveBeenCalledWith(
       "/session/register",
       expect.objectContaining({ method: "POST", credentials: "include" }),
