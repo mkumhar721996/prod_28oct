@@ -2,11 +2,16 @@ import { cookies } from "next/headers";
 
 export type Alert = {
   id: string;
-  kind: "money_received";
-  /** Minor units (cents) of `currency`. */
-  amountMinor: number;
-  currency: string;
-  senderName: string;
+  kind: "money_received" | "transfer_sent" | "account_frozen" | "account_unfrozen" | "identity_verification_result";
+  /** Minor units (cents) of `currency`. Money received and transfer sent only. */
+  amountMinor?: number;
+  currency?: string;
+  /** Money received only. */
+  senderName?: string;
+  /** Transfer sent only. */
+  recipientName?: string;
+  /** Identity verification result only. */
+  verificationResult?: "approved" | "rejected";
   /** ISO-8601 UTC. */
   createdAt: string;
   read: boolean;

@@ -36,6 +36,26 @@ describe('AlertsService', () => {
     });
   });
 
+  it('maps the other kinds as unread, without turning a null amount into 0', async () => {
+    const base = { id: '9', amount_minor: null, currency: null, sender_name: null, created_at: new Date('2026-11-02T09:00:00Z'), read_at: null };
+    const { service } = setup([
+      { ...base, kind: 'account_frozen' },
+      { ...base, id: '10', kind: 'transfer_sent', amount_minor: '5000', currency: 'USD', recipient_name: 'Ada Lee' },
+      { ...base, id: '11', kind: 'identity_verification_result', verification_result: 'rejected' },
+    ]);
+    const alerts = await service.listFor('p1');
+    expect(alerts[0]).toMatchObject({ kind: 'account_frozen', read: false });
+    expect(alerts[0].amountMinor).toBeUndefined();
+    expect(alerts[1]).toMatchObject({ kind: 'transfer_sent', amountMinor: 5000, currency: 'USD', recipientName: 'Ada Lee' });
+    expect(alerts[2]).toMatchObject({ kind: 'identity_verification_result', verificationResult: 'rejected' });
+  });
+
+  it('counts unread alerts of every kind', async () => {
+    const { service, query } = setup([{ count: '3' }]);
+    await service.unreadCountFor('p1');
+    expect(query.mock.calls[0][0]).not.toContain('kind');
+  });
+
   it('counts the customer’s unread alerts', async () => {
     const { service, query } = setup([{ count: '2' }]);
     await expect(service.unreadCountFor('p1')).resolves.toBe(2);

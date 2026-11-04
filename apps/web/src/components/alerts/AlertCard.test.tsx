@@ -45,6 +45,37 @@ describe("AlertCard unread", () => {
   });
 });
 
+describe("AlertCard other kinds", () => {
+  const base = { id: "8", createdAt: "2026-11-04T10:00:00.000Z", read: false };
+  const cases: [string, Alert, string][] = [
+    ["transfer_sent", { ...base, kind: "transfer_sent", amountMinor: 5000, currency: "USD", recipientName: "Ada Lee" }, "Money sent"],
+    ["account_frozen", { ...base, kind: "account_frozen" }, "Account frozen"],
+    ["account_unfrozen", { ...base, kind: "account_unfrozen" }, "Account unfrozen"],
+    ["identity_verification_result", { ...base, kind: "identity_verification_result", verificationResult: "approved" }, "Identity verified"],
+  ];
+
+  it.each(cases)("%s renders unread with its title", (_k, a, title) => {
+    const html = render(a);
+    expect(html).toContain(title);
+    expect(html).toContain("is-unread");
+    expect(html).toMatch(/badge badge-info[^>]*>Unread</);
+  });
+
+  it("shows the transfer amount and recipient", () => {
+    const html = render(cases[0][1]);
+    expect(html).toMatch(/Amount sent: [^<]*50\.00/);
+    expect(html).toContain("To: Ada Lee");
+  });
+
+  it("words two verification results differently", () => {
+    const ok = render({ ...base, kind: "identity_verification_result", verificationResult: "approved" });
+    const bad = render({ ...base, kind: "identity_verification_result", verificationResult: "rejected" });
+    expect(ok).not.toEqual(bad);
+    expect(ok).toContain("Identity verified");
+    expect(bad).toContain("Identity verification unsuccessful");
+  });
+});
+
 describe("AlertCard read", () => {
   const html = render({ ...alert, read: true });
 
