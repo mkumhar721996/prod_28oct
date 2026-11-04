@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
       },
       // Same reason: /wallet is the page itself.
       { source: "/api/wallet/top-up", destination: `${apiUrl}/wallet/top-up` },
+      // Same reason: /transfer is the page itself.
+      { source: "/api/transfers", destination: `${apiUrl}/transfers` },
     ];
   },
 };

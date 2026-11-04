@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AccountsModule } from './accounts/accounts.module';
 import { AppController } from './app.controller';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { DatabaseModule } from './database/database.module';
@@ -17,6 +18,7 @@ import { WalletModule } from './wallet/wallet.module';
     AppointmentsModule,
     OnboardingTemplatesModule,
     StaffModule,
+    AccountsModule,
   ],
   controllers: [AppController],
 })

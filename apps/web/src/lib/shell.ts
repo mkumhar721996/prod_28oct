@@ -13,6 +13,7 @@ export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
 export const MENU_HREF = "/menu";
 export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
+export const TRANSFER_HREF = "/transfer";
 /** Back-office pages: deliberately not in MAIN_NAV or NEXT_TARGETS, so customers are never sent there. */
 export const BACK_OFFICE_HREF = "/back-office";
 export const STAFF_SIGN_IN_HREF = "/back-office/sign-in";
@@ -29,6 +30,7 @@ const NEXT_TARGETS: Record<string, string> = {
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
   checkout: CHECKOUT_HREF,
   [ONBOARDING_TEMPLATES_HREF]: ONBOARDING_TEMPLATES_HREF,
+  transfer: TRANSFER_HREF,
 };
 
 export function signInTarget(next: string | undefined): string {
@@ -47,6 +49,7 @@ export const MAIN_NAV: readonly NavEntry[] = [
   { key: "menu", label: "Menu", href: MENU_HREF, public: true },
   { key: "onboarding-templates", label: "Templates", href: ONBOARDING_TEMPLATES_HREF },
   { key: "lobby", label: "Lobby", href: LOBBY_HREF, public: true },
+  { key: "transfer", label: "Transfer", href: TRANSFER_HREF },
 ];
 
 export function brandHref(signedIn: boolean): string {

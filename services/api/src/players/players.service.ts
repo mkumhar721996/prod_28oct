@@ -4,6 +4,7 @@ import {
   EMAIL_PATTERN,
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
+  OPENING_BALANCE,
   STARTING_GRANT,
 } from './players.constants';
 import { PasswordService } from './password.service';
@@ -26,7 +27,7 @@ export class PlayersService {
     private readonly passwords: PasswordService,
   ) {}
 
-  /** Creates the player and the wallet with its one-time grant in ONE transaction. */
+  /** Creates the player, the wallet with its one-time grant, and the checking and savings accounts in ONE transaction. */
   async register(email: unknown, password: unknown): Promise<Player> {
     const normalised = normaliseEmail(email);
     if (!EMAIL_PATTERN.test(normalised)) {
@@ -55,6 +56,10 @@ export class PlayersService {
       await client.query(
         "insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits) values ($1, 'grant', $2, $2)",
         [player.id, STARTING_GRANT],
+      );
+      await client.query(
+        "insert into accounts (player_id, kind, balance) select $1::uuid, k, $2::bigint from unnest(array['checking', 'savings']) as k",
+        [player.id, OPENING_BALANCE],
       );
       await client.query('commit');
       return player;

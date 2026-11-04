@@ -47,6 +47,12 @@ describe("TopBar signed in", () => {
     expect(html.indexOf(">Sign out<")).toBeGreaterThan(html.indexOf("</nav>"));
   });
 
+  it("lists Transfer last in the nav, linking to /transfer", () => {
+    const keys = [...html.matchAll(/data-nav-key="([^"]+)"/g)].map((m) => m[1]);
+    expect(keys.at(-1)).toBe("transfer");
+    expect(html).toMatch(/<a[^>]*href="\/transfer"[^>]*>Transfer</);
+  });
+
   it("shows no alert without an error", () => {
     expect(html).not.toContain('role="alert"');
   });
@@ -70,6 +76,7 @@ describe("TopBar signed out", () => {
       /<a[^>]*data-nav-key="menu"[^>]*href="\/menu"|<a[^>]*href="\/menu"[^>]*data-nav-key="menu"/,
     );
     expect(html).not.toContain('data-nav-key="wallet"');
+    expect(html).not.toContain('data-nav-key="transfer"');
   });
 
   it("marks Menu current on /menu", () => {

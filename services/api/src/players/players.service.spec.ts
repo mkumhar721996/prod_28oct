@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { STARTING_GRANT } from './players.constants';
+import { OPENING_BALANCE, STARTING_GRANT } from './players.constants';
 import { PasswordService } from './password.service';
 import { PlayersService } from './players.service';
 
@@ -40,7 +40,9 @@ describe('PlayersService.register', () => {
     expect(calls[2][1]).toEqual(['p1', STARTING_GRANT]);
     expect(sql[3]).toMatch(/^insert into wallet_entries/);
     expect(calls[3][1]).toEqual(['p1', STARTING_GRANT]);
-    expect(sql[4]).toBe('commit');
+    expect(sql[4]).toMatch(/^insert into accounts/);
+    expect(calls[4][1]).toEqual(['p1', OPENING_BALANCE]);
+    expect(sql[5]).toBe('commit');
     expect(calls[1][1]![0]).toBe('ana@example.com');
     expect(client.release).toHaveBeenCalled();
   });
