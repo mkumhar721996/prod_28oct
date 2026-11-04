@@ -13,6 +13,7 @@
     "start": "node dist/main",
     "migrate": "node --experimental-strip-types scripts/migrate.ts",
     "create-staff": "nest build && node dist/staff/create-staff",
+    "seed-super-admin": "nest build && node dist/accounts/seed-super-admin",
     "start:dev": "nest start --watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --config jest.config.js",

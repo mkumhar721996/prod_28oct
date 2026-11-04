@@ -39,12 +39,16 @@ export function SignInForm({
   registerPrompt,
   registerLabel = "Create an account",
   refusalMessage,
+  notice,
 }: {
+  /** A warning shown above the fields, e.g. that the session ended. */
+  notice?: string;
   redirected?: boolean;
   redirectTo?: string;
   title?: string;
   signIn?: (email: string, password: string) => Promise<AuthResult>;
-  registerHref?: string;
+  /** `null` hides the register link, for sign-ins whose accounts are made by an administrator. */
+  registerHref?: string | null;
   /** Plain text before the register link, e.g. "No staff account?". */
   registerPrompt?: string;
   registerLabel?: string;
@@ -91,6 +95,12 @@ export function SignInForm({
     <div className="narrow">
       <form className="card stack" onSubmit={onSubmit} noValidate>
         <h1>{title}</h1>
+        {notice && (
+          <div className="alert alert-warning" role="status">
+            <Icon name="alert" />
+            <span>{notice}</span>
+          </div>
+        )}
         {redirected && (
           <div className="alert alert-info" role="status">
             <span>Sign in to see your wallet.</span>
@@ -141,12 +151,14 @@ export function SignInForm({
             {pending ? "Signing in…" : "Sign in"}
           </button>
         </div>
-        <p className="text-sm row-inline">
-          {registerPrompt && <span>{registerPrompt}</span>}
-          <Link className="link" href={registerHref}>
-            {registerLabel}
-          </Link>
-        </p>
+        {registerHref !== null && (
+          <p className="text-sm row-inline">
+            {registerPrompt && <span>{registerPrompt}</span>}
+            <Link className="link" href={registerHref}>
+              {registerLabel}
+            </Link>
+          </p>
+        )}
       </form>
     </div>
   );

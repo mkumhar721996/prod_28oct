@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
     return [
       { source: "/session/:path*", destination: `${apiUrl}/session/:path*` },
       { source: "/staff/session/:path*", destination: `${apiUrl}/staff/session/:path*` },
+      { source: "/auth/session/:path*", destination: `${apiUrl}/auth/session/:path*` },
+      // Same reason: /organizations and /accounts are the pages themselves.
+      { source: "/api/organizations", destination: `${apiUrl}/organizations` },
+      { source: "/api/organizations/:path*", destination: `${apiUrl}/organizations/:path*` },
+      { source: "/api/accounts", destination: `${apiUrl}/accounts` },
       // Under /api because /orders is the Orders page itself.
       { source: "/api/orders", destination: `${apiUrl}/orders` },
       // Same reason: /appointments is the page itself.

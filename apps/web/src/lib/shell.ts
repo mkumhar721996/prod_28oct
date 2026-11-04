@@ -18,6 +18,10 @@ export const CHECKOUT_HREF = "/checkout";
 export const BACK_OFFICE_HREF = "/back-office";
 export const STAFF_SIGN_IN_HREF = "/back-office/sign-in";
 export const STAFF_REGISTER_HREF = "/back-office/register";
+/** Organization pages: signed-in staff, consultants and super-admins; kept out of MAIN_NAV like the back office. */
+export const ORG_SIGN_IN_HREF = "/accounts/sign-in";
+export const ORGANIZATIONS_HREF = "/organizations";
+export const NEW_ACCOUNT_HREF = "/accounts/new";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
 export const PLACE_BET_HREF = WALLET_HREF;
 
