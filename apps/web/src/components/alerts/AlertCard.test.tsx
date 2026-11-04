@@ -82,3 +82,23 @@ describe("NoAlerts", () => {
     expect(html).toContain("When you receive money, you&#x27;ll see it here.");
   });
 });
+
+describe("AlertCard identity decisions", () => {
+  const base = { id: "9", amountMinor: null, currency: null, senderName: null, createdAt: "2026-11-04T10:00:00.000Z", read: false } as const;
+
+  it("shows the approved text and the Mark as read button", () => {
+    const html = render({ ...base, kind: "identity_approved" });
+    expect(html).toContain("Verification approved");
+    expect(html).toContain("Your identity verification was approved.");
+    expect(html).toContain("Unread");
+    expect(html).toContain("Mark as read");
+    expect(html).not.toContain("Amount received");
+  });
+
+  it("shows the rejected text with a link to the status page", () => {
+    const html = render({ ...base, kind: "identity_rejected" });
+    expect(html).toContain("Verification rejected");
+    expect(html).toContain("Your identity verification was rejected.");
+    expect(html).toContain('href="/identity-verification"');
+  });
+});

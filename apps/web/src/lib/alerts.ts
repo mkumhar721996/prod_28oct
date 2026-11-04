@@ -1,16 +1,29 @@
 import { cookies } from "next/headers";
 
-export type Alert = {
+type AlertBase = {
   id: string;
+  /** ISO-8601 UTC. */
+  createdAt: string;
+  read: boolean;
+};
+
+export type MoneyAlert = AlertBase & {
   kind: "money_received";
   /** Minor units (cents) of `currency`. */
   amountMinor: number;
   currency: string;
   senderName: string;
-  /** ISO-8601 UTC. */
-  createdAt: string;
-  read: boolean;
 };
+
+/** A staff decision on the customer's ID details; carries no money. */
+export type IdentityAlert = AlertBase & {
+  kind: "identity_approved" | "identity_rejected";
+  amountMinor: null;
+  currency: null;
+  senderName: null;
+};
+
+export type Alert = MoneyAlert | IdentityAlert;
 
 export type UnreadResult = { ok: true; unreadCount: number } | { ok: false };
 export type AlertsResult = { ok: true; alerts: Alert[] } | { ok: false };

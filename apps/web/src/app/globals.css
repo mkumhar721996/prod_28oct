@@ -281,3 +281,19 @@ fieldset.field legend { padding: 0; font-size: var(--font-size-sm); font-weight:
 .alert-card.is-unread { border-left-color: var(--color-primary); }
 .alert-card h3, .alert-card p { overflow-wrap: anywhere; }
 .amount { font-weight: var(--font-weight-semibold); }
+
+/* Identity verifications: review workspace, records and facts (from the approved prototype) */
+.workspace { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; }
+.queue-col { flex: 1 1 var(--size-drawer); min-width: 0; }
+.detail-col { flex: 2 1 var(--size-drawer); min-width: 0; }
+.record { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); overflow-wrap: anywhere; }
+.facts { margin: 0; display: grid; gap: var(--space-1); }
+.facts div { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.facts dt { color: var(--color-fg-muted); min-width: 9em; }
+.facts dd { margin: 0; font-weight: var(--font-weight-medium); }
+.mono { font-family: var(--font-family-mono); }
+.queue-item { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.queue-item.is-quiet { border-color: var(--color-border); background: var(--color-bg); color: var(--color-fg-muted); }
+/* Right-aligned, wrapping actions; the plain .form-actions rule stretches buttons for the narrow forms. */
+.form-actions-end { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
+.form-actions-end .btn { width: auto; }

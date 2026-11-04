@@ -22,6 +22,16 @@ const nextConfig: NextConfig = {
       // Same reason: /alerts is the page itself.
       { source: "/api/alerts", destination: `${apiUrl}/alerts` },
       { source: "/api/alerts/:path*", destination: `${apiUrl}/alerts/:path*` },
+      // Same reason: /identity-verification is the customer page itself.
+      { source: "/api/identity-verification", destination: `${apiUrl}/identity-verification` },
+      {
+        source: "/api/staff/identity-verifications",
+        destination: `${apiUrl}/staff/identity-verifications`,
+      },
+      {
+        source: "/api/staff/identity-verifications/:path*",
+        destination: `${apiUrl}/staff/identity-verifications/:path*`,
+      },
       // Same reason: /wallet is the page itself.
       { source: "/api/wallet/top-up", destination: `${apiUrl}/wallet/top-up` },
     ];

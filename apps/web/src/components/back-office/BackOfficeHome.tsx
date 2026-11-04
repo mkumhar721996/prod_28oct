@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { STAFF_SIGN_IN_HREF } from "@/lib/shell";
+import { IDENTITY_VERIFICATIONS_HREF, STAFF_SIGN_IN_HREF } from "@/lib/shell";
 import { signOutStaff } from "@/lib/staffSession";
 import { Toast } from "../appointments/Toast";
 import { Icon } from "../orders/Icon";
@@ -40,7 +41,9 @@ export function BackOfficeHome() {
       <h1>Back-office tools</h1>
       <div className="card">
         <div className="empty-state">
-          <p>Review identity verifications and freeze accounts will appear here.</p>
+          <Link className="btn btn-primary" href={IDENTITY_VERIFICATIONS_HREF}>
+            Review identity verifications
+          </Link>
           <span className="badge badge-info">Signed in as staff</span>
         </div>
       </div>

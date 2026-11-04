@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 
+export type AlertKind = 'money_received' | 'identity_approved' | 'identity_rejected';
+
+/** Identity alerts carry no money, so the amount, currency and sender are null for them. */
 export type Alert = {
   id: string;
-  kind: 'money_received';
-  amountMinor: number;
-  currency: string;
-  senderName: string;
+  kind: AlertKind;
+  amountMinor: number | null;
+  currency: string | null;
+  senderName: string | null;
   createdAt: string;
   read: boolean;
 };
 
 type Row = {
   id: string;
-  kind: 'money_received';
-  amount_minor: string | number;
-  currency: string;
-  sender_name: string;
+  kind: AlertKind;
+  amount_minor: string | number | null;
+  currency: string | null;
+  sender_name: string | null;
   created_at: Date;
   read_at: Date | null;
 };
@@ -59,7 +62,7 @@ function view(r: Row): Alert {
   return {
     id: String(r.id),
     kind: r.kind,
-    amountMinor: Number(r.amount_minor),
+    amountMinor: r.amount_minor === null ? null : Number(r.amount_minor),
     currency: r.currency,
     senderName: r.sender_name,
     createdAt: r.created_at.toISOString(),
