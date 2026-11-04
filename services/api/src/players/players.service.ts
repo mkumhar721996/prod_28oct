@@ -26,7 +26,7 @@ export class PlayersService {
     private readonly passwords: PasswordService,
   ) {}
 
-  /** Creates the player and the wallet with its one-time grant in ONE transaction. */
+  /** Creates the player and the wallet with its one-time grant, and the bank account in ONE transaction. */
   async register(email: unknown, password: unknown): Promise<Player> {
     const normalised = normaliseEmail(email);
     if (!EMAIL_PATTERN.test(normalised)) {
@@ -52,6 +52,7 @@ export class PlayersService {
         player.id,
         STARTING_GRANT,
       ]);
+      await client.query('insert into accounts (player_id) values ($1)', [player.id]);
       await client.query(
         "insert into wallet_entries (player_id, kind, amount_credits, balance_after_credits) values ($1, 'grant', $2, $2)",
         [player.id, STARTING_GRANT],
