@@ -8,6 +8,7 @@ export const WALLET_HREF = "/wallet";
 export const HISTORY_HREF = "/history";
 export const APPOINTMENTS_HREF = "/appointments";
 export const ALERTS_HREF = "/alerts";
+export const IDENTITY_VERIFICATION_HREF = "/identity-verification";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
 export const ONBOARDING_TEMPLATES_HREF = "/onboarding-templates";
 export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
@@ -16,6 +17,7 @@ export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
 /** Back-office pages: deliberately not in MAIN_NAV or NEXT_TARGETS, so customers are never sent there. */
 export const BACK_OFFICE_HREF = "/back-office";
+export const IDENTITY_VERIFICATIONS_HREF = "/back-office/identity-verifications";
 export const STAFF_SIGN_IN_HREF = "/back-office/sign-in";
 export const STAFF_REGISTER_HREF = "/back-office/register";
 /** Temporary: the Play screen does not exist yet. Point this at the Play route when that feature ships. */
@@ -30,6 +32,7 @@ const NEXT_TARGETS: Record<string, string> = {
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
   checkout: CHECKOUT_HREF,
   alerts: ALERTS_HREF,
+  "identity-verification": IDENTITY_VERIFICATION_HREF,
   [ONBOARDING_TEMPLATES_HREF]: ONBOARDING_TEMPLATES_HREF,
 };
 

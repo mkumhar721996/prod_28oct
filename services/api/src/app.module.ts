@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AlertsModule } from './alerts/alerts.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { DatabaseModule } from './database/database.module';
+import { IdentityVerificationsModule } from './identity-verifications/identity-verifications.module';
 import { OnboardingTemplatesModule } from './onboarding-templates/onboarding-templates.module';
 import { RecordsModule } from './records/records.module';
 import { SessionModule } from './session/session.module';
@@ -19,6 +20,7 @@ import { WalletModule } from './wallet/wallet.module';
     OnboardingTemplatesModule,
     StaffModule,
     AlertsModule,
+    IdentityVerificationsModule,
   ],
   controllers: [AppController],
 })

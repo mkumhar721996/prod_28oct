@@ -36,6 +36,14 @@ describe('AlertsService', () => {
     });
   });
 
+  it('maps identity decision alerts, which carry no amount, currency or sender', async () => {
+    const { service } = setup([
+      { ...row('4'), kind: 'identity_approved', amount_minor: null, currency: null, sender_name: null },
+    ]);
+    const [alert] = await service.listFor('p1');
+    expect(alert).toMatchObject({ kind: 'identity_approved', amountMinor: null, currency: null, senderName: null });
+  });
+
   it('counts the customer’s unread alerts', async () => {
     const { service, query } = setup([{ count: '2' }]);
     await expect(service.unreadCountFor('p1')).resolves.toBe(2);

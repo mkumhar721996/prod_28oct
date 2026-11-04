@@ -20,6 +20,7 @@ describe("back-office page", () => {
     const html = await render();
     expect(html).toContain("Back-office tools");
     expect(html).toContain("Signed in as staff");
+    expect(html).toContain('href="/back-office/identity-verifications"');
   });
 
   it("AC4: a signed-out visitor sees no back-office content", async () => {
