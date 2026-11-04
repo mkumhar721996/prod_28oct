@@ -4,10 +4,15 @@ import { BackOfficeHome, handleStaffSignOut } from "./BackOfficeHome";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 vi.mock("@/lib/staffSession", () => ({ signOutStaff: vi.fn() }));
+vi.mock("@/lib/staffAccounts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/staffAccounts")>()),
+  searchAccounts: vi.fn(() => new Promise(() => undefined)),
+}));
 
 describe("BackOfficeHome", () => {
-  it("shows the toolbar sign out, heading and status badge", () => {
+  it("shows the toolbar sign out, the accounts screen, the placeholder and status badge", () => {
     const html = renderToStaticMarkup(<BackOfficeHome />);
+    expect(html).toContain("Find an account");
     expect(html).toContain("btn btn-ghost");
     expect(html).toContain("Sign out");
     expect(html).toContain("Back-office tools");

@@ -35,6 +35,7 @@ describe("back-office page", () => {
     getStaffAccess.mockResolvedValue({ status: "refused", reason: "customer" });
     const html = await render();
     expect(html).toContain("Customer accounts cannot open back-office pages.");
+    expect(html).not.toContain("Find an account");
     expect(html).not.toContain("Back-office tools");
   });
 

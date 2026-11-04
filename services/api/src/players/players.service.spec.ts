@@ -25,7 +25,7 @@ function setup(handler: (sql: string, params?: unknown[]) => unknown = () => ({ 
 const sqlOf = (calls: Array<[string, unknown[] | undefined]>) => calls.map(([sql]) => sql.trim());
 
 describe('PlayersService.register', () => {
-  it('inserts the player and the starting grant in one transaction', async () => {
+  it('inserts the player, the starting grant and the bank account in one transaction', async () => {
     const { service, calls, client } = setup((sql) =>
       sql.includes('insert into players')
         ? { rows: [{ id: 'p1', email: 'ana@example.com' }] }
@@ -38,9 +38,11 @@ describe('PlayersService.register', () => {
     expect(sql[1]).toMatch(/^insert into players/);
     expect(sql[2]).toMatch(/^insert into wallets/);
     expect(calls[2][1]).toEqual(['p1', STARTING_GRANT]);
-    expect(sql[3]).toMatch(/^insert into wallet_entries/);
-    expect(calls[3][1]).toEqual(['p1', STARTING_GRANT]);
-    expect(sql[4]).toBe('commit');
+    expect(sql[3]).toMatch(/^insert into accounts/);
+    expect(calls[3][1]).toEqual(['p1']);
+    expect(sql[4]).toMatch(/^insert into wallet_entries/);
+    expect(calls[4][1]).toEqual(['p1', STARTING_GRANT]);
+    expect(sql[5]).toBe('commit');
     expect(calls[1][1]![0]).toBe('ana@example.com');
     expect(client.release).toHaveBeenCalled();
   });
