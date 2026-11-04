@@ -42,6 +42,38 @@ export async function loadGames(
   }
 }
 
+export type PlayOutcome = "opened" | "sign-in" | "unavailable" | "failed";
+
+/**
+ * What pressing Play does: guests sign in first; a "Coming soon" game opens nothing (the card's
+ * button is disabled, this is the guard behind it); an open that throws is "failed".
+ */
+export async function playGame(
+  game: Game,
+  deps: {
+    signedIn: boolean;
+    open: (game: Game) => Promise<void> | void;
+    goToSignIn: () => void;
+  },
+): Promise<PlayOutcome> {
+  if (!deps.signedIn) {
+    try {
+      deps.goToSignIn();
+    } catch (error) {
+      console.error(`Could not go to sign-in from game ${game.id}`, error);
+    }
+    return "sign-in";
+  }
+  if (!game.available) return "unavailable";
+  try {
+    await deps.open(game);
+    return "opened";
+  } catch (error) {
+    console.error(`Could not open game ${game.id}`, error);
+    return "failed";
+  }
+}
+
 export function lobbyReducer(state: LobbyState, action: LobbyAction): LobbyState {
   switch (action.type) {
     case "requested":

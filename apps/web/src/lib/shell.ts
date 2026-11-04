@@ -13,6 +13,9 @@ export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
 export const MENU_HREF = "/menu";
 export const LOBBY_HREF = "/lobby";
 export const CHECKOUT_HREF = "/checkout";
+export function gameHref(id: string): string {
+  return `/games/${encodeURIComponent(id)}`;
+}
 /** Back-office pages: deliberately not in MAIN_NAV or NEXT_TARGETS, so customers are never sent there. */
 export const BACK_OFFICE_HREF = "/back-office";
 export const STAFF_SIGN_IN_HREF = "/back-office/sign-in";
