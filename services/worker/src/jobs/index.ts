@@ -1,6 +1,19 @@
 import { Pool } from 'pg';
 import { loadConfig } from '../config';
 import { MONEY_RECEIVED_QUEUE, MoneyReceivedEvent, handleMoneyReceived } from './money-received';
+import { TRANSFER_SENT_QUEUE, TransferSentEvent, handleTransferSent } from './transfer-sent';
+import {
+  ACCOUNT_FROZEN_QUEUE,
+  ACCOUNT_UNFROZEN_QUEUE,
+  AccountStatusEvent,
+  handleAccountFrozen,
+  handleAccountUnfrozen,
+} from './account-status';
+import {
+  IDENTITY_VERIFICATION_RESULT_QUEUE,
+  IdentityVerificationResultEvent,
+  handleIdentityVerificationResult,
+} from './identity-verification-result';
 
 export interface JobDefinition<T = unknown> {
   name: string;
@@ -38,6 +51,34 @@ export const jobs: JobDefinition<any>[] = [
     retryLimit: 5,
     handler: async (data: MoneyReceivedEvent) => {
       await handleMoneyReceived(data, db());
+    },
+  },
+  {
+    name: TRANSFER_SENT_QUEUE,
+    retryLimit: 5,
+    handler: async (data: TransferSentEvent) => {
+      await handleTransferSent(data, db());
+    },
+  },
+  {
+    name: ACCOUNT_FROZEN_QUEUE,
+    retryLimit: 5,
+    handler: async (data: AccountStatusEvent) => {
+      await handleAccountFrozen(data, db());
+    },
+  },
+  {
+    name: ACCOUNT_UNFROZEN_QUEUE,
+    retryLimit: 5,
+    handler: async (data: AccountStatusEvent) => {
+      await handleAccountUnfrozen(data, db());
+    },
+  },
+  {
+    name: IDENTITY_VERIFICATION_RESULT_QUEUE,
+    retryLimit: 5,
+    handler: async (data: IdentityVerificationResultEvent) => {
+      await handleIdentityVerificationResult(data, db());
     },
   },
 ];
