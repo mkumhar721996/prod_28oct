@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       { source: "/session/:path*", destination: `${apiUrl}/session/:path*` },
+      { source: "/staff/session/:path*", destination: `${apiUrl}/staff/session/:path*` },
       // Under /api because /orders is the Orders page itself.
       { source: "/api/orders", destination: `${apiUrl}/orders` },
       // Same reason: /appointments is the page itself.

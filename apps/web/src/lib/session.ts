@@ -115,7 +115,7 @@ export type AuthResult =
 
 const GENERIC_ERROR = "Something went wrong. Try again.";
 
-async function postCredentials(
+export async function postCredentials(
   path: string,
   email: string,
   password: string,
