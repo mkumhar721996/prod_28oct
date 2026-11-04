@@ -1,4 +1,5 @@
-import { BRAND_NAME, brandHref, isCurrent, visibleNav } from "@/lib/shell";
+import { ALERTS_HREF, BRAND_NAME, brandHref, isCurrent, visibleNav } from "@/lib/shell";
+import { Icon } from "./orders/Icon";
 
 type TopBarProps = {
   signedIn: boolean;
@@ -9,6 +10,8 @@ type TopBarProps = {
   onToggleMenu?: () => void;
   onSignOut?: () => void;
   signingOut?: boolean;
+  /** Unread alerts; null or undefined while unknown. The badge is hidden at 0. */
+  unreadCount?: number | null;
 };
 
 export function TopBar({
@@ -19,7 +22,9 @@ export function TopBar({
   onToggleMenu,
   onSignOut,
   signingOut = false,
+  unreadCount = null,
 }: TopBarProps) {
+  const unread = unreadCount ?? 0;
   const brand = (
     <a className="shell-brand" href={brandHref(signedIn)}>
       {BRAND_NAME}
@@ -55,6 +60,19 @@ export function TopBar({
         </div>
         {signedIn && (
           <>
+            <a
+              className="btn btn-ghost btn-sm count-link"
+              href={ALERTS_HREF}
+              data-nav-key="alerts"
+              aria-label={unread > 0 ? `Alerts, ${unread} unread` : "Alerts"}
+              aria-current={pathname === ALERTS_HREF ? "page" : undefined}
+            >
+              <Icon name="bell" />
+              <span>Alerts</span>
+              <span className={unread > 0 ? "badge badge-danger" : undefined} role="status" aria-live="polite">
+                {unread > 0 ? `${unread} unread` : null}
+              </span>
+            </a>
             <button
               className="btn btn-ghost btn-sm"
               type="button"

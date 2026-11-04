@@ -7,6 +7,7 @@ export const REGISTER_HREF = "/register";
 export const WALLET_HREF = "/wallet";
 export const HISTORY_HREF = "/history";
 export const APPOINTMENTS_HREF = "/appointments";
+export const ALERTS_HREF = "/alerts";
 export const BOOK_APPOINTMENT_HREF = "/appointments/book";
 export const ONBOARDING_TEMPLATES_HREF = "/onboarding-templates";
 export const NEW_ONBOARDING_TEMPLATE_HREF = "/onboarding-templates/new";
@@ -28,6 +29,7 @@ const NEXT_TARGETS: Record<string, string> = {
   [APPOINTMENTS_HREF]: APPOINTMENTS_HREF,
   [BOOK_APPOINTMENT_HREF]: BOOK_APPOINTMENT_HREF,
   checkout: CHECKOUT_HREF,
+  alerts: ALERTS_HREF,
   [ONBOARDING_TEMPLATES_HREF]: ONBOARDING_TEMPLATES_HREF,
 };
 

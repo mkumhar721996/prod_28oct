@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
         source: "/api/onboarding-templates/:path*",
         destination: `${apiUrl}/onboarding-templates/:path*`,
       },
+      // Same reason: /alerts is the page itself.
+      { source: "/api/alerts", destination: `${apiUrl}/alerts` },
+      { source: "/api/alerts/:path*", destination: `${apiUrl}/alerts/:path*` },
       // Same reason: /wallet is the page itself.
       { source: "/api/wallet/top-up", destination: `${apiUrl}/wallet/top-up` },
     ];
