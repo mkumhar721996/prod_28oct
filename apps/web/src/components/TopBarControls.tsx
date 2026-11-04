@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOut } from "@/lib/session";
 import { SIGN_IN_HREF } from "@/lib/shell";
+import { useUnreadCount } from "./alerts/useAlertPolling";
 import { TopBar } from "./TopBar";
 
 export const SIGN_OUT_ERROR = "Sign out failed. You are still signed in. Try again.";
@@ -37,6 +38,7 @@ export function TopBarControls({ signedIn }: { signedIn: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const unreadCount = useUnreadCount(signedIn);
 
   async function onSignOut() {
     setSigningOut(true);
@@ -53,6 +55,7 @@ export function TopBarControls({ signedIn }: { signedIn: boolean }) {
       onToggleMenu={() => setMenuOpen((open) => !open)}
       onSignOut={onSignOut}
       signingOut={signingOut}
+      unreadCount={unreadCount}
     />
   );
 }

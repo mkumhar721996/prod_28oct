@@ -17,6 +17,8 @@
     "devloop": "pnpm run typecheck && jest"
   },
   "dependencies": {
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
     "pg-boss": "^10.1.5"
   },
   "devDependencies": {
